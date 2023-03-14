@@ -139,11 +139,8 @@ export class UserUpdateService {
     };
   }
 
-  public async changePassword(
-    paramInput: GetOneUserInput,
-    bodyInput: ChangeUserPasswordInput,
-  ) {
-    const { authUid } = paramInput;
+  public async changePassword(input: ChangeUserPasswordInput) {
+    const { authUid, oldPassword, newPassword } = input;
 
     const existingUser = await this.readService.getOneByFields({
       fields: {
@@ -152,8 +149,6 @@ export class UserUpdateService {
       checkIfExists: true,
       loadRelationIds: false,
     });
-
-    const { oldPassword, newPassword } = bodyInput;
 
     try {
       await this.basicAclService.changePassword({

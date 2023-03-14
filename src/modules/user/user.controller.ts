@@ -77,10 +77,7 @@ export class UserController {
 
   @PermissionName('users:changePassword')
   @Patch('/password')
-  changePassword(
-    @Query() paramInput: GetOneUserInput,
-    @Body() bodyInput: ChangeUserPasswordInput,
-  ) {
-    return this.userService.updateService.changePassword(paramInput, bodyInput);
+  changePassword(@Body() input: ChangeUserPasswordInput) {
+    return this.userService.updateService.changePassword(input);
   }
 }
