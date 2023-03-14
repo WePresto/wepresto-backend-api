@@ -39,31 +39,31 @@ export class UserController {
     return this.userService.createService.createBorrower(input);
   }
 
-  @PermissionName('users:read')
-  @Get('/:authUid')
+  @PermissionName('users:getOne')
+  @Get(':authUid')
   getOne(@Param() input: GetOneUserInput) {
     return this.userService.readService.getOne(input);
   }
 
-  @PermissionName('users:handle')
+  @PermissionName('users:deleteBorrower')
   @Delete('borrower')
   deleteBorrower(@Query() input: GetOneUserInput) {
     return this.userService.deleteService.deleteBorrower(input);
   }
 
-  @PermissionName('user:handle')
+  @PermissionName('user:changeEmail')
   @Patch('email')
   changeEmail(@Body() input: ChangeUserEmailInput) {
     return this.userService.updateService.changeEmail(input);
   }
 
-  @PermissionName('user:handle')
+  @PermissionName('users:changePhone')
   @Patch('phone')
   changePhone(@Body() input: ChangeUserPhoneInput) {
     return this.userService.updateService.changePhone(input);
   }
 
-  @PermissionName('user:handle')
+  @PermissionName('users:changeAddress')
   @Patch('address')
   changeAddress(@Body() input: ChangeUserAddressInput) {
     return this.userService.updateService.changeAddress(input);
@@ -75,7 +75,7 @@ export class UserController {
     return this.userService.updateService.sendResetPasswordEmail(input);
   }
 
-  @PermissionName('user:handle')
+  @PermissionName('users:changePassword')
   @Patch('/password')
   changePassword(
     @Query() paramInput: GetOneUserInput,
