@@ -4,9 +4,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BasicAclService } from 'nestjs-basic-acl-sdk';
 
-import appConfig from '../../../config/app.config';
+import appConfig from '../../../../config/app.config';
 
-import { User } from '../entities/user.entity';
+import { User } from '../user.entity';
 
 import { UserReadService } from './user.read.service';
 

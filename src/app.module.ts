@@ -11,8 +11,17 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
 import { CommonModule } from './common/common.module';
+
 import { RedisCacheModule } from './plugins/redis-cache/redis-cache.module';
-import { UserModule } from './modules/user/user.module';
+
+import { UserModule } from './domains/users/user/user.module';
+import { BorrowerModule } from './domains/users/borrower/borrower.module';
+import { LenderModule } from './domains/users/lender/lender.module';
+
+import { LoanModule } from './domains/loans/loan/loan.module';
+import { MovementModule } from './domains/loans/movement/movement.module';
+import { LoanRequestModule } from './domains/loans/loan-request/loan-request.module';
+import { LoanParticipationModule } from './domains/loans/loan-participation/loan-participation.module';
 
 @Module({
   imports: [
@@ -84,6 +93,18 @@ import { UserModule } from './modules/user/user.module';
     CommonModule,
 
     UserModule,
+
+    LoanModule,
+
+    BorrowerModule,
+
+    LenderModule,
+
+    MovementModule,
+
+    LoanRequestModule,
+
+    LoanParticipationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

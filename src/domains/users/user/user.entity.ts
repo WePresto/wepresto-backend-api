@@ -9,8 +9,9 @@ import {
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
-import { Lender } from './lender.entity';
 
+import { Lender } from '../lender/lender.entity';
+import { Borrower } from '../borrower/borrower.entity';
 // import { Loan } from '../loan/loan.entity';
 // import { LoanRequest } from '../loan-request/loan-request.entity';
 
@@ -54,10 +55,8 @@ export class User extends BaseEntity {
   @OneToOne(() => Lender, (lender) => lender.user, { cascade: true })
   lender: Lender;
 
-  /*
-  @OneToMany(() => Loan, (loan) => loan.user)
-  loans: Loan[];
-  */
+  @OneToOne(() => Borrower, (borrower) => borrower.user, { cascade: true })
+  borrower: Borrower;
 
   /*
   @OneToMany(() => Loan, (loan) => loan.user)

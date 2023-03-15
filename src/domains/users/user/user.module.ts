@@ -3,10 +3,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BasicAclModule } from 'nestjs-basic-acl-sdk';
 
-import appConfig from '../../config/app.config';
+import appConfig from '../../../config/app.config';
 
-import { User } from './entities/user.entity';
-import { Lender } from './entities/lender.entity';
+import { User } from './user.entity';
 
 import { UserReadService } from './services/user.read.service';
 import { UserCreateService } from './services/user.create.service';
@@ -19,7 +18,7 @@ import { UserController } from './user.controller';
 @Module({
   imports: [
     ConfigModule.forFeature(appConfig),
-    TypeOrmModule.forFeature([User, Lender]),
+    TypeOrmModule.forFeature([User]),
     BasicAclModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

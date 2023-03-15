@@ -3,11 +3,11 @@ import { ConfigType } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import appConfig from '../../../config/app.config';
+import appConfig from '../../../../config/app.config';
 
-import { User } from '../entities/user.entity';
+import { User } from '../user.entity';
 
-import { BaseService } from '../../../common/base.service';
+import { BaseService } from '../../../../common/base.service';
 
 import { GetOneUserInput } from '../dto/get-one-user-input.dto';
 

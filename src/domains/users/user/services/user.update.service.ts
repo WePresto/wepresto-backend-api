@@ -9,9 +9,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { BasicAclService } from 'nestjs-basic-acl-sdk';
 import { Repository } from 'typeorm';
 
-import appConfig from '../../../config/app.config';
+import appConfig from '../../../../config/app.config';
 
-import { User } from '../entities/user.entity';
+import { User } from '../user.entity';
 
 import { UserReadService } from './user.read.service';
 
@@ -19,7 +19,6 @@ import { ChangeUserEmailInput } from '../dto/change-user-email-input.dto';
 import { ChangeUserPhoneInput } from '../dto/change-user-phone-input.dto';
 import { ChangeUserAddressInput } from '../dto/change-user-address-input.dto';
 import { SendUserResetPasswordEmail } from '../dto/send-user-reset-password-email-input.dto';
-import { GetOneUserInput } from '../dto/get-one-user-input.dto';
 import { ChangeUserPasswordInput } from '../dto/change-user-password-input.dto';
 
 @Injectable()
