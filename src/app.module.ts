@@ -13,6 +13,7 @@ import { AppService } from './app.service';
 import { CommonModule } from './common/common.module';
 
 import { RedisCacheModule } from './plugins/redis-cache/redis-cache.module';
+import { RabbitMQLocalModule } from './plugins/rabbit-local/rabbit-mq-local.module';
 
 import { UserModule } from './domains/users/user/user.module';
 import { BorrowerModule } from './domains/users/borrower/borrower.module';
@@ -22,6 +23,7 @@ import { LoanModule } from './domains/loans/loan/loan.module';
 import { MovementModule } from './domains/loans/movement/movement.module';
 import { LoanRequestModule } from './domains/loans/loan-request/loan-request.module';
 import { LoanParticipationModule } from './domains/loans/loan-participation/loan-participation.module';
+import { FrenchAmortizationSystemModule } from './domains/loans/french-amortization-system/french-amortization-system.module';
 
 @Module({
   imports: [
@@ -59,6 +61,9 @@ import { LoanParticipationModule } from './domains/loans/loan-participation/loan
     // Redis cache
     RedisCacheModule,
 
+    // RabbitMQ local module
+    RabbitMQLocalModule,
+
     // Cache
     /*
     CacheModule.register({
@@ -92,19 +97,29 @@ import { LoanParticipationModule } from './domains/loans/loan-participation/loan
 
     CommonModule,
 
-    UserModule,
+    /* Users domain */
 
-    LoanModule,
+    UserModule,
 
     BorrowerModule,
 
     LenderModule,
+
+    /* Users domain */
+
+    /* Loans domain */
+
+    LoanModule,
 
     MovementModule,
 
     LoanRequestModule,
 
     LoanParticipationModule,
+
+    FrenchAmortizationSystemModule,
+
+    /* Loans domain */
   ],
   controllers: [AppController],
   providers: [AppService],

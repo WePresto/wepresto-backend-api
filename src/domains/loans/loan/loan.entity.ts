@@ -62,10 +62,10 @@ export class Loan extends BaseEntity {
   annualInterestOverdueRate: number;
 
   @Column({
-    name: 'loan_term',
+    name: 'term',
     type: 'int',
   })
-  loanTerm: number;
+  term: number;
 
   @Column({
     name: 'start_date',
@@ -97,7 +97,7 @@ export class Loan extends BaseEntity {
   @JoinColumn({ name: 'borrower_id' })
   borrower: Borrower;
 
-  @OneToMany(() => Movement, (movement) => movement.loan)
+  @OneToMany(() => Movement, (movement) => movement.loan, { cascade: true })
   movements: Movement[];
 
   @OneToMany(

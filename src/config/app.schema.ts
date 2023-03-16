@@ -22,9 +22,9 @@ export default Joi.object({
   BASIC_ACL_BORROWER_ROLE_CODE: Joi.required(),
 
   // RABBITMQ
-  //RABBITMQ_URL: Joi.required(),
-  //RABBITMQ_EXCHANGE: Joi.required(),
-  //RABBITMQ_WAIT_FOR_CONNECTION: Joi.required(),
+  RABBITMQ_URL: Joi.required(),
+  RABBITMQ_EXCHANGE: Joi.required(),
+  RABBITMQ_WAIT_FOR_CONNECTION: Joi.required(),
 
   // TWILIO
   //TWILIO_ACCOUNT_SID: Joi.required(),

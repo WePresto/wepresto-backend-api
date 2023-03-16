@@ -6,6 +6,7 @@ import appConfig from '../../config/app.config';
 
 import { getRabbitMQExchangeName } from '../../utils';
 
+import { PublishLoanCreatedInput } from './dto/publish-loan-created-input.dto';
 import { PublishOverdueLoanInput } from './dto/publish-overdue-loan-input.dto';
 import { PublishSettleLoanInterestsInput } from './dto/publish-settle-loan-interests-input.dto';
 import { PublishLoanRequestCreatedInput } from './dto/publish-loan-request-created-input.dto';
@@ -15,7 +16,7 @@ import { PublishLoanRequestRejectedInput } from './dto/publish-loan-request-reje
 import { PublishLoanRequestApprovedInput } from './dto/publish-loan-request-approved-input.dto';
 
 @Injectable()
-export class RabbitMQLocalModuleService {
+export class RabbitMQLocalService {
   private exchangeName: string;
 
   constructor(
@@ -25,6 +26,30 @@ export class RabbitMQLocalModuleService {
   ) {
     this.exchangeName = getRabbitMQExchangeName();
   }
+
+  public async publishLoanCreated(
+    input: PublishLoanCreatedInput,
+  ): Promise<void> {
+    const { loanUid } = input;
+
+    const { exchangeName } = this;
+
+    const routingKey = `${exchangeName}.loan_created`;
+
+    await this.amqpConnection.publish(exchangeName, routingKey, {
+      loanUid,
+    });
+
+    Logger.log(
+      `message published to exchange ${exchangeName} ` +
+        `for routing key ${routingKey} with input: ${JSON.stringify(input)}`,
+      RabbitMQLocalService.name,
+    );
+  }
+
+  /*
+  ----OLD CODE----
+  */
 
   public async publishOverdueLoan(
     input: PublishOverdueLoanInput,
@@ -42,7 +67,7 @@ export class RabbitMQLocalModuleService {
     Logger.log(
       `message published to exchange ${exchangeName} ` +
         `for routing key ${routingKey} with input: ${JSON.stringify(input)}`,
-      RabbitMQLocalModuleService.name,
+      RabbitMQLocalService.name,
     );
   }
 
@@ -62,7 +87,7 @@ export class RabbitMQLocalModuleService {
     Logger.log(
       `message published to exchange ${exchangeName} ` +
         `for routing key ${routingKey} with input: ${JSON.stringify(input)}`,
-      RabbitMQLocalModuleService.name,
+      RabbitMQLocalService.name,
     );
   }
 
@@ -78,7 +103,7 @@ export class RabbitMQLocalModuleService {
     Logger.log(
       `message published to exchange ${exchangeName} ` +
         `for routing key ${routingKey} with input: ${JSON.stringify(input)}`,
-      RabbitMQLocalModuleService.name,
+      RabbitMQLocalService.name,
     );
   }
 
@@ -96,7 +121,7 @@ export class RabbitMQLocalModuleService {
     Logger.log(
       `message published to exchange ${exchangeName} ` +
         `for routing key ${routingKey} with input: ${JSON.stringify(input)}`,
-      RabbitMQLocalModuleService.name,
+      RabbitMQLocalService.name,
     );
   }
 
@@ -114,7 +139,7 @@ export class RabbitMQLocalModuleService {
     Logger.log(
       `message published to exchange ${exchangeName} ` +
         `for routing key ${routingKey} with input: ${JSON.stringify(input)}`,
-      RabbitMQLocalModuleService.name,
+      RabbitMQLocalService.name,
     );
   }
 
@@ -132,7 +157,7 @@ export class RabbitMQLocalModuleService {
     Logger.log(
       `message published to exchange ${exchangeName} ` +
         `for routing key ${routingKey} with input: ${JSON.stringify(input)}`,
-      RabbitMQLocalModuleService.name,
+      RabbitMQLocalService.name,
     );
   }
 
@@ -150,7 +175,7 @@ export class RabbitMQLocalModuleService {
     Logger.log(
       `message published to exchange ${exchangeName} ` +
         `for routing key ${routingKey} with input: ${JSON.stringify(input)}`,
-      RabbitMQLocalModuleService.name,
+      RabbitMQLocalService.name,
     );
   }
 
@@ -168,7 +193,7 @@ export class RabbitMQLocalModuleService {
     Logger.log(
       `message published to exchange ${exchangeName} ` +
         `for routing key ${routingKey} with input: ${JSON.stringify(input)}`,
-      RabbitMQLocalModuleService.name,
+      RabbitMQLocalService.name,
     );
   }
 }

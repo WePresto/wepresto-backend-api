@@ -5,7 +5,7 @@ import { getRabbitMQExchangeName } from '../../utils';
 
 import appConfig from '../../config/app.config';
 
-import { RabbitMQLocalModuleService } from './rabbit-mq-local-module.service';
+import { RabbitMQLocalService } from './rabbit-mq-local.service';
 
 @Module({
   imports: [
@@ -41,7 +41,7 @@ import { RabbitMQLocalModuleService } from './rabbit-mq-local-module.service';
       },
     }),
   ],
-  providers: [RabbitMQLocalModuleService],
-  exports: [RabbitMQLocalModuleService],
+  providers: [RabbitMQLocalService],
+  exports: [RabbitMQLocalService],
 })
-export class RabbitMQLocalModuleModule {}
+export class RabbitMQLocalModule {}

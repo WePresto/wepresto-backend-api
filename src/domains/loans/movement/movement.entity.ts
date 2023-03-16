@@ -47,28 +47,54 @@ export class Movement extends BaseEntity {
   amount: number;
 
   @Column({
-    name: 'interest_amount',
     type: 'decimal',
     precision: 15,
     scale: 3,
+    nullable: true,
     transformer: {
       from: (value: string) => parseFloat(value),
       to: (value: number) => value,
     },
   })
-  interestAmount: number;
+  interest?: number;
 
   @Column({
-    name: 'start_date',
-    type: 'timestamptz',
+    type: 'decimal',
+    precision: 15,
+    scale: 3,
+    nullable: true,
+    transformer: {
+      from: (value: string) => parseFloat(value),
+      to: (value: number) => value,
+    },
   })
-  startDate: Date;
+  principal?: number;
 
   @Column({
-    name: 'end_date',
-    type: 'timestamptz',
+    type: 'decimal',
+    precision: 15,
+    scale: 3,
+    nullable: true,
+    transformer: {
+      from: (value: string) => parseFloat(value),
+      to: (value: number) => value,
+    },
   })
-  endDate: Date;
+  balance?: number;
+
+  @Column({
+    name: 'due_date',
+    type: 'timestamptz',
+    nullable: true,
+  })
+  dueDate?: Date;
+
+  @Column({
+    name: 'movement_date',
+    type: 'timestamptz',
+    nullable: true,
+  })
+  movementDate?: Date;
 
   @Column({
     type: 'boolean',

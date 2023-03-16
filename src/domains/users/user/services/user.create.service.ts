@@ -133,8 +133,17 @@ export class UserCreateService {
   }
 
   public async createBorrower(input: CreateBorrowerInput): Promise<User> {
-    const { documentNumber, email, password, phoneNumber, fullName, address } =
-      input;
+    const {
+      documentType,
+      documentNumber,
+      email,
+      password,
+      phoneNumber,
+      fullName,
+      country,
+      city,
+      address,
+    } = input;
 
     // check if the user already exists by document number
     const existingUserByDocumentNumber = await this.readService.getOneByFields({
@@ -196,14 +205,26 @@ export class UserCreateService {
 
       const createdUser = this.userRepository.create({
         authUid,
+        documentType,
         documentNumber,
         fullName,
         email,
         phoneNumber,
+        country,
+        city,
         address,
       });
 
       const savedUser = await this.userRepository.save(createdUser);
+
+      const preloaded = await this.userRepository.preload({
+        id: savedUser.id,
+        borrower: {
+          id: savedUser.id,
+        },
+      });
+
+      await this.userRepository.save(preloaded);
 
       return savedUser;
     } catch (error) {
