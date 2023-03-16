@@ -12,8 +12,20 @@ import {
 
 import { Lender } from '../lender/lender.entity';
 import { Borrower } from '../borrower/borrower.entity';
-// import { Loan } from '../loan/loan.entity';
-// import { LoanRequest } from '../loan-request/loan-request.entity';
+
+export enum DocumentType {
+  CEDULA_CIUDADANIA = 'CEDULA_CIUDADANIA',
+  CEDULA_EXTRANJERIA = 'CEDULA_EXTRANJERIA',
+  PASAPORTE = 'PASAPORTE',
+}
+
+export enum Country {
+  COLOMBIA = 'COLOMBIA',
+}
+
+export enum City {
+  CALI = 'CALI',
+}
 
 @Entity({ name: 'user' })
 @Unique('uk_user_auth_uid', ['authUid'])
@@ -23,6 +35,14 @@ export class User extends BaseEntity {
 
   @Column({ name: 'auth_uid', type: 'varchar', length: 100, nullable: true })
   authUid?: string;
+
+  @Column({
+    name: 'document_type',
+    type: 'varchar',
+    length: 20,
+    nullable: true,
+  })
+  documentType?: string;
 
   @Column({
     name: 'document_number',
@@ -40,6 +60,12 @@ export class User extends BaseEntity {
 
   @Column({ name: 'phone_number', type: 'varchar', length: 13, nullable: true })
   phoneNumber?: string;
+
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  country?: string;
+
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  city?: string;
 
   @Column({ type: 'varchar', length: 100, nullable: true })
   address?: string;

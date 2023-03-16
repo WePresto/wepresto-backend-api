@@ -14,6 +14,7 @@ import { PermissionName, Public } from 'nestjs-basic-acl-sdk';
 
 import { UserService } from './services/user.service';
 
+import { CreateLenderInput } from './dto/create-lender-input.dto';
 import { CreateBorrowerInput } from './dto/create-borrower-input.dto';
 import { GetOneUserInput } from './dto/get-one-user-input.dto';
 import { ChangeUserEmailInput } from './dto/change-user-email-input.dto';
@@ -29,7 +30,7 @@ export class UserController {
 
   @Public()
   @Post('lender')
-  createLender(@Body() input: CreateBorrowerInput) {
+  createLender(@Body() input: CreateLenderInput) {
     return this.userService.createService.createLender(input);
   }
 
@@ -37,6 +38,12 @@ export class UserController {
   @Post('borrower')
   createBorrower(@Body() input: CreateBorrowerInput) {
     return this.userService.createService.createBorrower(input);
+  }
+
+  @Public()
+  @Get('document-types')
+  getDocumentTypes() {
+    return this.userService.readService.getDocumentTypes();
   }
 
   @PermissionName('users:getOne')

@@ -25,8 +25,17 @@ export class UserCreateService {
   ) {}
 
   public async createLender(input: CreateLenderInput) {
-    const { documentNumber, email, password, phoneNumber, fullName, address } =
-      input;
+    const {
+      documentType,
+      documentNumber,
+      email,
+      password,
+      phoneNumber,
+      fullName,
+      address,
+      country,
+      city,
+    } = input;
 
     const {
       acl: {
@@ -91,11 +100,14 @@ export class UserCreateService {
       const { authUid } = aclUser;
 
       const createdUser = this.userRepository.create({
+        documentType,
         authUid,
         documentNumber,
         fullName,
         email,
         phoneNumber,
+        country,
+        city,
         address,
       });
 

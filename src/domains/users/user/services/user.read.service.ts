@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 
 import appConfig from '../../../../config/app.config';
 
-import { User } from '../user.entity';
+import { User, DocumentType } from '../user.entity';
 
 import { BaseService } from '../../../../common/base.service';
 
@@ -32,5 +32,18 @@ export class UserReadService extends BaseService<User> {
     });
 
     return existingUser;
+  }
+
+  public getDocumentTypes() {
+    // construct and object array with the enum values
+    const documentTypes = Object.keys(DocumentType).map((key) => ({
+      name: key
+        .split('_')
+        .map((word) => word[0].toUpperCase() + word.slice(1).toLowerCase())
+        .join(' '),
+      value: DocumentType[key],
+    }));
+
+    return documentTypes;
   }
 }
