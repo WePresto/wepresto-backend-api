@@ -71,6 +71,7 @@ export class LoanConsumerService {
           principal: loanInstallment.principal,
           balance: loanInstallment.balance,
           dueDate: loanInstallment.dueDate,
+          paid: false,
         })),
       });
 

@@ -44,7 +44,7 @@ export class CreateLenderInput {
   @IsString()
   readonly address: string;
 
-  @Length(6, 16)
+  @Length(6, 25)
   @IsString()
   readonly password: string;
 }
