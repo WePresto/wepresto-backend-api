@@ -28,7 +28,7 @@ export class UserReadService extends BaseService<User> {
         authUid: input.authUid,
       },
       checkIfExists: true,
-      loadRelationIds: false,
+      relations: ['lender', 'borrower'],
     });
 
     return existingUser;
