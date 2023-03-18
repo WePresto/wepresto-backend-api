@@ -1,3 +1,3 @@
-export class PublishLoanCreatedInput {
+export class PublishLoanDisbursementInput {
   readonly loanUid: string;
 }

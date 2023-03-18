@@ -21,7 +21,6 @@ import { LenderModule } from './domains/users/lender/lender.module';
 
 import { LoanModule } from './domains/loans/loan/loan.module';
 import { MovementModule } from './domains/loans/movement/movement.module';
-import { LoanRequestModule } from './domains/loans/loan-request/loan-request.module';
 import { LoanParticipationModule } from './domains/loans/loan-participation/loan-participation.module';
 import { FrenchAmortizationSystemModule } from './domains/loans/french-amortization-system/french-amortization-system.module';
 
@@ -112,8 +111,6 @@ import { FrenchAmortizationSystemModule } from './domains/loans/french-amortizat
     LoanModule,
 
     MovementModule,
-
-    LoanRequestModule,
 
     LoanParticipationModule,
 

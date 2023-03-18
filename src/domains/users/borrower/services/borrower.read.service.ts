@@ -35,4 +35,20 @@ export class BorrowerReadService extends BaseService<Borrower> {
 
     return existingBorrower;
   }
+
+  public async getLoans(input: GetOneBorrowerInput) {
+    const { uid } = input;
+
+    const existingBorrower = await this.getOneByFields({
+      fields: {
+        uid,
+      },
+      checkIfExists: true,
+      relations: ['loans'],
+    });
+
+    const { loans } = existingBorrower;
+
+    return loans;
+  }
 }

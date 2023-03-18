@@ -15,7 +15,6 @@ import {
 import { User } from '../user/user.entity';
 
 import { Loan } from '../../loans/loan/loan.entity';
-// import { LoanRequest } from '../loan-request/loan-request.entity';
 
 @Entity({ name: 'borrower' })
 @Unique('uk_borrower_uid', ['uid'])

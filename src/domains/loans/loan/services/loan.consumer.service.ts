@@ -31,12 +31,12 @@ export class LoanConsumerService {
 
   @RabbitRPC({
     exchange: RABBITMQ_EXCHANGE,
-    routingKey: `${RABBITMQ_EXCHANGE}.loan_created`,
-    queue: `${RABBITMQ_EXCHANGE}.${LoanConsumerService.name}.loan_created`,
+    routingKey: `${RABBITMQ_EXCHANGE}.loan_disbursement`,
+    queue: `${RABBITMQ_EXCHANGE}.${LoanConsumerService.name}.loan_disbursement`,
   })
-  public async loanCreatedConsumer(input: any) {
+  public async loanDisbursementConsumer(input: any) {
     const eventMessage = await this.eventMessageService.create({
-      routingKey: `${RABBITMQ_EXCHANGE}.loan_created`,
+      routingKey: `${RABBITMQ_EXCHANGE}.loan_disbursement`,
       functionName: 'loanCreated',
       data: input,
     });

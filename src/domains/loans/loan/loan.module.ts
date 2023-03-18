@@ -14,6 +14,7 @@ import { BorrowerModule } from '../../users/borrower/borrower.module';
 import { LoanConsumerService } from './services/loan.consumer.service';
 import { LoanCreateService } from './services/loan.create.service';
 import { LoanReadService } from './services/loan.read.service';
+import { LoanUpdateService } from './services/loan.update.service';
 import { LoanService } from './services/loan.service';
 
 import { LoanController } from './loan.controller';
@@ -31,6 +32,7 @@ import { LoanController } from './loan.controller';
     LoanConsumerService,
     LoanCreateService,
     LoanReadService,
+    LoanUpdateService,
     LoanService,
   ],
   controllers: [LoanController],

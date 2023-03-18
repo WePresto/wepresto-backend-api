@@ -16,6 +16,15 @@ import { Borrower } from '../../users/borrower/borrower.entity';
 import { Movement } from '../movement/movement.entity';
 import { LoanParticipation } from '../loan-participation/loan-participation.entity';
 
+export enum LoanStatus {
+  APPLIED = 'APPLIED',
+  REVIEWING = 'REVIEWING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+  DISBURSED = 'DISBURSED',
+  PAID = 'PAID',
+}
+
 @Entity({ name: 'loan' })
 @Unique('uk_loan_uid', ['uid'])
 export class Loan extends BaseEntity {
@@ -34,6 +43,7 @@ export class Loan extends BaseEntity {
       from: (value: string) => parseFloat(value),
       to: (value: number) => value,
     },
+    nullable: true,
   })
   amount: number;
 
@@ -46,8 +56,9 @@ export class Loan extends BaseEntity {
       from: (value: string) => parseFloat(value),
       to: (value: number) => value,
     },
+    nullable: true,
   })
-  annualInterestRate: number;
+  annualInterestRate?: number;
 
   @Column({
     name: 'annual_interest_overdue_rate',
@@ -58,32 +69,36 @@ export class Loan extends BaseEntity {
       from: (value: string) => parseFloat(value),
       to: (value: number) => value,
     },
+    nullable: true,
   })
-  annualInterestOverdueRate: number;
+  annualInterestOverdueRate?: number;
 
   @Column({
     name: 'term',
     type: 'int',
+    nullable: true,
   })
-  term: number;
+  term?: number;
 
   @Column({
     name: 'start_date',
     type: 'timestamptz',
+    nullable: true,
   })
-  startDate: Date;
+  startDate?: Date;
 
   @Column({
-    type: 'boolean',
-    default: false,
+    type: 'varchar',
+    length: 20,
+    nullable: true,
   })
-  paid?: boolean;
+  status?: string;
 
   @Column({
     type: 'varchar',
     default: null,
   })
-  description?: string;
+  comment?: string;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;

@@ -6,7 +6,7 @@ import appConfig from '../../config/app.config';
 
 import { getRabbitMQExchangeName } from '../../utils';
 
-import { PublishLoanCreatedInput } from './dto/publish-loan-created-input.dto';
+import { PublishLoanDisbursementInput } from './dto/publish-loan-created-input.dto';
 import { PublishOverdueLoanInput } from './dto/publish-overdue-loan-input.dto';
 import { PublishSettleLoanInterestsInput } from './dto/publish-settle-loan-interests-input.dto';
 import { PublishLoanRequestCreatedInput } from './dto/publish-loan-request-created-input.dto';
@@ -27,14 +27,14 @@ export class RabbitMQLocalService {
     this.exchangeName = getRabbitMQExchangeName();
   }
 
-  public async publishLoanCreated(
-    input: PublishLoanCreatedInput,
+  public async publishLoanDisbursement(
+    input: PublishLoanDisbursementInput,
   ): Promise<void> {
     const { loanUid } = input;
 
     const { exchangeName } = this;
 
-    const routingKey = `${exchangeName}.loan_created`;
+    const routingKey = `${exchangeName}.loan_disbursement`;
 
     await this.amqpConnection.publish(exchangeName, routingKey, {
       loanUid,

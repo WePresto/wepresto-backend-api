@@ -8,6 +8,7 @@ import { Borrower } from './borrower.entity';
 
 import { BorrowerReadService } from './services/borrower.read.service';
 import { BorrowerService } from './services/borrower.service';
+import { BorrowerController } from './borrower.controller';
 
 @Module({
   imports: [
@@ -16,5 +17,6 @@ import { BorrowerService } from './services/borrower.service';
   ],
   providers: [BorrowerReadService, BorrowerService],
   exports: [BorrowerService],
+  controllers: [BorrowerController],
 })
 export class BorrowerModule {}
