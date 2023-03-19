@@ -45,20 +45,17 @@ export class LoanReadService extends BaseService<Loan> {
 
     const existingLoan = await this.getOne({ uid });
 
-    // eslint-disable-next-line no-console
-    console.log('going to create the date...');
+    // console.log('going to create the date...');
 
     const localeDateString = new Date().toLocaleDateString('en-US', {
       timeZone: 'America/Bogota',
     });
 
-    // eslint-disable-next-line no-console
-    console.log('localeDateString', localeDateString);
+    // console.log('localeDateString', localeDateString);
 
     const referenceDateTime = new Date(localeDateString).toISOString();
 
-    // eslint-disable-next-line no-console
-    console.log('referenceDateTime', referenceDateTime);
+    // console.log('referenceDateTime', referenceDateTime);
 
     const [referenceDate] = referenceDateTime.split('T');
 
