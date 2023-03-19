@@ -6,11 +6,12 @@ import { Repository } from 'typeorm';
 import appConfig from '../../../../config/app.config';
 
 import { Loan } from '../loan.entity';
-import { MovementType } from '../../movement/movement.entity';
+import { Movement, MovementType } from '../../movement/movement.entity';
 
 import { BaseService } from '../../../../common/base.service';
 
 import { GetOneLoanInput } from '../dto/get-one-loan-input.dto';
+import { GetMinimumPaymentAmountOutput } from '../dto/get-minimum-payment-amount-output.dto';
 
 @Injectable()
 export class LoanReadService extends BaseService<Loan> {
@@ -37,16 +38,24 @@ export class LoanReadService extends BaseService<Loan> {
     return existingLoan;
   }
 
-  public async getMinimumPaymentAmount(input: GetOneLoanInput) {
+  public async getMinimumPaymentAmount(
+    input: GetOneLoanInput,
+  ): Promise<GetMinimumPaymentAmountOutput> {
     const { uid } = input;
 
     const existingLoan = await this.getOne({ uid });
+
+    // eslint-disable-next-line no-console
+    console.log('going to create the date...');
 
     const referenceDateTime = new Date(
       new Date().toLocaleString('en-US', {
         timeZone: 'America/Bogota',
       }),
     ).toISOString();
+
+    // eslint-disable-next-line no-console
+    console.log('referenceDateTime', referenceDateTime);
 
     const [referenceDate] = referenceDateTime.split('T');
 
@@ -60,7 +69,7 @@ export class LoanReadService extends BaseService<Loan> {
         movementType: MovementType.LOAN_INSTALLMENT,
       })
       .andWhere('movement.paid = :paid', { paid: false })
-      .andWhere(`(movement.due_date - interval '15 day') < :referenceDate`, {
+      .andWhere(`(movement.due_date - interval '10 day') < :referenceDate`, {
         referenceDate,
       })
       .getOne();
@@ -120,12 +129,12 @@ export class LoanReadService extends BaseService<Loan> {
     }
 
     // delete the duplicated movements by id
-    const movements = mergedMovements.filter(
+    const movements: Movement[] = mergedMovements.filter(
       (movement, index, self) =>
         index === self.findIndex((m) => m.id === movement.id),
     );
 
-    const response = movements.reduce(
+    const reducedMovements = movements.reduce(
       (acc, movement) => {
         const { amount, interest, principal, type } = movement;
 
@@ -148,6 +157,9 @@ export class LoanReadService extends BaseService<Loan> {
       },
     );
 
-    return response;
+    return {
+      ...reducedMovements,
+      movements,
+    };
   }
 }

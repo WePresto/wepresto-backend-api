@@ -36,7 +36,8 @@ export class LoanController {
 
   /* READ RELATED ENDPOINTS */
 
-  @PermissionName('loans:getMinimumPaymentAmount')
+  @Public()
+  // @PermissionName('loans:getMinimumPaymentAmount')
   @Get('minimum-payment-amount')
   getMinimumPaymentAmount(@Query() input: GetOneLoanInput) {
     return this.loanService.readService.getMinimumPaymentAmount(input);

@@ -2,6 +2,7 @@ import {
   BaseEntity,
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   Generated,
   JoinColumn,
@@ -17,6 +18,8 @@ export enum MovementType {
   LOAN_INSTALLMENT = 'LOAN_INSTALLMENT',
   OVERDUE_INTEREST = 'OVERDUE_INTEREST',
   PAYMENT = 'PAYMENT',
+  PAYMENT_TERM_REDUCTION = 'PAYMENT_TERM_REDUCTION',
+  PAYMENT_INSTALLMENT_AMOUNT_REDUCTION = 'PAYMENT_INSTALLMENT_AMOUNT_REDUCTION',
 }
 
 @Entity({ name: 'movement' })
@@ -102,11 +105,27 @@ export class Movement extends BaseEntity {
   })
   paid?: boolean;
 
+  @Column({
+    type: 'boolean',
+    default: null,
+  })
+  processed?: boolean;
+
+  @Column({
+    type: 'varchar',
+    default: null,
+    nullable: true,
+  })
+  comment?: string;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
+
+  @DeleteDateColumn({ name: 'delete_at', type: 'timestamptz' })
+  deleteAt?: Date;
 
   // relations
 

@@ -16,7 +16,7 @@ import { BorrowerController } from './borrower.controller';
     TypeOrmModule.forFeature([Borrower]),
   ],
   providers: [BorrowerReadService, BorrowerService],
-  exports: [BorrowerService],
   controllers: [BorrowerController],
+  exports: [BorrowerService],
 })
 export class BorrowerModule {}

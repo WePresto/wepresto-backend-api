@@ -36,5 +36,6 @@ import { LoanController } from './loan.controller';
     LoanService,
   ],
   controllers: [LoanController],
+  exports: [LoanService],
 })
 export class LoanModule {}
