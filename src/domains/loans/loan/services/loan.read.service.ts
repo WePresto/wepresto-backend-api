@@ -48,11 +48,14 @@ export class LoanReadService extends BaseService<Loan> {
     // eslint-disable-next-line no-console
     console.log('going to create the date...');
 
-    const referenceDateTime = new Date(
-      new Date().toLocaleString('en-US', {
-        timeZone: 'America/Bogota',
-      }),
-    ).toISOString();
+    const localeDateString = new Date().toLocaleDateString('en-US', {
+      timeZone: 'America/Bogota',
+    });
+
+    // eslint-disable-next-line no-console
+    console.log('localeDateString', localeDateString);
+
+    const referenceDateTime = new Date(localeDateString).toISOString();
 
     // eslint-disable-next-line no-console
     console.log('referenceDateTime', referenceDateTime);
@@ -94,7 +97,7 @@ export class LoanReadService extends BaseService<Loan> {
         movementType: MovementType.OVERDUE_INTEREST,
       })
       .andWhere('movement.paid = :paid', { paid: false })
-      .andWhere('movement.due_date < :referenceDate', { referenceDate })
+      .andWhere('movement.due_date <= :referenceDate', { referenceDate })
       .getOne();
 
     const [
