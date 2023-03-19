@@ -145,6 +145,12 @@ export class UserCreateService {
       address,
     } = input;
 
+    const {
+      acl: {
+        roles: { borrowerCode },
+      },
+    } = this.appConfiguration;
+
     // check if the user already exists by document number
     const existingUserByDocumentNumber = await this.readService.getOneByFields({
       fields: {
@@ -187,13 +193,11 @@ export class UserCreateService {
       );
     }
 
-    const roleCode = '01BO'; // TODO: get the role code from the config
-
     const aclUser = await this.basicAclService.createUser({
       email,
       password,
       phone: `+57${phoneNumber}`,
-      roleCode: roleCode,
+      roleCode: borrowerCode,
       sendEmail: true,
       emailTemplateParams: {
         fullName,
