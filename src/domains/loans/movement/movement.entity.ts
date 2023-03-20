@@ -43,7 +43,8 @@ export class Movement extends BaseEntity {
     precision: 15,
     scale: 3,
     transformer: {
-      from: (value: string) => parseFloat(value),
+      from: (value: string) =>
+        value === null || value === undefined ? value : parseFloat(value),
       to: (value: number) => value,
     },
   })
@@ -55,7 +56,8 @@ export class Movement extends BaseEntity {
     scale: 3,
     nullable: true,
     transformer: {
-      from: (value: string) => parseFloat(value),
+      from: (value: string) =>
+        value === null || value === undefined ? value : parseFloat(value),
       to: (value: number) => value,
     },
   })
@@ -67,7 +69,8 @@ export class Movement extends BaseEntity {
     scale: 3,
     nullable: true,
     transformer: {
-      from: (value: string) => parseFloat(value),
+      from: (value: string) =>
+        value === null || value === undefined ? value : parseFloat(value),
       to: (value: number) => value,
     },
   })
@@ -79,7 +82,8 @@ export class Movement extends BaseEntity {
     scale: 3,
     nullable: true,
     transformer: {
-      from: (value: string) => parseFloat(value),
+      from: (value: string) =>
+        value === null || value === undefined ? value : parseFloat(value),
       to: (value: number) => value,
     },
   })

@@ -40,7 +40,7 @@ export class MovementCreateService {
 
     if (minimumPaymentAmount > amount) {
       throw new ConflictException(
-        `the amount of the payment is less than the amount to pay`,
+        `the amount of the payment is less than the minimum payment amount`,
       );
     }
 

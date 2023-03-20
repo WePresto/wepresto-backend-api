@@ -40,7 +40,8 @@ export class Loan extends BaseEntity {
     precision: 15,
     scale: 3,
     transformer: {
-      from: (value: string) => parseFloat(value),
+      from: (value: string) =>
+        value === null || value === undefined ? value : parseFloat(value),
       to: (value: number) => value,
     },
     nullable: true,
@@ -53,7 +54,8 @@ export class Loan extends BaseEntity {
     precision: 5,
     scale: 3,
     transformer: {
-      from: (value: string) => parseFloat(value),
+      from: (value: string) =>
+        value === null || value === undefined ? value : parseFloat(value),
       to: (value: number) => value,
     },
     nullable: true,
@@ -66,7 +68,8 @@ export class Loan extends BaseEntity {
     precision: 5,
     scale: 3,
     transformer: {
-      from: (value: string) => parseFloat(value),
+      from: (value: string) =>
+        value === null || value === undefined ? value : parseFloat(value),
       to: (value: number) => value,
     },
     nullable: true,

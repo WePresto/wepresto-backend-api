@@ -6,6 +6,7 @@ import appConfig from '../../../config/app.config';
 
 import { Movement } from './movement.entity';
 
+import { MovementConsumerService } from './services/movement.consumer.service';
 import { MovementCreateService } from './services/movement.create.service';
 import { MovementReadService } from './services/movement.read.service';
 import { MovementService } from './services/movement.service';
@@ -26,7 +27,12 @@ import { FrenchAmortizationSystemModule } from '../french-amortization-system/fr
     LoanModule,
     FrenchAmortizationSystemModule,
   ],
-  providers: [MovementCreateService, MovementReadService, MovementService],
+  providers: [
+    MovementConsumerService,
+    MovementCreateService,
+    MovementReadService,
+    MovementService,
+  ],
   controllers: [MovementController],
 })
 export class MovementModule {}

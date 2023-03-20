@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
@@ -45,6 +45,11 @@ export class MovementConsumerService {
     try {
       const { movementUid } = input;
 
+      Logger.log(
+        `paymentCreatedConsumer: payment ${movementUid} received`,
+        MovementConsumerService.name,
+      );
+
       // get the movement
       const existingPayment = await this.readService.getOne({
         uid: movementUid,
@@ -55,13 +60,26 @@ export class MovementConsumerService {
         throw new Error(`movement ${existingPayment.uid} is not a payment`);
       }
 
+      // check if the payment is already processed
+      if (existingPayment.processed) {
+        throw new Error(`payment ${existingPayment.uid} is already processed`);
+      }
+
+      // extract the loan from the movement
+      const { loan } = existingPayment;
+
       // get the minimum amount to pay
       const {
         totalAmount: minimumPaymentAmount,
         movements: minimalMovementsToPay,
       } = await this.loanService.readService.getMinimumPaymentAmount({
-        uid: existingPayment.uid,
+        uid: loan.uid,
       });
+
+      Logger.log(
+        `paymentCreatedConsumer: minimumPaymentAmount: ${minimumPaymentAmount} minimalMovementsToPay: ${minimalMovementsToPay.length}`,
+        MovementConsumerService.name,
+      );
 
       // check if the payment is enough
       if (existingPayment.amount * -1 < minimumPaymentAmount) {
@@ -82,11 +100,19 @@ export class MovementConsumerService {
         },
       );
 
+      Logger.log(
+        `paymentCreatedConsumer: minimalMovementsToPay: ${minimalMovementsToPay.length} are now paid`,
+        MovementConsumerService.name,
+      );
+
       let comment;
 
       // if the payment is greater than the minimum amount to pay...
       if (existingPayment.amount * -1 > minimumPaymentAmount) {
-        const { loan } = existingPayment;
+        Logger.log(
+          `paymentCreatedConsumer: the payment ${existingPayment.uid} is greater than the minimum amount to pay`,
+          MovementConsumerService.name,
+        );
 
         // get the missing installments to pay  (if any)
         const missingInstallments = await this.movementRepository.find({
@@ -97,8 +123,18 @@ export class MovementConsumerService {
           },
         });
 
+        Logger.log(
+          `paymentCreatedConsumer: missingInstallments: ${missingInstallments.length}`,
+          MovementConsumerService.name,
+        );
+
         if (!missingInstallments.length) {
           // TODO: update the loan as paid
+
+          Logger.log(
+            `paymentCreatedConsumer: the loan ${loan.uid} is now paid`,
+            MovementConsumerService.name,
+          );
         }
 
         // get the total principal amount of the loan
@@ -107,15 +143,30 @@ export class MovementConsumerService {
           0,
         );
 
+        Logger.log(
+          `paymentCreatedConsumer: totalPrincipalDebt: ${totalPrincipalDebt}`,
+          MovementConsumerService.name,
+        );
+
         // determine the amount to re calculate the installments
         const newPrincipalDebt =
           totalPrincipalDebt -
           (existingPayment.amount * -1 - minimumPaymentAmount);
 
+        Logger.log(
+          `paymentCreatedConsumer: newPrincipalDebt: ${newPrincipalDebt}`,
+          MovementConsumerService.name,
+        );
+
         // re calculate the installments
         let newInstallments;
         if (existingPayment.type === MovementType.PAYMENT_TERM_REDUCTION) {
           // IF THE EXTRA PAYMENT IS TO REDUCE THE NUMBER OF THE INSTALLMENTS
+
+          Logger.log(
+            `paymentCreatedConsumer: the payment ${existingPayment.uid} is to reduce the number of the installments`,
+            MovementConsumerService.name,
+          );
 
           newInstallments = [];
           let newPrincipalDebtInInstallments = newPrincipalDebt;
@@ -158,20 +209,54 @@ export class MovementConsumerService {
         } else {
           // IF THE EXTRA PAYMENT IS TO REDUCE THE AMOUNT OF THE INSTALLMENTS
 
+          Logger.log(
+            `paymentCreatedConsumer: the payment ${existingPayment.uid} is to reduce the amount of the installments`,
+            MovementConsumerService.name,
+          );
+
+          let referenceDate;
+          if (minimalMovementsToPay.length) {
+            // getting the due date of the last installment that was paid
+            referenceDate = minimalMovementsToPay
+              .filter(
+                (movement) => movement.type === MovementType.LOAN_INSTALLMENT,
+              )
+              .slice(-1)[0].dueDate;
+          } else {
+            // get the due date of the last installment that was paid
+            const { dueDate } = await this.movementRepository.findOne({
+              where: {
+                loan: { id: loan.id },
+                paid: true,
+                type: MovementType.LOAN_INSTALLMENT,
+              },
+              order: {
+                dueDate: 'DESC',
+              },
+            });
+
+            referenceDate = dueDate;
+          }
+
+          Logger.log(
+            `paymentCreatedConsumer: referenceDate: ${referenceDate.toISOString()}`,
+            MovementConsumerService.name,
+          );
+
           // get the new installments
           newInstallments =
             await this.frenchAmortizationSystemService.getLoanInstallments({
               amount: newPrincipalDebt,
               annualInterestRate: loan.annualInterestRate,
               term: missingInstallments.length,
-              // getting the due date of the last installment that was paid
-              referenceDate: minimalMovementsToPay
-                .filter(
-                  (movement) => movement.type === MovementType.LOAN_INSTALLMENT,
-                )
-                .slice(-1)[0].dueDate,
+              referenceDate,
             });
         }
+
+        Logger.log(
+          `paymentCreatedConsumer: newInstallments: ${newInstallments.length}`,
+          MovementConsumerService.name,
+        );
 
         // create the new installments
         const createdInstallments = newInstallments.map((installment) => {
@@ -192,6 +277,11 @@ export class MovementConsumerService {
           this.movementRepository.save(createdInstallments),
         ]);
 
+        Logger.log(
+          `paymentCreatedConsumer: the installments were recalculated and saved`,
+          MovementConsumerService.name,
+        );
+
         comment = `The payment was greater than the minimum amount to pay, so the installments were recalculated. The new installments are: ${createdInstallments.length}`;
       }
 
@@ -203,6 +293,11 @@ export class MovementConsumerService {
       });
 
       await this.movementRepository.save(preloadedPayment);
+
+      Logger.log(
+        `paymentCreatedConsumer: the payment ${existingPayment.uid} was processed`,
+        MovementConsumerService.name,
+      );
     } catch (error) {
       console.error(error);
 
