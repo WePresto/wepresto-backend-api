@@ -10,6 +10,8 @@ import { Movement, MovementType } from '../movement.entity';
 import { RabbitMQLocalService } from '../../../../plugins/rabbit-local/rabbit-mq-local.service';
 import { LoanService } from '../../loan/services/loan.service';
 
+import { getReferenceDate } from '../../../../utils';
+
 import { CreatePaymentMovementInput } from '../dto/create-payment-movement-input.dto';
 
 export class MovementCreateService {
@@ -36,6 +38,7 @@ export class MovementCreateService {
     const { totalAmount: minimumPaymentAmount } =
       await this.loanService.readService.getMinimumPaymentAmount({
         uid: existingLoan.uid,
+        referenceDate: getReferenceDate(new Date()),
       });
 
     if (minimumPaymentAmount > amount) {
@@ -71,5 +74,13 @@ export class MovementCreateService {
     });
 
     return savedMovement;
+  }
+
+  public async createLatePaymentInterest() {
+    await this.rabbitMQLocalService.publishSettleLatePaymentInterest({
+      timeZone: 'America/Bogota',
+    });
+
+    return { message: 'ok' };
   }
 }

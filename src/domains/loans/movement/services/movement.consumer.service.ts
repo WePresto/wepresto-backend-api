@@ -7,8 +7,15 @@ import { RabbitRPC } from '@golevelup/nestjs-rabbitmq';
 import appConfig from '../../../../config/app.config';
 
 import { Movement, MovementType } from '../movement.entity';
+import { LoanStatus } from '../../loan/loan.entity';
 
-import { getRabbitMQExchangeName } from '../../../../utils';
+import {
+  addDays,
+  getNumberOfDays,
+  getRabbitMQExchangeName,
+  getReferenceDate,
+  isSameDay,
+} from '../../../../utils';
 
 import { MovementReadService } from './movement.read.service';
 import { EventMessageService } from '../../../event-message/event-message.service';
@@ -74,6 +81,7 @@ export class MovementConsumerService {
         movements: minimalMovementsToPay,
       } = await this.loanService.readService.getMinimumPaymentAmount({
         uid: loan.uid,
+        referenceDate: getReferenceDate(new Date()),
       });
 
       Logger.log(
@@ -314,6 +322,162 @@ export class MovementConsumerService {
         `paymentCreatedConsumer: the payment ${existingPayment.uid} was processed`,
         MovementConsumerService.name,
       );
+    } catch (error) {
+      console.error(error);
+
+      const message = error.message;
+
+      await this.eventMessageService.setError({
+        id: eventMessage._id,
+        error,
+      });
+
+      return {
+        status: error.status || 500,
+        message,
+        data: {},
+      };
+    }
+  }
+
+  @RabbitRPC({
+    exchange: RABBITMQ_EXCHANGE,
+    routingKey: `${RABBITMQ_EXCHANGE}.settle_late_payment_interest`,
+    queue: `${RABBITMQ_EXCHANGE}.${MovementConsumerService.name}.settle_late_payment_interest`,
+  })
+  public async settleLatePaymentInterest(input: any) {
+    const eventMessage = await this.eventMessageService.create({
+      routingKey: `${RABBITMQ_EXCHANGE}.settle_late_payment_interest`,
+      functionName: 'settleLatePaymentInterest',
+      data: input,
+    });
+
+    try {
+      const { timeZone } = input;
+
+      Logger.log(
+        `settleLatePaymentInterest: getting all loans that are disbursed`,
+        MovementConsumerService.name,
+      );
+
+      // get all loans that are disbursed
+      const existingLoans = await this.loanService.readService.getMany({
+        status: LoanStatus.DISBURSED,
+      });
+
+      const referenceDate = getReferenceDate(new Date(), timeZone);
+
+      Logger.log(
+        `settleLatePaymentInterest: referenceDate: ${referenceDate}`,
+        MovementConsumerService.name,
+      );
+
+      // for each loan that is disbursed look for the minimum amount to pay
+      // and get the movements
+      for (const existingLoan of existingLoans) {
+        Logger.log(
+          `settleLatePaymentInterest: processing loan ${existingLoan.uid}`,
+          MovementConsumerService.name,
+        );
+
+        // get the minimum amount to pay
+        const { movements } =
+          await this.loanService.readService.getMinimumPaymentAmount({
+            uid: existingLoan.uid,
+            referenceDate,
+          });
+
+        // if there are no movements, continue
+        if (!movements.length) {
+          Logger.log(
+            `settleLatePaymentInterest: there are no movements to pay for the loan ${existingLoan.uid}`,
+            MovementConsumerService.name,
+          );
+          continue;
+        }
+
+        // getting the overdue interest movements to save as new movements in the DB
+        const overdueInterestMovementsToSave = movements.reduce(
+          (overdueInterestMovements, currentMovement, _i, selfArray) => {
+            let newOverdueInterestMovements: Movement[] = [];
+
+            // only check for the loan installments
+            if (currentMovement.type === MovementType.LOAN_INSTALLMENT) {
+              const { dueDate } = currentMovement;
+
+              // get the reference date of the due date
+              const referenceDueDate = getReferenceDate(dueDate, timeZone);
+
+              // check if the installment is overdue
+              if (referenceDueDate < referenceDate) {
+                // get the number of days that the installment is overdue
+                const daysOverdue = getNumberOfDays(
+                  referenceDueDate,
+                  referenceDate,
+                );
+
+                Logger.log(
+                  `settleLatePaymentInterest: the installment ${currentMovement.uid} is overdue for ${daysOverdue} days`,
+                  MovementConsumerService.name,
+                );
+
+                // for each day that the installment is overdue, check if there is a overdue interest movement
+                for (let index = 1; index <= daysOverdue; index++) {
+                  const possibleDate = addDays(dueDate, index);
+
+                  // find a overdue interest movement for the possible date
+                  const existingOverdue = selfArray.find(
+                    (movement) =>
+                      movement.type === MovementType.OVERDUE_INTEREST &&
+                      isSameDay(movement.dueDate, possibleDate),
+                  );
+
+                  // if there is no overdue interest movement for the possible date and
+                  // the possible date is less than or equal to the reference date
+                  // then create a new overdue interest movement
+                  if (!existingOverdue && possibleDate <= referenceDate) {
+                    // eslint-disable-next-line prettier/prettier
+                    const amount = (currentMovement.principal * existingLoan.annualInterestOverdueRate) / 360;
+
+                    const newOverdueInterestMovement =
+                      this.movementRepository.create({
+                        amount,
+                        dueDate: possibleDate,
+                        loan: existingLoan,
+                        type: MovementType.OVERDUE_INTEREST,
+                        paid: false,
+                      });
+
+                    newOverdueInterestMovements = [
+                      ...newOverdueInterestMovements,
+                      newOverdueInterestMovement,
+                    ];
+                  }
+                }
+              } else {
+                Logger.log(
+                  `settleLatePaymentInterest: the installment ${currentMovement.uid} is not overdue`,
+                  MovementConsumerService.name,
+                );
+              }
+            }
+
+            return [
+              ...overdueInterestMovements,
+              ...newOverdueInterestMovements,
+            ];
+          },
+          [] as Movement[],
+        );
+
+        // save the new overdue interest movements
+        await this.movementRepository.save(overdueInterestMovementsToSave);
+
+        Logger.log(
+          `settleLatePaymentInterest: the overdue interest movements were saved for loan ${existingLoan.uid}`,
+          MovementConsumerService.name,
+        );
+      }
     } catch (error) {
       console.error(error);
 

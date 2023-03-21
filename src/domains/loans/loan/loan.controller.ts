@@ -12,6 +12,8 @@ import { PermissionName, Public } from 'nestjs-basic-acl-sdk';
 
 import { LoanService } from './services/loan.service';
 
+import { getReferenceDate } from '../../../utils';
+
 import { ApplyLoanInput } from './dto/apply-loan-input.dto';
 import { GetOneLoanInput } from './dto/get-one-loan-input.dto';
 import { ReviewLoanInput } from './dto/review-loan-input.dto';
@@ -40,7 +42,15 @@ export class LoanController {
   // @PermissionName('loans:getMinimumPaymentAmount')
   @Get('minimum-payment-amount')
   getMinimumPaymentAmount(@Query() input: GetOneLoanInput) {
-    return this.loanService.readService.getMinimumPaymentAmount(input);
+    const { uid } = input;
+
+    // create a reference date to execute the getMinimumPaymentAmount
+    const referenceDate = getReferenceDate(new Date());
+
+    return this.loanService.readService.getMinimumPaymentAmount({
+      uid,
+      referenceDate,
+    });
   }
 
   /* READ RELATED ENDPOINTS */

@@ -12,6 +12,8 @@ import { BaseService } from '../../../../common/base.service';
 
 import { GetOneLoanInput } from '../dto/get-one-loan-input.dto';
 import { GetMinimumPaymentAmountOutput } from '../dto/get-minimum-payment-amount-output.dto';
+import { GetManyLoansInput } from '../dto/get-many-loans-input.dto';
+import { GetMinimumPaymentAmountInput } from '../dto/get-minimum-payment-amount-input.dto';
 
 @Injectable()
 export class LoanReadService extends BaseService<Loan> {
@@ -39,27 +41,14 @@ export class LoanReadService extends BaseService<Loan> {
   }
 
   public async getMinimumPaymentAmount(
-    input: GetOneLoanInput,
+    input: GetMinimumPaymentAmountInput,
   ): Promise<GetMinimumPaymentAmountOutput> {
-    const { uid } = input;
+    const { uid, referenceDate } = input;
 
     const existingLoan = await this.getOne({ uid });
 
-    // console.log('going to create the date...');
-
-    const localeDateString = new Date().toLocaleDateString('en-US', {
-      timeZone: 'America/Bogota',
-    });
-
-    // console.log('localeDateString', localeDateString);
-
-    const referenceDateTime = new Date(localeDateString).toISOString();
-
-    // console.log('referenceDateTime', referenceDateTime);
-
-    const [referenceDate] = referenceDateTime.split('T');
-
-    const [year, month] = referenceDate.split('-');
+    const referenceDateISO = new Date(referenceDate).toISOString();
+    const [year, month] = referenceDateISO.split('-');
 
     const nextLoanInstallmentQuery = this.loanRepository
       .createQueryBuilder('loan')
@@ -161,5 +150,17 @@ export class LoanReadService extends BaseService<Loan> {
       ...reducedMovements,
       movements,
     };
+  }
+
+  public async getMany(input: GetManyLoansInput) {
+    const { status } = input;
+
+    const existingLoans = await this.loanRepository.find({
+      where: {
+        status,
+      },
+    });
+
+    return existingLoans;
   }
 }

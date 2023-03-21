@@ -15,6 +15,7 @@ import { PublishReceivedPaymentInput } from './dto/publish-received-payment-inpu
 import { PublishLoanRequestOnReviewInput } from './dto/publish-loan-request-on-review-input.dto';
 import { PublishLoanRequestRejectedInput } from './dto/publish-loan-request-rejected-input.dto';
 import { PublishLoanRequestApprovedInput } from './dto/publish-loan-request-approved-input.dto';
+import { PublishSettleLatePaymentInterestInput } from './dto/publish-settle-late-payment-interest-input.dto';
 
 @Injectable()
 export class RabbitMQLocalService {
@@ -59,6 +60,26 @@ export class RabbitMQLocalService {
 
     await this.amqpConnection.publish(exchangeName, routingKey, {
       movementUid,
+    });
+
+    Logger.log(
+      `message published to exchange ${exchangeName} ` +
+        `for routing key ${routingKey} with input: ${JSON.stringify(input)}`,
+      RabbitMQLocalService.name,
+    );
+  }
+
+  public async publishSettleLatePaymentInterest(
+    input: PublishSettleLatePaymentInterestInput,
+  ): Promise<void> {
+    const { timeZone } = input;
+
+    const { exchangeName } = this;
+
+    const routingKey = `${exchangeName}.settle_late_payment_interest`;
+
+    await this.amqpConnection.publish(exchangeName, routingKey, {
+      timeZone,
     });
 
     Logger.log(

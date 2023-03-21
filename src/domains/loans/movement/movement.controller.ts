@@ -24,5 +24,11 @@ export class MovementController {
     return this.movementService.createService.createPayment(input);
   }
 
+  @Public()
+  @Post('late-payment-interest')
+  createLatePaymentInterest() {
+    return this.movementService.createService.createLatePaymentInterest();
+  }
+
   /* CREATE RELATED ENDPOINTS */
 }

@@ -63,3 +63,21 @@ export const hash = (text: string): string => {
 
   return hash;
 };
+
+export const getReferenceDate = (date: Date, timeZone = 'America/Bogota') => {
+  const localeDateString = date.toLocaleDateString('en-US', {
+    timeZone,
+  });
+  const referenceDateTime = new Date(localeDateString).toISOString();
+  const [referenceDate] = referenceDateTime.split('T');
+
+  return new Date(referenceDate);
+};
+
+export const isSameDay = (...dates) => {
+  // get the day of the first date
+  const firstDay = dates[0].toISOString().substr(0, 10);
+
+  // check if all other dates are on the same day
+  return dates.every((date) => date.toISOString().substr(0, 10) === firstDay);
+};
