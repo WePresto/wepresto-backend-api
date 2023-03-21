@@ -61,6 +61,7 @@ export class LoanReadService extends BaseService<Loan> {
       .andWhere(`(movement.due_date - interval '10 day') < :referenceDate`, {
         referenceDate,
       })
+      .orderBy('movement.due_date', 'ASC')
       .getOne();
 
     const loanInstallmentsQuery = this.loanRepository
@@ -73,6 +74,7 @@ export class LoanReadService extends BaseService<Loan> {
       .andWhere('movement.paid = :paid', { paid: false })
       .andWhere(`extract('year' from movement.due_date) <= :year`, { year })
       .andWhere(`extract('month' from movement.due_date) <= :month`, { month })
+      .orderBy('movement.due_date', 'ASC')
       .getOne();
 
     const overDueInterestsQuery = this.loanRepository
@@ -84,6 +86,7 @@ export class LoanReadService extends BaseService<Loan> {
       })
       .andWhere('movement.paid = :paid', { paid: false })
       .andWhere('movement.due_date <= :referenceDate', { referenceDate })
+      .orderBy('movement.due_date', 'ASC')
       .getOne();
 
     const [
