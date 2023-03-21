@@ -2,8 +2,8 @@ import { IsNumber, IsUUID } from 'class-validator';
 
 export class ApplyLoanInput {
   @IsUUID()
-  borrowerUid: string;
+  readonly borrowerUid: string;
 
   @IsNumber()
-  amount: number;
+  readonly amount: number;
 }

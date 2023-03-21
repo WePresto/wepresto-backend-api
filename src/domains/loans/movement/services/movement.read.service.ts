@@ -1,4 +1,4 @@
-import { ConflictException, Inject } from '@nestjs/common';
+import { BadRequestException, ConflictException, Inject } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -10,7 +10,10 @@ import { Movement, MovementType } from '../movement.entity';
 import { BaseService } from '../../../../common/base.service';
 import { LoanService } from '../../loan/services/loan.service';
 
+import { getReferenceDate } from '../../../../utils';
+
 import { GetOneMovementInput } from '../dto/get-one-movement-input.dto';
+import { GetLoanMovementsInput } from '../dto/get-loan-movements-input.dto';
 
 export class MovementReadService extends BaseService<Movement> {
   constructor(
@@ -18,6 +21,7 @@ export class MovementReadService extends BaseService<Movement> {
     private readonly appConfiguration: ConfigType<typeof appConfig>,
     @InjectRepository(Movement)
     private readonly movementRepository: Repository<Movement>,
+    private readonly loanService: LoanService,
   ) {
     super(movementRepository);
   }
@@ -78,6 +82,94 @@ export class MovementReadService extends BaseService<Movement> {
       order: existingLoanInstallmentIndex + 1,
       numberOfInstallments: movements.length,
       paid: existingLoanInstallment.paid,
+    };
+  }
+
+  public async getLoanMovements(input: GetLoanMovementsInput) {
+    const {
+      loanUid,
+      take = '10',
+      skip = '0',
+      types,
+      startDate,
+      endDate,
+    } = input;
+
+    let parsedTypes = [];
+    if (types) {
+      parsedTypes = types.split(',').map((type) => type.trim());
+
+      // check if the types are valid
+      parsedTypes.forEach((type) => {
+        if (!Object.values(MovementType).includes(type as MovementType)) {
+          throw new BadRequestException(`invalid movement type ${type}`);
+        }
+      });
+    }
+
+    let parsedStartDate: Date | undefined;
+    if (startDate) {
+      parsedStartDate = new Date(startDate);
+    }
+
+    let parsedEndDate: Date | undefined;
+    if (endDate) {
+      parsedEndDate = new Date(endDate);
+    }
+
+    // get the loan
+    const existingLoan = await this.loanService.readService.getOneByFields({
+      fields: {
+        uid: loanUid,
+      },
+      checkIfExists: true,
+      loadRelationIds: false,
+    });
+
+    const query = this.movementRepository
+      .createQueryBuilder('movement')
+      .innerJoin('movement.loan', 'loan')
+      .where('loan.uid = :loanUid', { loanUid: existingLoan.uid });
+
+    if (parsedTypes.length) {
+      query.andWhere('movement.type IN (:...types)', { types: parsedTypes });
+    }
+
+    const [movements, count] = await query.getManyAndCount();
+
+    // order movements by date
+    const orderedMovements = movements
+      .filter((movement) => {
+        const movementDate = movement.dueDate ?? movement.movementDate;
+
+        if (parsedStartDate && parsedEndDate) {
+          return (
+            movementDate.getTime() >= parsedStartDate.getTime() &&
+            movementDate.getTime() <= parsedEndDate.getTime()
+          );
+        }
+
+        if (parsedStartDate) {
+          return movementDate.getTime() >= parsedStartDate.getTime();
+        }
+
+        if (parsedEndDate) {
+          return movementDate.getTime() <= parsedEndDate.getTime();
+        }
+
+        return true;
+      })
+      .sort((a, b) => {
+        const aDate = a.dueDate ?? a.movementDate;
+        const bDate = b.dueDate ?? b.movementDate;
+
+        return aDate.getTime() - bDate.getTime();
+      })
+      .slice(+skip, +skip + +take);
+
+    return {
+      count,
+      movements: orderedMovements,
     };
   }
 }

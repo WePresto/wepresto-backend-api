@@ -7,12 +7,13 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { Public } from 'nestjs-basic-acl-sdk';
+import { PermissionName, Public } from 'nestjs-basic-acl-sdk';
 
 import { MovementService } from './services/movement.service';
 
 import { CreatePaymentMovementInput } from './dto/create-payment-movement-input.dto';
 import { GetOneMovementInput } from './dto/get-one-movement-input.dto';
+import { GetLoanMovementsInput } from './dto/get-loan-movements-input.dto';
 
 @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
 @Controller('movements')
@@ -37,10 +38,16 @@ export class MovementController {
 
   /* READ RELATED ENDPOINTS */
 
-  @Public()
+  @PermissionName('movements:getLoanInstallmentInfo')
   @Get('loan-installment-info')
   getLoanInstallmentInfo(@Query() input: GetOneMovementInput) {
     return this.movementService.readService.getLoanInstallmentInfo(input);
+  }
+
+  @PermissionName('movements:getLoanMovements')
+  @Get('loan-movements')
+  getLoanMovements(@Query() input: GetLoanMovementsInput) {
+    return this.movementService.readService.getLoanMovements(input);
   }
 
   /* READ RELATED ENDPOINTS */
