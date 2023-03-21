@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigType } from '@nestjs/config';
 import { Repository } from 'typeorm';
@@ -108,7 +108,9 @@ export class LoanUpdateService {
 
     // check loan status
     if (existingLoan.status !== LoanStatus.APPROVED) {
-      throw new Error(`loan is not in ${LoanStatus.APPROVED} status`);
+      throw new ConflictException(
+        `loan is not in ${LoanStatus.APPROVED} status`,
+      );
     }
 
     // update loan

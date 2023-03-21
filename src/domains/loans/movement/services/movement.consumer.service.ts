@@ -169,24 +169,39 @@ export class MovementConsumerService {
           );
 
           newInstallments = [];
+
+          // distribute the new principal debt to the missing installments
           let newPrincipalDebtInInstallments = newPrincipalDebt;
           for (let i = 0; i < missingInstallments.length; i++) {
             const installment = missingInstallments[i];
 
-            if (newPrincipalDebt <= 0) break;
+            // if the new principal debt in installments is less than or equal to zero
+            // means that the debt was distributed to all the installments
+            // so we can break the loop
+            if (newPrincipalDebtInInstallments <= 0) break;
 
+            // if the new principal debt in installments is greater than the installment principal
+            // means it (new principal debt in installments) can hold the full principal of the installment
+            // so we can add the installment to the new installments
             if (newPrincipalDebtInInstallments > installment.principal) {
               newInstallments = [
                 ...newInstallments,
                 {
                   ...installment,
                   id: undefined,
+                  uid: undefined,
                   createdAt: undefined,
                   updatedAt: undefined,
+                  balance:
+                    newPrincipalDebtInInstallments - installment.principal,
                 },
               ];
               newPrincipalDebtInInstallments -= installment.principal;
             } else {
+              // otherwise, new principal debt in installments is less than the installment principal
+              // means this is the last installment to be added to the new installments
+              // so we can add the installment to the new installments
+
               const interest =
                 newPrincipalDebtInInstallments * (loan.annualInterestRate / 12);
 
@@ -195,6 +210,7 @@ export class MovementConsumerService {
                 {
                   ...installment,
                   id: undefined,
+                  uid: undefined,
                   createdAt: undefined,
                   updatedAt: undefined,
                   principal: newPrincipalDebtInInstallments,
@@ -239,7 +255,7 @@ export class MovementConsumerService {
           }
 
           Logger.log(
-            `paymentCreatedConsumer: referenceDate: ${referenceDate.toISOString()}`,
+            `paymentCreatedConsumer: referenceDate to calculate the new installments: ${referenceDate}`,
             MovementConsumerService.name,
           );
 
@@ -282,7 +298,7 @@ export class MovementConsumerService {
           MovementConsumerService.name,
         );
 
-        comment = `The payment was greater than the minimum amount to pay, so the installments were recalculated. The new installments are: ${createdInstallments.length}`;
+        comment = `The payment was greater than the minimum amount to pay, so the installments were recalculated`;
       }
 
       // update the movement as processed
