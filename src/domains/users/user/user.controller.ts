@@ -30,6 +30,8 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  /* CREATE RELATED ENDPOINTS */
+
   @ApiOperation({
     summary: 'Create a new lender',
   })
@@ -47,6 +49,10 @@ export class UserController {
   createBorrower(@Body() input: CreateBorrowerInput) {
     return this.userService.createService.createBorrower(input);
   }
+
+  /* CREATE RELATED ENDPOINTS */
+
+  /* READ RELATED ENDPOINTS */
 
   @ApiOperation({
     summary: 'Get document types',
@@ -66,14 +72,9 @@ export class UserController {
     return this.userService.readService.getOne(input);
   }
 
-  @ApiOperation({
-    summary: 'Delete user',
-  })
-  @PermissionName('users:delete')
-  @Delete('borrower')
-  delete(@Query() input: GetOneUserInput) {
-    return this.userService.deleteService.delete(input);
-  }
+  /* READ RELATED ENDPOINTS */
+
+  /* UPDATE RELATED ENDPOINTS */
 
   @ApiOperation({
     summary: 'Change user email',
@@ -119,4 +120,19 @@ export class UserController {
   changePassword(@Body() input: ChangeUserPasswordInput) {
     return this.userService.updateService.changePassword(input);
   }
+
+  /* UPDATE RELATED ENDPOINTS */
+
+  /* DELETE RELATED ENDPOINTS */
+
+  @ApiOperation({
+    summary: 'Delete user',
+  })
+  @PermissionName('users:delete')
+  @Delete('borrower')
+  delete(@Query() input: GetOneUserInput) {
+    return this.userService.deleteService.delete(input);
+  }
+
+  /* DELETE RELATED ENDPOINTS */
 }
