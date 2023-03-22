@@ -10,6 +10,7 @@ import { Borrower } from '../borrower.entity';
 import { BaseService } from '../../../../common/base.service';
 
 import { GetOneBorrowerInput } from '../dto/get-one-borrower-input.dto';
+import { GetManyBorrowersInput } from '../dto/get-many-borrowers-input.dto';
 
 @Injectable()
 export class BorrowerReadService extends BaseService<Borrower> {
@@ -50,5 +51,35 @@ export class BorrowerReadService extends BaseService<Borrower> {
     const { loans } = existingBorrower;
 
     return loans;
+  }
+
+  public async getMany(input: GetManyBorrowersInput) {
+    const { fullName, documentNumber, take = '10', skip = '0' } = input;
+
+    const query = this.borrowerRepository
+      .createQueryBuilder('borrower')
+      .innerJoinAndSelect('borrower.user', 'user')
+      .where('1 = 1')
+      .take(+take)
+      .skip(+skip);
+
+    if (fullName) {
+      query.andWhere('user.fullName ILIKE :fullName', {
+        fullName: `%${fullName}%`,
+      });
+    }
+
+    if (documentNumber) {
+      query.andWhere('user.documentNumber ILIKE :documentNumber', {
+        documentNumber: `%${documentNumber}%`,
+      });
+    }
+
+    const [borrowers, count] = await query.getManyAndCount();
+
+    return {
+      count,
+      borrowers,
+    };
   }
 }
