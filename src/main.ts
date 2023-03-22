@@ -1,8 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
+import { SwaggerModule } from '@nestjs/swagger';
 
 import { AppModule } from './app.module';
+
+import { createdocument } from './swagger';
+
+const ENVIRONMENTS_TO_SHOW_DOCS = ['local', 'development', 'staging'];
 
 async function bootstrap() {
   // create nestjs app
@@ -16,6 +21,10 @@ async function bootstrap() {
 
   // getting the environment var
   const ENV = configService.get<string>('config.environment');
+
+  if (ENV && ENVIRONMENTS_TO_SHOW_DOCS.includes(ENV)) {
+    SwaggerModule.setup('docs', app, createdocument(app));
+  }
 
   app.enableCors();
 

@@ -22,18 +22,26 @@ import { ChangeUserPhoneInput } from './dto/change-user-phone-input.dto';
 import { ChangeUserAddressInput } from './dto/change-user-address-input.dto';
 import { SendUserResetPasswordEmail } from './dto/send-user-reset-password-email-input.dto';
 import { ChangeUserPasswordInput } from './dto/change-user-password-input.dto';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('users')
 @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @ApiOperation({
+    summary: 'Create a new lender',
+  })
   @Public()
   @Post('lender')
   createLender(@Body() input: CreateLenderInput) {
     return this.userService.createService.createLender(input);
   }
 
+  @ApiOperation({
+    summary: 'Create a new borrower',
+  })
   @Public()
   @Post('borrower')
   createBorrower(@Body() input: CreateBorrowerInput) {
