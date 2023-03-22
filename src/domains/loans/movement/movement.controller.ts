@@ -22,7 +22,7 @@ export class MovementController {
 
   /* CREATE RELATED ENDPOINTS */
 
-  @Public()
+  @PermissionName('movements:createPayment')
   @Post('payment')
   createPayment(@Body() input: CreatePaymentMovementInput) {
     return this.movementService.createService.createPayment(input);
