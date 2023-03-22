@@ -23,7 +23,7 @@ export class UserDeleteService {
     private readonly basicAclService: BasicAclService,
   ) {}
 
-  public async deleteBorrower(input: GetOneUserInput): Promise<User> {
+  public async delete(input: GetOneUserInput): Promise<User> {
     // get the user
     const existingUser = await this.readService.getOneByFields({
       fields: {

@@ -48,48 +48,72 @@ export class UserController {
     return this.userService.createService.createBorrower(input);
   }
 
+  @ApiOperation({
+    summary: 'Get document types',
+  })
   @Public()
   @Get('document-types')
   getDocumentTypes() {
     return this.userService.readService.getDocumentTypes();
   }
 
+  @ApiOperation({
+    summary: 'Get user',
+  })
   @PermissionName('users:getOne')
   @Get(':authUid')
   getOne(@Param() input: GetOneUserInput) {
     return this.userService.readService.getOne(input);
   }
 
-  @PermissionName('users:deleteBorrower')
+  @ApiOperation({
+    summary: 'Delete user',
+  })
+  @PermissionName('users:delete')
   @Delete('borrower')
-  deleteBorrower(@Query() input: GetOneUserInput) {
-    return this.userService.deleteService.deleteBorrower(input);
+  delete(@Query() input: GetOneUserInput) {
+    return this.userService.deleteService.delete(input);
   }
 
+  @ApiOperation({
+    summary: 'Change user email',
+  })
   @PermissionName('user:changeEmail')
   @Patch('email')
   changeEmail(@Body() input: ChangeUserEmailInput) {
     return this.userService.updateService.changeEmail(input);
   }
 
+  @ApiOperation({
+    summary: 'Change user phone',
+  })
   @PermissionName('users:changePhone')
   @Patch('phone')
   changePhone(@Body() input: ChangeUserPhoneInput) {
     return this.userService.updateService.changePhone(input);
   }
 
+  @ApiOperation({
+    summary: 'Change user address',
+  })
   @PermissionName('users:changeAddress')
   @Patch('address')
   changeAddress(@Body() input: ChangeUserAddressInput) {
     return this.userService.updateService.changeAddress(input);
   }
 
+  @ApiOperation({
+    summary: 'Send reset password email',
+  })
   @Public()
   @Post('reset-password-email')
   sendResetPasswordEmail(@Body() input: SendUserResetPasswordEmail) {
     return this.userService.updateService.sendResetPasswordEmail(input);
   }
 
+  @ApiOperation({
+    summary: 'Change user password',
+  })
   @PermissionName('users:changePassword')
   @Patch('/password')
   changePassword(@Body() input: ChangeUserPasswordInput) {
