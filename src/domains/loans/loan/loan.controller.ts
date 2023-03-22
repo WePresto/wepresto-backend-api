@@ -8,7 +8,7 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { PermissionName, Public } from 'nestjs-basic-acl-sdk';
+import { PermissionName } from 'nestjs-basic-acl-sdk';
 
 import { LoanService } from './services/loan.service';
 
@@ -38,8 +38,7 @@ export class LoanController {
 
   /* READ RELATED ENDPOINTS */
 
-  @Public()
-  // @PermissionName('loans:getMinimumPaymentAmount')
+  @PermissionName('loans:getMinimumPaymentAmount')
   @Get('minimum-payment-amount')
   getMinimumPaymentAmount(@Query() input: GetOneLoanInput) {
     const { uid } = input;
@@ -57,25 +56,25 @@ export class LoanController {
 
   /* UPDATE RELATED ENDPOINTS */
 
-  @Public()
+  @PermissionName('loans:review')
   @Patch('loan-review')
   review(@Body() input: ReviewLoanInput) {
     return this.loanService.updateService.review(input);
   }
 
-  @Public()
+  @PermissionName('loans:reject')
   @Patch('loan-reject')
   reject(@Body() input: RejectLoanInput) {
     return this.loanService.updateService.reject(input);
   }
 
-  @Public()
+  @PermissionName('loans:approve')
   @Patch('loan-approve')
   approve(@Body() input: ApproveLoanInput) {
     return this.loanService.updateService.approve(input);
   }
 
-  @Public()
+  @PermissionName('loans:disburse')
   @Patch('loan-disburse')
   disburse(@Body() input: DisburseLoanInput) {
     return this.loanService.updateService.disburse(input);
