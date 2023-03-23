@@ -56,7 +56,7 @@ export class BorrowerReadService extends BaseService<Borrower> {
 
     const query = this.borrowerRepository
       .createQueryBuilder('borrower')
-      .innerJoinAndSelect('borrower.loans', 'loan')
+      .leftJoinAndSelect('borrower.loans', 'loan')
       .where('borrower.uid = :uid', { uid });
 
     if (parsedStatuses.length > 0) {
@@ -65,7 +65,7 @@ export class BorrowerReadService extends BaseService<Borrower> {
       });
     }
 
-    const { loans } = await query.getOne();
+    const { loans } = (await query.getOne()) || { loans: [] };
 
     return {
       count: loans.length,
