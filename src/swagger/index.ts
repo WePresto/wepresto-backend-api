@@ -11,6 +11,7 @@ export function createdocument(app: INestApplication): OpenAPIObject {
       'https://wepresto-backend-api-development.up.railway.app/',
       'Development',
     )
+    .addBearerAuth({ bearerFormat: 'JWT', type: 'http' })
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
