@@ -6,12 +6,12 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { PermissionName } from 'nestjs-basic-acl-sdk';
 
 import { BorrowerService } from './services/borrower.service';
 
-import { GetOneBorrowerInput } from './dto/get-one-borrower-input.dto';
-import { PermissionName } from 'nestjs-basic-acl-sdk';
 import { GetManyBorrowersInput } from './dto/get-many-borrowers-input.dto';
+import { GetBorrowerLoansInput } from './dto/get-borrower-loans-input.dto';
 
 @ApiTags('borrowers')
 @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
@@ -26,7 +26,7 @@ export class BorrowerController {
   })
   @PermissionName('borrowers:getLoans')
   @Get('loans')
-  getLoans(@Query() input: GetOneBorrowerInput) {
+  getLoans(@Query() input: GetBorrowerLoansInput) {
     return this.borrowerService.readService.getLoans(input);
   }
 

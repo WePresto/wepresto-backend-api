@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigType } from '@nestjs/config';
 import { Repository } from 'typeorm';
@@ -6,11 +6,13 @@ import { Repository } from 'typeorm';
 import appConfig from '../../../../config/app.config';
 
 import { Borrower } from '../borrower.entity';
+import { LoanStatus } from '../../../loans/loan/loan.entity';
 
 import { BaseService } from '../../../../common/base.service';
 
 import { GetOneBorrowerInput } from '../dto/get-one-borrower-input.dto';
 import { GetManyBorrowersInput } from '../dto/get-many-borrowers-input.dto';
+import { GetBorrowerLoansInput } from '../dto/get-borrower-loans-input.dto';
 
 @Injectable()
 export class BorrowerReadService extends BaseService<Borrower> {
@@ -37,20 +39,38 @@ export class BorrowerReadService extends BaseService<Borrower> {
     return existingBorrower;
   }
 
-  public async getLoans(input: GetOneBorrowerInput) {
-    const { uid } = input;
+  public async getLoans(input: GetBorrowerLoansInput) {
+    const { uid, statuses, take = '10', skip = '0' } = input;
 
-    const existingBorrower = await this.getOneByFields({
-      fields: {
-        uid,
-      },
-      checkIfExists: true,
-      relations: ['loans'],
-    });
+    let parsedStatuses: string[] = [];
+    if (statuses) {
+      parsedStatuses = statuses.split(',').map((type) => type.trim());
 
-    const { loans } = existingBorrower;
+      // check if the types are valid
+      parsedStatuses.forEach((status) => {
+        if (!Object.values(LoanStatus).includes(status as LoanStatus)) {
+          throw new BadRequestException(`invalid loan status ${status}`);
+        }
+      });
+    }
 
-    return loans;
+    const query = this.borrowerRepository
+      .createQueryBuilder('borrower')
+      .innerJoinAndSelect('borrower.loans', 'loan')
+      .where('borrower.uid = :uid', { uid });
+
+    if (parsedStatuses.length > 0) {
+      query.andWhere('loan.status IN (:...statuses)', {
+        statuses: parsedStatuses,
+      });
+    }
+
+    const { loans } = await query.getOne();
+
+    return {
+      count: loans.length,
+      data: loans.slice(+skip, +skip + +take),
+    };
   }
 
   public async getMany(input: GetManyBorrowersInput) {
