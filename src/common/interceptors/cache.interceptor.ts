@@ -69,7 +69,7 @@ export class CacheInterceptor implements NestInterceptor {
       request?.ip ||
       'unknown';
 
-    const { path } = request;
+    const { originalUrl: path } = request;
 
     const cache = await this.redisCacheService.get({
       keys: {
