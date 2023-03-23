@@ -8,6 +8,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { PermissionName, Public } from 'nestjs-basic-acl-sdk';
+import { ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { MovementService } from './services/movement.service';
 
@@ -15,6 +16,7 @@ import { CreatePaymentMovementInput } from './dto/create-payment-movement-input.
 import { GetOneMovementInput } from './dto/get-one-movement-input.dto';
 import { GetLoanMovementsInput } from './dto/get-loan-movements-input.dto';
 
+@ApiTags('movements')
 @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
 @Controller('movements')
 export class MovementController {
@@ -22,12 +24,16 @@ export class MovementController {
 
   /* CREATE RELATED ENDPOINTS */
 
+  @ApiOperation({
+    summary: 'Create a payment',
+  })
   @PermissionName('movements:createPayment')
   @Post('payment')
   createPayment(@Body() input: CreatePaymentMovementInput) {
     return this.movementService.createService.createPayment(input);
   }
 
+  @ApiExcludeEndpoint()
   @Public()
   @Post('late-payment-interest')
   createLatePaymentInterest() {
@@ -38,12 +44,18 @@ export class MovementController {
 
   /* READ RELATED ENDPOINTS */
 
+  @ApiOperation({
+    summary: 'Get loan installment info',
+  })
   @PermissionName('movements:getLoanInstallmentInfo')
   @Get('loan-installment-info')
   getLoanInstallmentInfo(@Query() input: GetOneMovementInput) {
     return this.movementService.readService.getLoanInstallmentInfo(input);
   }
 
+  @ApiOperation({
+    summary: 'Get loan movements',
+  })
   @PermissionName('movements:getLoanMovements')
   @Get('loan-movements')
   getLoanMovements(@Query() input: GetLoanMovementsInput) {

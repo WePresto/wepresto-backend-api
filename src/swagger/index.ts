@@ -6,7 +6,6 @@ export function createdocument(app: INestApplication): OpenAPIObject {
     .setTitle('WePresto-API')
     .setDescription('API for WePresto')
     .setVersion('1.0')
-    .addTag('api')
     .addServer(`http://localhost:${process.env.PORT}`, 'Local')
     .addServer(
       'https://wepresto-backend-api-development.up.railway.app/',
