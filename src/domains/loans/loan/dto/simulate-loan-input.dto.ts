@@ -11,7 +11,9 @@ export class SimulateLoanInput {
   readonly amount: number;
 
   @ApiProperty({
-    enum: Object.values(LoanTerm),
+    enum: Object.values(LoanTerm)
+      .map((term) => parseInt(term as string, 10))
+      .filter((term) => !!term),
   })
   @IsEnum(LoanTerm, {
     message: `term must be one of ${Object.values(LoanTerm)
