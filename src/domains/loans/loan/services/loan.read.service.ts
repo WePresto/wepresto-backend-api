@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 
 import appConfig from '../../../../config/app.config';
 
-import { Loan } from '../loan.entity';
+import { Loan, LoanTerm } from '../loan.entity';
 import { Movement, MovementType } from '../../movement/movement.entity';
 
 import { BaseService } from '../../../../common/base.service';
@@ -165,5 +165,25 @@ export class LoanReadService extends BaseService<Loan> {
     });
 
     return existingLoans;
+  }
+
+  public getLoanTerms() {
+    const loansTerms = Object.keys(LoanTerm)
+      .map((key, i, selfArray) => {
+        if (i < selfArray.length / 2) {
+          return {
+            name: selfArray[i + selfArray.length / 2]
+              .split('_')
+              .map(
+                (word) => word[0].toUpperCase() + word.slice(1).toLowerCase(),
+              )
+              .join(' '),
+            value: parseInt(key, 10),
+          };
+        }
+      })
+      .filter((item) => !!item);
+
+    return loansTerms;
   }
 }

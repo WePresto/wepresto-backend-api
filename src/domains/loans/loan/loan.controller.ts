@@ -8,7 +8,7 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { PermissionName } from 'nestjs-basic-acl-sdk';
+import { PermissionName, Public } from 'nestjs-basic-acl-sdk';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { LoanService } from './services/loan.service';
@@ -39,6 +39,15 @@ export class LoanController {
     return this.loanService.createService.apply(input);
   }
 
+  @ApiOperation({
+    summary: 'Simulate a loan',
+  })
+  @Public()
+  @Post('loan-simulate')
+  simulate(@Body() input: ApplyLoanInput) {
+    return this.loanService.createService.simulate(input);
+  }
+
   /* CREATE RELATED ENDPOINTS */
 
   /* READ RELATED ENDPOINTS */
@@ -58,6 +67,15 @@ export class LoanController {
       uid,
       referenceDate,
     });
+  }
+
+  @ApiOperation({
+    summary: 'Get the possible loan terms',
+  })
+  @Public()
+  @Get('loan-terms')
+  getLoanTerms() {
+    return this.loanService.readService.getLoanTerms();
   }
 
   /* READ RELATED ENDPOINTS */

@@ -25,6 +25,21 @@ export enum LoanStatus {
   PAID = 'PAID',
 }
 
+export enum LoanTerm {
+  SIX = 6,
+  TWELVE = 12,
+  EIGHTEEN = 18,
+  TWENTY_FOUR = 24,
+  THIRTY_SIX = 36,
+}
+
+export const InterstRate = {
+  [LoanTerm.SIX]: 0.42,
+  [LoanTerm.TWELVE]: 0.43,
+  [LoanTerm.EIGHTEEN]: 0.44,
+  [LoanTerm.TWENTY_FOUR]: 0.45,
+  [LoanTerm.THIRTY_SIX]: 0.46,
+};
 @Entity({ name: 'loan' })
 @Unique('uk_loan_uid', ['uid'])
 export class Loan extends BaseEntity {
@@ -102,6 +117,12 @@ export class Loan extends BaseEntity {
     default: null,
   })
   comment?: string;
+
+  @Column({
+    type: 'varchar',
+    nullable: true,
+  })
+  alias?: string;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
