@@ -21,6 +21,7 @@ import { ReviewLoanInput } from './dto/review-loan-input.dto';
 import { RejectLoanInput } from './dto/reject-loan-input.dto';
 import { ApproveLoanInput } from './dto/approve-loan-input.dto';
 import { DisburseLoanInput } from './dto/disburse-loan-input.dto';
+import { SimulateLoanInput } from './dto/simulate-loan-input.dto';
 
 @ApiTags('loans')
 @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
@@ -44,7 +45,7 @@ export class LoanController {
   })
   @Public()
   @Post('loan-simulate')
-  simulate(@Body() input: ApplyLoanInput) {
+  simulate(@Body() input: SimulateLoanInput) {
     return this.loanService.createService.simulate(input);
   }
 

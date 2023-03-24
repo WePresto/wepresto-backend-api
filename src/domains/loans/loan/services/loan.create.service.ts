@@ -11,6 +11,7 @@ import { FrenchAmortizationSystemService } from '../../french-amortization-syste
 import { BorrowerService } from '../../../users/borrower/services/borrower.service';
 
 import { ApplyLoanInput } from '../dto/apply-loan-input.dto';
+import { SimulateLoanInput } from '../dto/simulate-loan-input.dto';
 
 @Injectable()
 export class LoanCreateService {
@@ -69,7 +70,7 @@ export class LoanCreateService {
     }
   }
 
-  public simulate(input: ApplyLoanInput) {
+  public simulate(input: SimulateLoanInput) {
     const { amount, term } = input;
 
     // validate term and amount
