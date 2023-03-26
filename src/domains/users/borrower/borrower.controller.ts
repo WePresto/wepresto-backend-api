@@ -8,6 +8,8 @@ import {
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { PermissionName } from 'nestjs-basic-acl-sdk';
 
+import { RedisCacheTTL } from '../../../plugins/redis-cache/decorators/redis-cache-ttl.decorator';
+
 import { BorrowerService } from './services/borrower.service';
 
 import { GetManyBorrowersInput } from './dto/get-many-borrowers-input.dto';
@@ -24,6 +26,7 @@ export class BorrowerController {
   @ApiOperation({
     summary: 'Get borrower loans',
   })
+  @RedisCacheTTL(0)
   @PermissionName('borrowers:getLoans')
   @Get('loans')
   getLoans(@Query() input: GetBorrowerLoansInput) {

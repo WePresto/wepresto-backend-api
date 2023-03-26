@@ -5,11 +5,13 @@ import { Repository } from 'typeorm';
 
 import appConfig from '../../../../config/app.config';
 
-import { Loan, LoanStatus } from '../loan.entity';
+import { Loan, LoanStatus, InterstRate } from '../loan.entity';
 
 import { LoanReadService } from './loan.read.service';
 
 import { RabbitMQLocalService } from '../../../../plugins/rabbit-local/rabbit-mq-local.service';
+
+import { getReferenceDate } from '../../../../utils';
 
 import { ReviewLoanInput } from '../dto/review-loan-input.dto';
 import { RejectLoanInput } from '../dto/reject-loan-input.dto';
@@ -76,7 +78,7 @@ export class LoanUpdateService {
   }
 
   public async approve(input: ApproveLoanInput) {
-    const { uid, annualInterestRate, term, startDate, comment } = input;
+    const { uid, comment } = input;
 
     // get loan
     const existingLoan = await this.readService.getOne({ uid });
@@ -91,10 +93,8 @@ export class LoanUpdateService {
     // update loan
     const preloadedLoan = await this.loanRepository.preload({
       id: existingLoan.id,
-      annualInterestRate,
-      annualInterestOverdueRate: annualInterestRate * 1.5, // TODO: this should be a config
-      term,
-      startDate,
+      annualInterestRate: InterstRate[existingLoan.term],
+      annualInterestOverdueRate: InterstRate[existingLoan.term] * 1.5, // TODO: this should be a config
       status: LoanStatus.APPROVED,
       comment,
     });
@@ -120,6 +120,7 @@ export class LoanUpdateService {
     // update loan
     const preloadedLoan = await this.loanRepository.preload({
       id: existingLoan.id,
+      startDate: getReferenceDate(new Date()),
       status: LoanStatus.DISBURSED,
       comment,
     });

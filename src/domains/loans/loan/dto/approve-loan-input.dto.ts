@@ -15,27 +15,6 @@ export class ApproveLoanInput {
   readonly uid: string;
 
   @ApiProperty({
-    example: 0.1,
-  })
-  @IsNumber()
-  readonly annualInterestRate: number;
-
-  @ApiProperty({
-    example: 12,
-  })
-  @IsNumber()
-  readonly term: number;
-
-  @ApiProperty({
-    example: '2020-12-31',
-  })
-  @IsDateString({
-    format: 'YYYY-MM-DD',
-    length: 10,
-  })
-  readonly startDate: string;
-
-  @ApiProperty({
     example: 'prestamo aprobado',
   })
   @IsOptional()
