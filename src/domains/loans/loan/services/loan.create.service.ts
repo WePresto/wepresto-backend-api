@@ -62,6 +62,7 @@ export class LoanCreateService {
       amount,
       status: LoanStatus.APPLIED,
       alias,
+      term,
     });
 
     const savedLoan = await this.loanRepository.save(createdLoan);
