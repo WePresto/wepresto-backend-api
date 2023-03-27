@@ -63,6 +63,8 @@ export class LoanCreateService {
       status: LoanStatus.APPLIED,
       alias,
       term,
+      annualInterestRate: InterstRate[term],
+      annualInterestOverdueRate: InterstRate[term] * 1.5, // TODO: this should be a config
     });
 
     const savedLoan = await this.loanRepository.save(createdLoan);

@@ -93,8 +93,6 @@ export class LoanUpdateService {
     // update loan
     const preloadedLoan = await this.loanRepository.preload({
       id: existingLoan.id,
-      annualInterestRate: InterstRate[existingLoan.term],
-      annualInterestOverdueRate: InterstRate[existingLoan.term] * 1.5, // TODO: this should be a config
       status: LoanStatus.APPROVED,
       comment,
     });
