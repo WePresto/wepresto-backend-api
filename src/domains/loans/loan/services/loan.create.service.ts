@@ -1,7 +1,12 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigType } from '@nestjs/config';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 import appConfig from '../../../../config/app.config';
 
@@ -34,6 +39,22 @@ export class LoanCreateService {
     const existingBorrower = await this.borrowerService.readService.getOne({
       uid: borrowerUid,
     });
+
+    // check if the borrower has an active application for a loan
+    const activeLoanApplication = await this.loanRepository.findOne({
+      where: {
+        borrower: { id: existingBorrower.id },
+        status: In([
+          LoanStatus.APPLIED,
+          LoanStatus.REVIEWING,
+          LoanStatus.APPROVED,
+        ]),
+      },
+    });
+
+    if (activeLoanApplication) {
+      throw new ConflictException('borrower has an active loan application');
+    }
 
     // create loan
     const createdLoan = this.loanRepository.create({
