@@ -53,4 +53,7 @@ export default Joi.object({
 
   // MESSAGEBIRD
   //MESSAGEBIRD_API_KEY: Joi.required(),
+
+  // SLACK
+  SLACK_TOKEN: Joi.required(),
 });

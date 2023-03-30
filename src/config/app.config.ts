@@ -59,5 +59,8 @@ export default registerAs('config', () => {
     messagebird: {
       apiKey: process.env.MESSAGEBIRD_API_KEY,
     },
+    slack: {
+      token: process.env.SLACK_TOKEN,
+    },
   };
 });

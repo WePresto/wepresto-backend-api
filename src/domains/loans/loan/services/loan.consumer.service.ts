@@ -9,8 +9,9 @@ import appConfig from '../../../../config/app.config';
 import { Loan } from '../loan.entity';
 import { MovementType } from '../../movement/movement.entity';
 
-import { EventMessageService } from '../../../event-message/event-message.service';
 import { LoanReadService } from './loan.read.service';
+import { WeprestoSlackService } from '../../../../plugins/wepresto-slack/wepresto-slack.service';
+import { EventMessageService } from '../../../event-message/event-message.service';
 import { FrenchAmortizationSystemService } from '../../french-amortization-system/french-amortization-system.service';
 
 import { getRabbitMQExchangeName } from '../../../../utils';
@@ -24,8 +25,9 @@ export class LoanConsumerService {
     private readonly appConfiguration: ConfigType<typeof appConfig>,
     @InjectRepository(Loan)
     private readonly loanRepository: Repository<Loan>,
-    private readonly eventMessageService: EventMessageService,
     private readonly readService: LoanReadService,
+    private readonly weprestoSlackService: WeprestoSlackService,
+    private readonly eventMessageService: EventMessageService,
     private readonly frenchAmortizationSystemService: FrenchAmortizationSystemService,
   ) {}
 
@@ -37,12 +39,17 @@ export class LoanConsumerService {
   public async loanDisbursementConsumer(input: any) {
     const eventMessage = await this.eventMessageService.create({
       routingKey: `${RABBITMQ_EXCHANGE}.loan_disbursement`,
-      functionName: 'loanCreated',
+      functionName: 'loanDisbursementConsumer',
       data: input,
     });
 
     try {
       const { loanUid } = input;
+
+      Logger.log(
+        `loanDisbursementConsumer: loan ${loanUid} received`,
+        LoanConsumerService.name,
+      );
 
       // get the loan
       const existingLoan = await this.readService.getOne({
@@ -84,6 +91,56 @@ export class LoanConsumerService {
         )}`,
         LoanConsumerService.name,
       );
+    } catch (error) {
+      console.error(error);
+
+      const message = error.message;
+
+      await this.eventMessageService.setError({
+        id: eventMessage._id,
+        error,
+      });
+
+      return {
+        status: error.status || 500,
+        message,
+        data: {},
+      };
+    }
+  }
+
+  @RabbitRPC({
+    exchange: RABBITMQ_EXCHANGE,
+    routingKey: `${RABBITMQ_EXCHANGE}.loan_application`,
+    queue: `${RABBITMQ_EXCHANGE}.${LoanConsumerService.name}.loan_application`,
+  })
+  public async loanApplicationConsumer(input: any) {
+    const eventMessage = await this.eventMessageService.create({
+      routingKey: `${RABBITMQ_EXCHANGE}.loan_application`,
+      functionName: 'loanApplicationConsumer',
+      data: input,
+    });
+
+    try {
+      const { loanUid } = input;
+
+      Logger.log(
+        `loanApplicationConsumer: loan ${loanUid} received`,
+        LoanConsumerService.name,
+      );
+
+      // get the loan
+      const existingLoan = await this.loanRepository
+        .createQueryBuilder('loan')
+        .innerJoinAndSelect('loan.borrower', 'borrower')
+        .innerJoinAndSelect('borrower.user', 'user')
+        .where('loan.uid = :loanUid', { loanUid })
+        .getOne();
+
+      // send the message
+      await this.weprestoSlackService.sendNewLoanApplicationMessage({
+        loan: existingLoan,
+      });
     } catch (error) {
       console.error(error);
 

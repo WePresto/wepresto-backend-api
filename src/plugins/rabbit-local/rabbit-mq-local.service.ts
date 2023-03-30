@@ -69,6 +69,26 @@ export class RabbitMQLocalService {
     );
   }
 
+  public async publishLoanApplication(
+    input: PublishLoanDisbursementInput,
+  ): Promise<void> {
+    const { loanUid } = input;
+
+    const { exchangeName } = this;
+
+    const routingKey = `${exchangeName}.loan_application`;
+
+    await this.amqpConnection.publish(exchangeName, routingKey, {
+      loanUid,
+    });
+
+    Logger.log(
+      `message published to exchange ${exchangeName} ` +
+        `for routing key ${routingKey} with input: ${JSON.stringify(input)}`,
+      RabbitMQLocalService.name,
+    );
+  }
+
   public async publishSettleLatePaymentInterest(
     input: PublishSettleLatePaymentInterestInput,
   ): Promise<void> {

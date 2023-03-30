@@ -37,7 +37,9 @@ export class LoanUpdateService {
 
     // check loan status
     if (existingLoan.status !== LoanStatus.APPLIED) {
-      throw new Error(`loan is not in ${LoanStatus.APPLIED} status`);
+      throw new ConflictException(
+        `loan is not in ${LoanStatus.APPLIED} status`,
+      );
     }
 
     // update loan

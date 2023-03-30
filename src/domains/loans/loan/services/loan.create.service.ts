@@ -12,6 +12,7 @@ import appConfig from '../../../../config/app.config';
 
 import { Loan, LoanStatus, InterstRate } from '../loan.entity';
 
+import { RabbitMQLocalService } from '../../../../plugins/rabbit-local/rabbit-mq-local.service';
 import { FrenchAmortizationSystemService } from '../../french-amortization-system/french-amortization-system.service';
 import { BorrowerService } from '../../../users/borrower/services/borrower.service';
 
@@ -25,6 +26,7 @@ export class LoanCreateService {
     private readonly appConfiguration: ConfigType<typeof appConfig>,
     @InjectRepository(Loan)
     private readonly loanRepository: Repository<Loan>,
+    private readonly rabbitMQLocalService: RabbitMQLocalService,
     private readonly frenchAmortizationSystemService: FrenchAmortizationSystemService,
     private readonly borrowerService: BorrowerService,
   ) {}
@@ -68,6 +70,11 @@ export class LoanCreateService {
     });
 
     const savedLoan = await this.loanRepository.save(createdLoan);
+
+    // publish loan application event
+    await this.rabbitMQLocalService.publishLoanApplication({
+      loanUid: savedLoan.uid,
+    });
 
     return savedLoan;
   }

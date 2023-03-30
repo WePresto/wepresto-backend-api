@@ -7,6 +7,7 @@ import appConfig from '../../../config/app.config';
 import { Loan } from './loan.entity';
 
 import { RabbitMQLocalModule } from '../../../plugins/rabbit-local/rabbit-mq-local.module';
+import { WeprestoSlackModule } from '../../../plugins/wepresto-slack/wepresto-slack.module';
 import { EventMessageModule } from '../../event-message/event-message.module';
 import { FrenchAmortizationSystemModule } from '../french-amortization-system/french-amortization-system.module';
 import { BorrowerModule } from '../../users/borrower/borrower.module';
@@ -24,6 +25,7 @@ import { LoanController } from './loan.controller';
     ConfigModule.forFeature(appConfig),
     TypeOrmModule.forFeature([Loan]),
     RabbitMQLocalModule,
+    WeprestoSlackModule,
     EventMessageModule,
     FrenchAmortizationSystemModule,
     BorrowerModule,

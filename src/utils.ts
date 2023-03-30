@@ -47,10 +47,10 @@ export const getNumberOfDays = (startDate: Date, endDate: Date) => {
 };
 
 // function to format currency
-export const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('es-CO', {
+export const formatCurrency = (value: number, currency = 'COP') => {
+  return new Intl.NumberFormat('default', {
     style: 'currency',
-    currency: 'COP',
+    currency,
   }).format(value);
 };
 
@@ -80,4 +80,21 @@ export const isSameDay = (...dates) => {
 
   // check if all other dates are on the same day
   return dates.every((date) => date.toISOString().substr(0, 10) === firstDay);
+};
+
+export const formatDateTime = (date: Date, timeZone = 'America/Bogota') => {
+  const year = date.toLocaleString('default', { timeZone, year: 'numeric' });
+  const month = date.toLocaleString('default', { timeZone, month: '2-digit' });
+  const day = date.toLocaleString('default', { timeZone, day: '2-digit' });
+  const hour = date.toLocaleString('default', { timeZone, hour: '2-digit' });
+  const minute = date.toLocaleString('default', {
+    timeZone,
+    minute: '2-digit',
+  });
+  const second = date.toLocaleString('default', {
+    timeZone,
+    second: '2-digit',
+  });
+
+  return `${year}-${month}-${day} ${hour}:${minute}:${second} ${timeZone}`;
 };
