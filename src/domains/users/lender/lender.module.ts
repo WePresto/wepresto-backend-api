@@ -8,6 +8,7 @@ import { LenderReadService } from './services/lender.read.service';
 import { LenderService } from './services/lender.service';
 
 import { Lender } from './lender.entity';
+import { LenderController } from './lender.controller';
 
 @Module({
   imports: [
@@ -16,5 +17,6 @@ import { Lender } from './lender.entity';
   ],
   providers: [LenderReadService, LenderService],
   exports: [LenderService],
+  controllers: [LenderController],
 })
 export class LenderModule {}
