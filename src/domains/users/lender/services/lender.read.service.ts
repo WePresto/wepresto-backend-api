@@ -36,6 +36,13 @@ export class LenderReadService extends BaseService<Lender> {
     return existingLender;
   }
 
+  private getParticipationPercentage(
+    participationAmount: number,
+    loanAmount: number,
+  ) {
+    return participationAmount / loanAmount;
+  }
+
   public async getParticipationsResume(input: GetOneLenderInput) {
     const { uid } = input;
 
@@ -65,20 +72,25 @@ export class LenderReadService extends BaseService<Lender> {
 
     const resume = loanParticipations.reduce(
       (pre, cur) => {
-        const {
+        const { amount, loan } = cur;
+
+        // get participation percentage based on loan amount and participation amount
+        const participationPercentage = this.getParticipationPercentage(
           amount,
-          loan: { movements = [] },
-        } = cur;
+          loan.amount,
+        );
+
+        // get paid interest
+        const paidInterest = loan.movements.reduce((pre, cur) => {
+          const { interest, paid } = cur;
+
+          return pre + (paid ? interest : 0);
+        }, 0);
 
         return {
           totalInvested: pre.totalInvested + amount,
           totalInterest:
-            pre.totalInterest +
-            movements.reduce((pre, cur) => {
-              const { interest, paid } = cur;
-
-              return pre + (paid ? interest : 0);
-            }, 0),
+            pre.totalInterest + paidInterest * participationPercentage,
         };
       },
       {
@@ -88,5 +100,65 @@ export class LenderReadService extends BaseService<Lender> {
     );
 
     return resume;
+  }
+
+  public async getParticipations(input: GetOneLenderInput) {
+    const { uid } = input;
+
+    const existingLender = await this.getOneByFields({
+      fields: {
+        uid,
+      },
+      checkIfExists: true,
+      loadRelationIds: false,
+    });
+
+    if (!existingLender) {
+      throw new BadRequestException('Lender not found');
+    }
+
+    const queryResult = await this.lenderRepository
+      .createQueryBuilder('lender')
+      .leftJoinAndSelect('lender.loanParticipations', 'loanParticipation')
+      .leftJoinAndSelect('loanParticipation.loan', 'loan')
+      .leftJoinAndSelect('loan.movements', 'movement')
+      .where('lender.uid = :uid', { uid })
+      .getOne();
+
+    let loanParticipations = [];
+
+    loanParticipations = queryResult?.loanParticipations || [];
+
+    const participations = loanParticipations.map((loanParticipation) => {
+      const { amount, loan } = loanParticipation;
+
+      // get participation percentage based on loan amount and participation amount
+      const participationPercentage = this.getParticipationPercentage(
+        amount,
+        loan.amount,
+      );
+
+      // get paid interest
+      const paidInterest = loan.movements.reduce((pre, cur) => {
+        const { interest, paid } = cur;
+
+        return pre + (paid ? interest : 0);
+      }, 0);
+
+      return {
+        ...loanParticipation,
+        participationPercentage,
+        loan: {
+          amount: loan.amount,
+          interest: loan.interest,
+          term: loan.term,
+          annualInterestRate: loan.annualInterestRate,
+          annualInterestOverdueRate: loan.annualInterestOverdueRate,
+          paidInterest: paidInterest * participationPercentage,
+        },
+      };
+    });
+
+    return participations;
   }
 }

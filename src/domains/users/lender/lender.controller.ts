@@ -28,9 +28,18 @@ export class LenderController {
     summary: 'get participations resume',
   })
   @Public()
-  @Get('resume')
-  create(@Query() input: GetOneLenderInput) {
+  @Get('participations-resume')
+  getParticipationsResume(@Query() input: GetOneLenderInput) {
     return this.lenderService.readService.getParticipationsResume(input);
+  }
+
+  @ApiOperation({
+    summary: 'get participations',
+  })
+  @Public()
+  @Get('participations')
+  create(@Query() input: GetOneLenderInput) {
+    return this.lenderService.readService.getParticipations(input);
   }
 
   /* READ RELATED ENDPOINTS */
