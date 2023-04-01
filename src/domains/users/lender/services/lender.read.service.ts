@@ -36,7 +36,7 @@ export class LenderReadService extends BaseService<Lender> {
     return existingLender;
   }
 
-  private getParticipationPercentage(
+  private getParticipationRate(
     participationAmount: number,
     loanAmount: number,
   ) {
@@ -75,7 +75,7 @@ export class LenderReadService extends BaseService<Lender> {
         const { amount, loan } = cur;
 
         // get participation percentage based on loan amount and participation amount
-        const participationPercentage = this.getParticipationPercentage(
+        const participationRate = this.getParticipationRate(
           amount,
           loan.amount,
         );
@@ -89,8 +89,7 @@ export class LenderReadService extends BaseService<Lender> {
 
         return {
           totalInvested: pre.totalInvested + amount,
-          totalInterest:
-            pre.totalInterest + paidInterest * participationPercentage,
+          totalInterest: pre.totalInterest + paidInterest * participationRate,
         };
       },
       {
@@ -133,10 +132,7 @@ export class LenderReadService extends BaseService<Lender> {
       const { amount, loan } = loanParticipation;
 
       // get participation percentage based on loan amount and participation amount
-      const participationPercentage = this.getParticipationPercentage(
-        amount,
-        loan.amount,
-      );
+      const participationRate = this.getParticipationRate(amount, loan.amount);
 
       // get paid interest
       const paidInterest = loan.movements.reduce((pre, cur) => {
@@ -147,14 +143,16 @@ export class LenderReadService extends BaseService<Lender> {
 
       return {
         ...loanParticipation,
-        participationPercentage,
+        participationRate,
+        annualInterestParticipationRate:
+          loan.annualInterestRate * participationRate,
         loan: {
           amount: loan.amount,
           interest: loan.interest,
           term: loan.term,
           annualInterestRate: loan.annualInterestRate,
           annualInterestOverdueRate: loan.annualInterestOverdueRate,
-          paidInterest: paidInterest * participationPercentage,
+          paidInterest: paidInterest * participationRate,
         },
       };
     });
