@@ -92,7 +92,7 @@ export class UserCreateService {
       roleCode: lenderCode,
       sendEmail: true,
       emailTemplateParams: {
-        fullName,
+        firstName: fullName.split(' ')[0],
       },
     });
 

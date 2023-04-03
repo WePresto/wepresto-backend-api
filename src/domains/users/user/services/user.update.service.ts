@@ -129,12 +129,26 @@ export class UserUpdateService {
   public async sendResetPasswordEmail(input: SendUserResetPasswordEmail) {
     const { email } = input;
 
-    await this.basicAclService.sendResetPasswordEmail({
-      email,
+    // get the by the email
+    const existingUser = await this.readService.getOneByFields({
+      fields: {
+        email,
+      },
+      checkIfExists: false,
+      loadRelationIds: false,
     });
 
+    if (existingUser) {
+      await this.basicAclService.sendResetPasswordEmail({
+        email,
+        emailTemplateParams: {
+          firstName: existingUser.fullName.split(' ')[0],
+        },
+      });
+    }
+
     return {
-      message: 'email message was sent',
+      message: 'ok',
     };
   }
 
@@ -155,7 +169,7 @@ export class UserUpdateService {
         oldPassword,
         newPassword,
         emailTemplateParams: {
-          fullName: existingUser.fullName,
+          firstName: existingUser.fullName.split(' ')[0],
         },
       });
     } catch (error) {
