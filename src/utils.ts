@@ -98,3 +98,11 @@ export const formatDateTime = (date: Date, timeZone = 'America/Bogota') => {
 
   return `${year}-${month}-${day} ${hour}:${minute}:${second} ${timeZone}`;
 };
+
+export const formatDate = (date: Date, timeZone = 'America/Bogota') => {
+  const year = date.toLocaleString('default', { timeZone, year: 'numeric' });
+  const month = date.toLocaleString('default', { timeZone, month: '2-digit' });
+  const day = date.toLocaleString('default', { timeZone, day: '2-digit' });
+
+  return `${year}-${month}-${day}`;
+};

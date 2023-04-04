@@ -109,6 +109,20 @@ export class RabbitMQLocalService {
     );
   }
 
+  public async publishSendEarlyPaymentNotifications() {
+    const { exchangeName } = this;
+
+    const routingKey = `${exchangeName}.send_early_payment_notifications`;
+
+    await this.amqpConnection.publish(exchangeName, routingKey, {});
+
+    Logger.log(
+      `message published to exchange ${exchangeName} ` +
+        `for routing key ${routingKey}`,
+      RabbitMQLocalService.name,
+    );
+  }
+
   /*
   ----OLD CODE----
   */

@@ -105,7 +105,7 @@ export class LoanUpdateService {
   }
 
   public async disburse(input: DisburseLoanInput) {
-    const { uid, comment } = input;
+    const { uid, comment, startDate } = input;
 
     // get loan
     const existingLoan = await this.readService.getOne({ uid });
@@ -120,7 +120,7 @@ export class LoanUpdateService {
     // update loan
     const preloadedLoan = await this.loanRepository.preload({
       id: existingLoan.id,
-      startDate: getReferenceDate(new Date()),
+      startDate: startDate ? new Date(startDate) : getReferenceDate(new Date()),
       status: LoanStatus.DISBURSED,
       comment,
     });

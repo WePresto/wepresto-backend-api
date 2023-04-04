@@ -3,7 +3,7 @@ import { Document } from 'mongoose';
 
 export type EventMessageDocument = EventMessage & Document;
 
-@Schema()
+@Schema({ collection: 'event-message' })
 export class EventMessage {
   @Prop({ required: true })
   hash: string;

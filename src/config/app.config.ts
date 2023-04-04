@@ -45,7 +45,7 @@ export default registerAs('config', () => {
     },
     mailgun: {
       domain: process.env.MAILGUN_DOMAIN,
-      from: process.env.MAILGUN_FROM,
+      from: process.env.MAILGUN_EMAIL_FROM,
       privateKey: process.env.MAILGUN_PRIVATE_KEY,
       publicKey: process.env.MAILGUN_PUBLIC_KEY,
     },

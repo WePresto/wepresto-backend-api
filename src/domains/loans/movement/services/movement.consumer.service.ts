@@ -345,10 +345,10 @@ export class MovementConsumerService {
     routingKey: `${RABBITMQ_EXCHANGE}.settle_late_payment_interest`,
     queue: `${RABBITMQ_EXCHANGE}.${MovementConsumerService.name}.settle_late_payment_interest`,
   })
-  public async settleLatePaymentInterest(input: any) {
+  public async settleLatePaymentInterestConsumer(input: any) {
     const eventMessage = await this.eventMessageService.create({
       routingKey: `${RABBITMQ_EXCHANGE}.settle_late_payment_interest`,
-      functionName: 'settleLatePaymentInterest',
+      functionName: 'settleLatePaymentInterestConsumer',
       data: input,
     });
 

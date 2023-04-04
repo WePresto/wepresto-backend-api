@@ -49,6 +49,15 @@ export class LoanController {
     return this.loanService.createService.simulate(input);
   }
 
+  @ApiOperation({
+    summary: 'Send early payment notifications',
+  })
+  @Public()
+  @Post('early-payment-notifications')
+  sendEarlyPaymentNotifications() {
+    return this.loanService.createService.sendEarlyPaymentNotifications();
+  }
+
   /* CREATE RELATED ENDPOINTS */
 
   /* READ RELATED ENDPOINTS */

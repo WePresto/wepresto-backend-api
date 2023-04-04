@@ -90,6 +90,10 @@ export class MailingService {
       parameters,
     });
 
+    // console.log('html');
+    // console.log(html);
+    // console.log('html');
+
     const subjectToUse =
       this.appConfiguration.environment === 'production'
         ? subject

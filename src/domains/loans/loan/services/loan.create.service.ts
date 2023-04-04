@@ -130,4 +130,10 @@ export class LoanCreateService {
       loanInstallments,
     };
   }
+
+  public async sendEarlyPaymentNotifications() {
+    await this.rabbitMQLocalService.publishSendEarlyPaymentNotifications();
+
+    return { message: 'ok' };
+  }
 }

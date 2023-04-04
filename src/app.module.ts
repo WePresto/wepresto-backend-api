@@ -24,6 +24,7 @@ import { MovementModule } from './domains/loans/movement/movement.module';
 import { LoanParticipationModule } from './domains/loans/loan-participation/loan-participation.module';
 import { FrenchAmortizationSystemModule } from './domains/loans/french-amortization-system/french-amortization-system.module';
 import { WeprestoSlackModule } from './plugins/wepresto-slack/wepresto-slack.module';
+import { NotificationModule } from './domains/notification/notification.module';
 
 @Module({
   imports: [
@@ -118,6 +119,8 @@ import { WeprestoSlackModule } from './plugins/wepresto-slack/wepresto-slack.mod
     FrenchAmortizationSystemModule,
 
     WeprestoSlackModule,
+
+    NotificationModule,
 
     /* Loans domain */
   ],

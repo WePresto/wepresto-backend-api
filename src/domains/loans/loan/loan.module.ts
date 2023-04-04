@@ -9,6 +9,7 @@ import { Loan } from './loan.entity';
 import { RabbitMQLocalModule } from '../../../plugins/rabbit-local/rabbit-mq-local.module';
 import { WeprestoSlackModule } from '../../../plugins/wepresto-slack/wepresto-slack.module';
 import { EventMessageModule } from '../../event-message/event-message.module';
+import { NotificationModule } from '../../notification/notification.module';
 import { FrenchAmortizationSystemModule } from '../french-amortization-system/french-amortization-system.module';
 import { BorrowerModule } from '../../users/borrower/borrower.module';
 
@@ -27,6 +28,7 @@ import { LoanController } from './loan.controller';
     RabbitMQLocalModule,
     WeprestoSlackModule,
     EventMessageModule,
+    NotificationModule,
     FrenchAmortizationSystemModule,
     BorrowerModule,
   ],

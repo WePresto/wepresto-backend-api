@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsUUID, IsOptional, IsString } from 'class-validator';
+import { IsUUID, IsOptional, IsString, IsDateString } from 'class-validator';
 
 export class DisburseLoanInput {
   @ApiProperty({
@@ -14,4 +14,14 @@ export class DisburseLoanInput {
   @IsOptional()
   @IsString()
   readonly comment?: string;
+
+  @ApiPropertyOptional({
+    example: '2020-10-10',
+  })
+  @IsOptional()
+  @IsDateString({
+    format: 'YYYY-MM-DD',
+    length: 10,
+  })
+  readonly startDate: string;
 }

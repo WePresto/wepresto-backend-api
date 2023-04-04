@@ -39,10 +39,10 @@ export default Joi.object({
   //EPAYCO_TESTING: Joi.required(),
 
   // MAILGUN
-  //MAILGUN_DOMAIN: Joi.required(),
-  //MAILGUN_FROM: Joi.required(),
-  //MAILGUN_PRIVATE_KEY: Joi.required(),
-  //MAILGUN_PUBLIC_KEY: Joi.required(),
+  MAILGUN_DOMAIN: Joi.required(),
+  MAILGUN_EMAIL_FROM: Joi.required(),
+  MAILGUN_PRIVATE_KEY: Joi.required(),
+  MAILGUN_PUBLIC_KEY: Joi.required(),
 
   // MONGODB
   MONGODB_URI: Joi.required(),
