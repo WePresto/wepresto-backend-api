@@ -7,7 +7,7 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { PermissionName, Public } from 'nestjs-basic-acl-sdk';
+import { PermissionName } from 'nestjs-basic-acl-sdk';
 import { ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { MovementService } from './services/movement.service';
@@ -34,7 +34,7 @@ export class MovementController {
   }
 
   @ApiExcludeEndpoint()
-  @Public()
+  @PermissionName('movements:createLatePaymentInterest')
   @Post('late-payment-interest')
   createLatePaymentInterest() {
     return this.movementService.createService.createLatePaymentInterest();

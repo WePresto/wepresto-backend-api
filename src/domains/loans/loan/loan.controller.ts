@@ -52,7 +52,7 @@ export class LoanController {
   @ApiOperation({
     summary: 'Send early payment notifications',
   })
-  @Public()
+  @PermissionName('loans:sendEarlyPaymentNotifications')
   @Post('early-payment-notifications')
   sendEarlyPaymentNotifications() {
     return this.loanService.createService.sendEarlyPaymentNotifications();
