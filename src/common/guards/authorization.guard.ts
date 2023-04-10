@@ -92,7 +92,7 @@ export class AuthorizationGuard implements CanActivate {
 
     // check if the user has the permission to access the resource in the acl
     try {
-      const permission = await this.basicAclService.checkPermission({
+      const { allowed } = await this.basicAclService.checkPermission({
         token,
         permissionName,
         apiKey,
@@ -105,7 +105,7 @@ export class AuthorizationGuard implements CanActivate {
       );
       */
 
-      return permission.allowed;
+      return allowed;
     } catch (error) {
       Logger.error(
         `permission check error ${error.message}.`,
