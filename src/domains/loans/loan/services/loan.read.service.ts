@@ -14,6 +14,8 @@ import { GetOneLoanInput } from '../dto/get-one-loan-input.dto';
 import { GetMinimumPaymentAmountOutput } from '../dto/get-minimum-payment-amount-output.dto';
 import { GetManyLoansInput } from '../dto/get-many-loans-input.dto';
 import { GetMinimumPaymentAmountInput } from '../dto/get-minimum-payment-amount-input.dto';
+import { GetTotalPaymentAmountInput } from '../dto/get-total-payment-amount-input.dto';
+import { GetTotalPaymentAmountOutput } from '../dto/get-total-payment-amount-output.dto';
 
 @Injectable()
 export class LoanReadService extends BaseService<Loan> {
@@ -185,5 +187,73 @@ export class LoanReadService extends BaseService<Loan> {
       .filter((item) => !!item);
 
     return loansTerms;
+  }
+
+  public async getTotalPaymentAmount(
+    input: GetTotalPaymentAmountInput,
+  ): Promise<GetTotalPaymentAmountOutput> {
+    const { uid, referenceDate } = input;
+
+    // query to get the unpaid movements
+    const unpaidLoanInstallmentsQuery = this.loanRepository
+      .createQueryBuilder('loan')
+      .innerJoinAndSelect('loan.movements', 'movement')
+      .where('loan.uid = :uid', { uid })
+      .andWhere('movement.type = :movementType', {
+        movementType: MovementType.LOAN_INSTALLMENT,
+      })
+      .andWhere('movement.paid = :paid', { paid: false })
+      .getOne();
+
+    // get the minimum payment amount and the unpaid movements
+    const [minimumPaymentAmountResult, unpaidLoanInstallmentsResult] =
+      await Promise.all([
+        this.getMinimumPaymentAmount({ uid, referenceDate }),
+        unpaidLoanInstallmentsQuery,
+      ]);
+
+    // from the unpaid movements, get the movements that are not in the minimum payment amount result
+    const unpaidLoanInstallments =
+      unpaidLoanInstallmentsResult.movements.filter(
+        (movement) =>
+          !minimumPaymentAmountResult.movements.find(
+            (m) => m.id === movement.id,
+          ),
+      );
+
+    const mergedMovements = [
+      ...minimumPaymentAmountResult.movements,
+      ...unpaidLoanInstallments,
+    ];
+
+    // delete the duplicated movements by id
+    const movements: Movement[] = mergedMovements.filter(
+      (movement, index, self) =>
+        index === self.findIndex((m) => m.id === movement.id),
+    );
+
+    const reducedMovements = unpaidLoanInstallments.reduce(
+      (acc, movement) => {
+        const { principal } = movement;
+
+        return {
+          totalAmount: acc.totalAmount + principal,
+          interest: acc.interest,
+          principal: acc.principal + principal,
+          overDueInterest: acc.overDueInterest,
+        };
+      },
+      {
+        totalAmount: minimumPaymentAmountResult.totalAmount,
+        interest: minimumPaymentAmountResult.interest,
+        principal: minimumPaymentAmountResult.principal,
+        overDueInterest: minimumPaymentAmountResult.overDueInterest,
+      },
+    );
+
+    return {
+      ...reducedMovements,
+      movements,
+    };
   }
 }

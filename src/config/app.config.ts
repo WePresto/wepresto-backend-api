@@ -62,5 +62,12 @@ export default registerAs('config', () => {
     slack: {
       token: process.env.SLACK_TOKEN,
     },
+    nequi: {
+      authUrl: process.env.NEQUI_AUTH_URL,
+      url: process.env.NEQUI_URL,
+      clientId: process.env.NEQUI_CLIENT_ID,
+      clientSecret: process.env.NEQUI_CLIENT_SECRET,
+      apiKey: process.env.NEQUI_API_KEY,
+    },
   };
 });

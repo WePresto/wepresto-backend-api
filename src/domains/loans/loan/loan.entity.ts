@@ -15,6 +15,7 @@ import {
 import { Borrower } from '../../users/borrower/borrower.entity';
 import { Movement } from '../movement/movement.entity';
 import { LoanParticipation } from '../loan-participation/loan-participation.entity';
+import { PaymentAttempt } from '../../payments/payment-attempt/payment-attempt.entity';
 
 export enum LoanStatus {
   APPLIED = 'APPLIED',
@@ -144,4 +145,10 @@ export class Loan extends BaseEntity {
     (loanParticipation) => loanParticipation.lender,
   )
   loanParticipations: LoanParticipation[];
+
+  @OneToMany(
+    () => LoanParticipation,
+    (loanParticipation) => loanParticipation.lender,
+  )
+  paymentAttempts: PaymentAttempt[];
 }

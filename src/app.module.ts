@@ -25,6 +25,8 @@ import { LoanParticipationModule } from './domains/loans/loan-participation/loan
 import { FrenchAmortizationSystemModule } from './domains/loans/french-amortization-system/french-amortization-system.module';
 import { WeprestoSlackModule } from './plugins/wepresto-slack/wepresto-slack.module';
 import { NotificationModule } from './domains/notification/notification.module';
+import { NequiModule } from './domains/payments/nequi/nequi.module';
+import { PaymentAttemptModule } from './domains/payments/payment-attempt/payment-attempt.module';
 
 @Module({
   imports: [
@@ -123,6 +125,14 @@ import { NotificationModule } from './domains/notification/notification.module';
     NotificationModule,
 
     /* Loans domain */
+
+    /* Payments domain */
+
+    NequiModule,
+
+    PaymentAttemptModule,
+
+    /* Payments domain */
   ],
   controllers: [AppController],
   providers: [AppService],

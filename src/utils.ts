@@ -1,5 +1,6 @@
 import * as dotenv from 'dotenv';
 import * as crypto from 'crypto';
+import * as os from 'os';
 
 dotenv.config();
 
@@ -105,4 +106,19 @@ export const formatDate = (date: Date, timeZone = 'America/Bogota') => {
   const day = date.toLocaleString('default', { timeZone, day: '2-digit' });
 
   return `${year}-${month}-${day}`;
+};
+
+export const getMacAddress = () => {
+  const interfaces = os.networkInterfaces();
+  for (const devName in interfaces) {
+    const iface = interfaces[devName];
+
+    for (let i = 0; i < iface.length; i++) {
+      const alias = iface[i];
+
+      if (alias.family === 'IPv4' && alias.address !== '' && !alias.internal) {
+        return alias.mac;
+      }
+    }
+  }
 };

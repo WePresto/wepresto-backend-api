@@ -88,6 +88,23 @@ export class LoanController {
     return this.loanService.readService.getLoanTerms();
   }
 
+  @ApiOperation({
+    summary: 'Get the total payment amount',
+  })
+  @Public()
+  @Get('total-payment-amount')
+  getTotalPaymentAmount(@Query() input: GetOneLoanInput) {
+    const { uid } = input;
+
+    // create a reference date to execute the getTotalPaymentAmount
+    const referenceDate = getReferenceDate(new Date());
+
+    return this.loanService.readService.getTotalPaymentAmount({
+      uid,
+      referenceDate,
+    });
+  }
+
   /* READ RELATED ENDPOINTS */
 
   /* UPDATE RELATED ENDPOINTS */
