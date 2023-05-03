@@ -87,13 +87,23 @@ export class LenderReadService extends BaseService<Lender> {
           return pre + (paid ? interest : 0);
         }, 0);
 
+        // get paid principal
+        const paidPrincipal = loan.movements.reduce((pre, cur) => {
+          const { principal, paid } = cur;
+
+          return pre + (paid ? principal : 0);
+        }, 0);
+
         return {
           totalInvested: pre.totalInvested + amount,
+          totalPrincipal:
+            pre.totalPrincipal + paidPrincipal * participationRate,
           totalInterest: pre.totalInterest + paidInterest * participationRate,
         };
       },
       {
         totalInvested: 0,
+        totalPrincipal: 0,
         totalInterest: 0,
       },
     );
