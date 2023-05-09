@@ -9,6 +9,9 @@ import { Withdrawal, WithdrawalStatus } from '../withdrawal.entity';
 
 import { LenderService } from '../../../users/lender/services/lender.service';
 
+import { GetTotalWithdrawnInput } from '../dto/get-total-withdrawn-input.dto';
+import { GetAvailableToWithdrawInput } from '../dto/get-available-to-withdraw-input.dto';
+
 @Injectable()
 export class WithdrawalReadService {
   constructor(
@@ -20,7 +23,7 @@ export class WithdrawalReadService {
   ) {}
 
   public async getTotalWithdrawn(
-    input: any,
+    input: GetTotalWithdrawnInput,
   ): Promise<{ totalWithdrawn: number }> {
     const { lenderUid } = input;
 
@@ -51,7 +54,7 @@ export class WithdrawalReadService {
   }
 
   public async getAvailableToWithdraw(
-    input: any,
+    input: GetAvailableToWithdrawInput,
   ): Promise<{ availableToWithdraw: number }> {
     const { lenderUid } = input;
 
