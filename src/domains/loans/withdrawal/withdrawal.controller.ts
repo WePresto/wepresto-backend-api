@@ -14,6 +14,7 @@ import { WithdrawalService } from './services/withdrawal.service';
 
 import { RequestWithdrawalInput } from './dto/request-withdrawal-input.dto';
 import { GetTotalWithdrawnInput } from './dto/get-total-withdrawn-input.dto';
+import { GetAvailableToWithdrawInput } from './dto/get-available-to-withdraw-input.dto';
 
 @ApiTags('withdrawals')
 @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
@@ -43,6 +44,15 @@ export class WithdrawalController {
   @Get('total-withdrawn')
   getTotalWithdrawn(@Query() input: GetTotalWithdrawnInput) {
     return this.withdrawalService.readService.getTotalWithdrawn(input);
+  }
+
+  @ApiOperation({
+    summary: 'Get the available to withdraw for a lender',
+  })
+  @Public()
+  @Get('available-to-withdraw')
+  getAvailableToWithdraw(@Query() input: GetAvailableToWithdrawInput) {
+    return this.withdrawalService.readService.getAvailableToWithdraw(input);
   }
 
   /* READ RELATED ENDPOINTS */
