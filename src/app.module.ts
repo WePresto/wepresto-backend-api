@@ -27,6 +27,7 @@ import { WeprestoSlackModule } from './plugins/wepresto-slack/wepresto-slack.mod
 import { NotificationModule } from './domains/notification/notification.module';
 import { NequiModule } from './domains/payments/nequi/nequi.module';
 import { PaymentAttemptModule } from './domains/payments/payment-attempt/payment-attempt.module';
+import { WithdrawalModule } from './domains/loans/withdrawal/withdrawal.module';
 
 @Module({
   imports: [
@@ -131,6 +132,8 @@ import { PaymentAttemptModule } from './domains/payments/payment-attempt/payment
     NequiModule,
 
     PaymentAttemptModule,
+
+    WithdrawalModule,
 
     /* Payments domain */
   ],

@@ -4,9 +4,10 @@ import { WebClient } from '@slack/web-api';
 
 import appConfig from '../../config/app.config';
 
-import { formatCurrency, formatDateTime, getReferenceDate } from '../../utils';
+import { formatCurrency, formatDateTime } from '../../utils';
 
 import { SendNewLoanApplicationMessageInput } from './dto/send-new-loan-application-input.dto';
+import { SendNewWithdrawalRequestMessageInput } from './dto/send-new-withdrawal-request-message-input.dto';
 
 @Injectable()
 export class WeprestoSlackService {
@@ -52,6 +53,44 @@ export class WeprestoSlackService {
 
     Logger.log(
       `new loan application message sent to slack`,
+      WeprestoSlackService.name,
+    );
+  }
+
+  public async sendNewWithdrawalRequestMessage(
+    input: SendNewWithdrawalRequestMessageInput,
+  ) {
+    const { withdrawal } = input;
+    const {
+      lender: { user },
+    } = withdrawal;
+
+    Logger.log(
+      `sending new withdrawal request message to slack`,
+      WeprestoSlackService.name,
+    );
+
+    const message =
+      '<!here> *New Withdrawal Request* :money_with_wings: \n' +
+      `Hello team! :wave::skin-tone-2: A new withdrawal request has been submitted by *${user.fullName}* ` +
+      `for *${formatCurrency(withdrawal.amount, 'COP')}*. ` +
+      // eslint-disable-next-line prettier/prettier
+      `The request was submitted on *${formatDateTime(withdrawal.createdAt)}*. ` +
+      `Please review the request and take any necessary actions. \n\n` +
+      `Withdrawal Details: \n` +
+      `- Bank: *${withdrawal.accountInfo.bank}*\n` +
+      `- Account: *${withdrawal.accountInfo.accountNumber}*\n` +
+      `- Amount: *${formatCurrency(withdrawal.amount, 'COP')}*\n\n` +
+      `<https://wepresto.retool.com/apps/1234|View Withdrawal Request> :eyes:`;
+
+    await this.webClient.chat.postMessage({
+      channel: '#notifications',
+      mrkdwn: true,
+      text: message,
+    });
+
+    Logger.log(
+      `new withdrawal request message sent to slack`,
       WeprestoSlackService.name,
     );
   }
