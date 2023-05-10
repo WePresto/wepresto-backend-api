@@ -23,6 +23,7 @@ import { ChangeUserAddressInput } from './dto/change-user-address-input.dto';
 import { SendUserResetPasswordEmail } from './dto/send-user-reset-password-email-input.dto';
 import { ChangeUserPasswordInput } from './dto/change-user-password-input.dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { GetManyUsersInput } from './dto/get-many-users-input.dto';
 
 @ApiTags('users')
 @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
@@ -70,6 +71,15 @@ export class UserController {
   @Get(':authUid')
   getOne(@Param() input: GetOneUserInput) {
     return this.userService.readService.getOne(input);
+  }
+
+  @ApiOperation({
+    summary: 'Get users',
+  })
+  @Public()
+  @Get()
+  getMany(@Query() input: GetManyUsersInput) {
+    return this.userService.readService.getMany(input);
   }
 
   /* READ RELATED ENDPOINTS */

@@ -10,8 +10,6 @@ import { Movement, MovementType } from '../movement.entity';
 import { BaseService } from '../../../../common/base.service';
 import { LoanService } from '../../loan/services/loan.service';
 
-import { getReferenceDate } from '../../../../utils';
-
 import { GetOneMovementInput } from '../dto/get-one-movement-input.dto';
 import { GetLoanMovementsInput } from '../dto/get-loan-movements-input.dto';
 

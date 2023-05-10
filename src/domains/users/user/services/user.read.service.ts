@@ -10,6 +10,7 @@ import { User, DocumentType } from '../user.entity';
 import { BaseService } from '../../../../common/base.service';
 
 import { GetOneUserInput } from '../dto/get-one-user-input.dto';
+import { GetManyUsersInput } from '../dto/get-many-users-input.dto';
 
 @Injectable()
 export class UserReadService extends BaseService<User> {
@@ -45,5 +46,45 @@ export class UserReadService extends BaseService<User> {
     }));
 
     return documentTypes;
+  }
+
+  public async getMany(input: GetManyUsersInput) {
+    const { q, take, skip } = input;
+
+    const query = this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.borrower', 'borrower')
+      .leftJoinAndSelect('user.lender', 'lender');
+
+    if (q) {
+      query.andWhere('user.fullName ILIKE :q or user.documentNumber ILIKE :q', {
+        q: `%${q}%`,
+      });
+    }
+
+    query
+      .take(take ? +take : undefined)
+      .skip(skip ? +skip : undefined)
+      .getManyAndCount();
+
+    const [users, count] = await query.getManyAndCount();
+
+    return {
+      count,
+      data: users.map((user) => {
+        let type = 'NONE';
+
+        if (user.borrower) {
+          type = 'BORROWER';
+        } else if (user.lender) {
+          type = 'LENDER';
+        }
+
+        return {
+          ...user,
+          type,
+        };
+      }),
+    };
   }
 }
