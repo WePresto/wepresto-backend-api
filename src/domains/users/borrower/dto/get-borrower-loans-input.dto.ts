@@ -4,14 +4,14 @@ import {
   IsString,
   IsOptional,
   IsNumberString,
+  IsUUID,
 } from 'class-validator';
 
 export class GetBorrowerLoansInput {
   @ApiProperty({
     example: 'erotljerkjltjkldfjgdgfgd',
   })
-  @IsNotEmpty()
-  @IsString()
+  @IsUUID()
   readonly uid: string;
 
   @ApiPropertyOptional({
@@ -20,6 +20,13 @@ export class GetBorrowerLoansInput {
   @IsOptional()
   @IsString()
   readonly statuses?: string;
+
+  @ApiPropertyOptional({
+    example: 'dfksljl',
+  })
+  @IsOptional()
+  @IsString()
+  readonly q?: string;
 
   @ApiPropertyOptional({
     example: '1',

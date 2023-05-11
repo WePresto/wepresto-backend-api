@@ -40,7 +40,7 @@ export class BorrowerReadService extends BaseService<Borrower> {
   }
 
   public async getLoans(input: GetBorrowerLoansInput) {
-    const { uid, statuses, take = '10', skip = '0' } = input;
+    const { uid, statuses, q, take, skip } = input;
 
     let parsedStatuses: string[] = [];
     if (statuses) {
@@ -59,6 +59,12 @@ export class BorrowerReadService extends BaseService<Borrower> {
       .leftJoinAndSelect('borrower.loans', 'loan')
       .where('borrower.uid = :uid', { uid });
 
+    if (q) {
+      query.andWhere('loan.status ILIKE :q', {
+        q: `%${q}%`,
+      });
+    }
+
     if (parsedStatuses.length > 0) {
       query.andWhere('loan.status IN (:...statuses)', {
         statuses: parsedStatuses,
@@ -69,7 +75,10 @@ export class BorrowerReadService extends BaseService<Borrower> {
 
     return {
       count: loans.length,
-      data: loans.slice(+skip, +skip + +take),
+      data: loans.slice(
+        skip ? +skip : 0,
+        (skip ? +skip : 0) + (take ? +take : 0),
+      ),
     };
   }
 

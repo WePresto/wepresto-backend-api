@@ -76,7 +76,7 @@ export class UserController {
   @ApiOperation({
     summary: 'Get users',
   })
-  @Public()
+  @PermissionName('users:getMany')
   @Get()
   getMany(@Query() input: GetManyUsersInput) {
     return this.userService.readService.getMany(input);

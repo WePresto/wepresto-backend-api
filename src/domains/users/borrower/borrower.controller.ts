@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Param,
   Query,
   UsePipes,
   ValidationPipe,
@@ -14,6 +15,7 @@ import { BorrowerService } from './services/borrower.service';
 
 import { GetManyBorrowersInput } from './dto/get-many-borrowers-input.dto';
 import { GetBorrowerLoansInput } from './dto/get-borrower-loans-input.dto';
+import { GetOneBorrowerInput } from './dto/get-one-borrower-input.dto';
 
 @ApiTags('borrowers')
 @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
@@ -40,6 +42,15 @@ export class BorrowerController {
   @Get()
   getMany(@Query() input: GetManyBorrowersInput) {
     return this.borrowerService.readService.getMany(input);
+  }
+
+  @ApiOperation({
+    summary: 'Get borrower',
+  })
+  @PermissionName('borrowers:getOne')
+  @Get(':uid')
+  getOne(@Param() input: GetOneBorrowerInput) {
+    return this.borrowerService.readService.getOne(input);
   }
 
   /* READ RELATED ENDPOINTS */
