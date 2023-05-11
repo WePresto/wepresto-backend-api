@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Patch,
   Post,
   Query,
@@ -91,7 +92,7 @@ export class LoanController {
   @ApiOperation({
     summary: 'Get the total payment amount',
   })
-  @Public()
+  @PermissionName('loans:getTotalPaymentAmount')
   @Get('total-payment-amount')
   getTotalPaymentAmount(@Query() input: GetOneLoanInput) {
     const { uid } = input;
@@ -103,6 +104,15 @@ export class LoanController {
       uid,
       referenceDate,
     });
+  }
+
+  @ApiOperation({
+    summary: 'Get the loan',
+  })
+  @PermissionName('loans:getOne')
+  @Get(':uid')
+  getOne(@Param() input: GetOneLoanInput) {
+    return this.loanService.readService.getOne(input);
   }
 
   /* READ RELATED ENDPOINTS */

@@ -60,9 +60,6 @@ export class LoanReadService extends BaseService<Loan> {
         movementType: MovementType.LOAN_INSTALLMENT,
       })
       .andWhere('movement.paid = :paid', { paid: false })
-      .andWhere(`(movement.due_date - interval '10 day') < :referenceDate`, {
-        referenceDate,
-      })
       .orderBy('movement.due_date', 'ASC')
       .getOne();
 
@@ -104,9 +101,11 @@ export class LoanReadService extends BaseService<Loan> {
     let mergedMovements = [];
 
     if (nextLoanInstallmentResult) {
+      // just concat the first movement (next loan installment)
+
       mergedMovements = [
         ...mergedMovements,
-        ...nextLoanInstallmentResult.movements,
+        nextLoanInstallmentResult.movements[0],
       ];
     }
     if (loanInstallmentsResult) {
@@ -123,10 +122,12 @@ export class LoanReadService extends BaseService<Loan> {
     }
 
     // delete the duplicated movements by id
-    const movements: Movement[] = mergedMovements.filter(
-      (movement, index, self) =>
-        index === self.findIndex((m) => m.id === movement.id),
-    );
+    const movements: Movement[] = mergedMovements
+      .filter(
+        (movement, index, self) =>
+          index === self.findIndex((m) => m.id === movement.id),
+      )
+      .sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
 
     const reducedMovements = movements.reduce(
       (acc, movement) => {
@@ -213,13 +214,12 @@ export class LoanReadService extends BaseService<Loan> {
       ]);
 
     // from the unpaid movements, get the movements that are not in the minimum payment amount result
-    const unpaidLoanInstallments =
-      unpaidLoanInstallmentsResult.movements.filter(
-        (movement) =>
-          !minimumPaymentAmountResult.movements.find(
-            (m) => m.id === movement.id,
-          ),
-      );
+    const unpaidLoanInstallments = (
+      unpaidLoanInstallmentsResult ? unpaidLoanInstallmentsResult.movements : []
+    ).filter(
+      (movement) =>
+        !minimumPaymentAmountResult.movements.find((m) => m.id === movement.id),
+    );
 
     const mergedMovements = [
       ...minimumPaymentAmountResult.movements,
@@ -227,10 +227,12 @@ export class LoanReadService extends BaseService<Loan> {
     ];
 
     // delete the duplicated movements by id
-    const movements: Movement[] = mergedMovements.filter(
-      (movement, index, self) =>
-        index === self.findIndex((m) => m.id === movement.id),
-    );
+    const movements: Movement[] = mergedMovements
+      .filter(
+        (movement, index, self) =>
+          index === self.findIndex((m) => m.id === movement.id),
+      )
+      .sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
 
     const reducedMovements = unpaidLoanInstallments.reduce(
       (acc, movement) => {
@@ -241,6 +243,7 @@ export class LoanReadService extends BaseService<Loan> {
           interest: acc.interest,
           principal: acc.principal + principal,
           overDueInterest: acc.overDueInterest,
+          paymentDate: movement.dueDate,
         };
       },
       {
@@ -248,6 +251,7 @@ export class LoanReadService extends BaseService<Loan> {
         interest: minimumPaymentAmountResult.interest,
         principal: minimumPaymentAmountResult.principal,
         overDueInterest: minimumPaymentAmountResult.overDueInterest,
+        paymentDate: undefined,
       },
     );
 
