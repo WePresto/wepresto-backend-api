@@ -28,9 +28,8 @@ export class WeprestoSlackService {
     input: SendNewLoanApplicationMessageInput,
   ) {
     const { loan } = input;
-    const {
-      borrower: { user },
-    } = loan;
+    const { borrower } = loan;
+    const { user } = borrower;
 
     Logger.log(
       `sending new loan application message to slack`,
@@ -43,7 +42,7 @@ export class WeprestoSlackService {
       // eslint-disable-next-line prettier/prettier
       `*${user.fullName}* for *${formatCurrency(loan.amount)}* over a *${loan.term}* term. The application was submitted on ` +
       `*${formatDateTime(loan.createdAt)}*. Let's take a look at it! \n\n` +
-      `<https://wepresto.retool.com/apps/a73c6406-c86d-11ed-a36d-07f8d94cb81b/Loans|View Loan Application> :eyes:`;
+      `<https://admin.wepresto.com/borrowers/${borrower.uid}/loans|View Loan Application> :eyes:`;
 
     await this.webClient.chat.postMessage({
       channel: '#notifications',
