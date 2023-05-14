@@ -91,6 +91,8 @@ export class MovementReadService extends BaseService<Movement> {
       types,
       startDate,
       endDate,
+      endAmount,
+      startAmount,
     } = input;
 
     let parsedTypes = [];
@@ -115,6 +117,16 @@ export class MovementReadService extends BaseService<Movement> {
       parsedEndDate = new Date(endDate);
     }
 
+    let parsedStartAmount: number | undefined;
+    if (startAmount) {
+      parsedStartAmount = +startAmount;
+    }
+
+    let parsedEndAmount: number | undefined;
+    if (endAmount) {
+      parsedEndAmount = +endAmount;
+    }
+
     // get the loan
     const existingLoan = await this.loanService.readService.getOneByFields({
       fields: {
@@ -133,9 +145,21 @@ export class MovementReadService extends BaseService<Movement> {
       query.andWhere('movement.type IN (:...types)', { types: parsedTypes });
     }
 
+    if (parsedStartAmount) {
+      query.andWhere('ABS(movement.amount) >= :startAmount', {
+        startAmount: parsedStartAmount,
+      });
+    }
+
+    if (parsedEndAmount) {
+      query.andWhere('movement.amount <= :endAmount', {
+        endAmount: parsedEndAmount,
+      });
+    }
+
     const [movements, count] = await query.getManyAndCount();
 
-    // order movements by date
+    // filter n order movements by date
     const orderedMovements = movements
       .filter((movement) => {
         const movementDate = movement.dueDate ?? movement.movementDate;

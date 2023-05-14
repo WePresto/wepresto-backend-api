@@ -71,7 +71,7 @@ export class UserReadService extends BaseService<User> {
 
     return {
       count,
-      data: users.map((user) => {
+      users: users.map((user) => {
         let type = 'NONE';
 
         if (user.borrower) {

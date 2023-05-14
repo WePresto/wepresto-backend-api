@@ -42,6 +42,20 @@ export class GetLoanMovementsInput {
   readonly endDate?: string;
 
   @ApiPropertyOptional({
+    example: '10',
+  })
+  @IsOptional()
+  @IsNumberString()
+  readonly startAmount?: string;
+
+  @ApiPropertyOptional({
+    example: '100',
+  })
+  @IsOptional()
+  @IsNumberString()
+  readonly endAmount?: string;
+
+  @ApiPropertyOptional({
     example: '1',
   })
   @IsOptional()
