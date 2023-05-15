@@ -1,7 +1,7 @@
 import {
   IsDateString,
   IsEnum,
-  IsNumber,
+  IsNumberString,
   IsOptional,
   IsUUID,
 } from 'class-validator';
@@ -23,8 +23,8 @@ export class CreatePaymentMovementInput {
   @ApiProperty({
     example: 1000,
   })
-  @IsNumber()
-  readonly amount: number;
+  @IsNumberString()
+  readonly amount: string;
 
   @ApiProperty({
     example: '2020-01-01',
@@ -46,4 +46,6 @@ export class CreatePaymentMovementInput {
     )}`,
   })
   readonly type?: string;
+
+  readonly file?: any;
 }

@@ -52,14 +52,12 @@ export class RabbitMQLocalService {
   public async publishPaymentCreated(
     input: PublishPaymentCreatedInput,
   ): Promise<void> {
-    const { movementUid } = input;
-
     const { exchangeName } = this;
 
     const routingKey = `${exchangeName}.payment_created`;
 
     await this.amqpConnection.publish(exchangeName, routingKey, {
-      movementUid,
+      ...input,
     });
 
     Logger.log(

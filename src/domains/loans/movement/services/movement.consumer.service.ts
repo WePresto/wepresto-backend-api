@@ -16,8 +16,10 @@ import {
   getReferenceDate,
   isSameDay,
 } from '../../../../utils';
+import { getFileExtensionByMimeType } from '../../../../utils/get-file-extension.util';
 
 import { MovementReadService } from './movement.read.service';
+import { GoogleStorageService } from '../../../../plugins/google-storage/google-storage.service';
 import { EventMessageService } from '../../../event-message/event-message.service';
 import { LoanService } from '../../loan/services/loan.service';
 import { FrenchAmortizationSystemService } from '../../french-amortization-system/french-amortization-system.service';
@@ -32,11 +34,25 @@ export class MovementConsumerService {
     @InjectRepository(Movement)
     private readonly movementRepository: Repository<Movement>,
     private readonly readService: MovementReadService,
+    private readonly googleStorageService: GoogleStorageService,
     private readonly eventMessageService: EventMessageService,
     private readonly loanService: LoanService,
     private readonly frenchAmortizationSystemService: FrenchAmortizationSystemService,
   ) {}
-
+  /**
+ *
+ * 
+ *
+ * @param {*} input
+ * @return {*} 
+ * @memberof MovementConsumerService
+/**
+ *
+ *
+ * @param {*} input
+ * @return {*} 
+ * @memberof MovementConsumerService
+ */
   @RabbitRPC({
     exchange: RABBITMQ_EXCHANGE,
     routingKey: `${RABBITMQ_EXCHANGE}.payment_created`,
@@ -50,7 +66,7 @@ export class MovementConsumerService {
     });
 
     try {
-      const { movementUid } = input;
+      const { movementUid, base64File } = input;
 
       Logger.log(
         `paymentCreatedConsumer: payment ${movementUid} received`,
@@ -322,6 +338,29 @@ export class MovementConsumerService {
         `paymentCreatedConsumer: the payment ${existingPayment.uid} was processed`,
         MovementConsumerService.name,
       );
+
+      if (base64File) {
+        const fileExtension = getFileExtensionByMimeType(base64File);
+
+        const googleFile = await this.googleStorageService.uploadFileFromBase64(
+          {
+            bucketName: 'wepresto_bucket', // TODO: move to env
+            base64: base64File,
+            destinationPath: `${this.appConfiguration.environment}/payments/${existingPayment.uid}.${fileExtension}`,
+          },
+        );
+
+        // make the file public
+        await googleFile.makePublic();
+
+        // update the movement with the file url
+        const preloadedPayment = await this.movementRepository.preload({
+          id: existingPayment.id,
+          proofURL: `https://storage.googleapis.com/wepresto_bucket/${this.appConfiguration.environment}/payments/${existingPayment.uid}.${fileExtension}`,
+        });
+
+        await this.movementRepository.save(preloadedPayment);
+      }
     } catch (error) {
       console.error(error);
 

@@ -56,4 +56,16 @@ export default Joi.object({
 
   // SLACK
   SLACK_TOKEN: Joi.required(),
+
+  // GCP
+  GCP_TYPE: Joi.required(),
+  GCP_PROJECT_ID: Joi.required(),
+  GCP_PRIVATE_KEY_ID: Joi.required(),
+  GCP_PRIVATE_KEY: Joi.required(),
+  GCP_CLIENT_EMAIL: Joi.required(),
+  GCP_CLIENT_ID: Joi.required(),
+  GCP_AUTH_URI: Joi.required(),
+  GCP_TOKEN_URI: Joi.required(),
+  GCP_AUTH_PROVIDER_X509_CERT_URL: Joi.required(),
+  GCP_CLIENT_X509_CERT_URL: Joi.required(),
 });

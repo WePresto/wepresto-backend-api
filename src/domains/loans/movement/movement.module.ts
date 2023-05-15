@@ -14,6 +14,7 @@ import { MovementService } from './services/movement.service';
 import { MovementController } from './movement.controller';
 
 import { RabbitMQLocalModule } from '../../../plugins/rabbit-local/rabbit-mq-local.module';
+import { GoogleStorageModule } from '../../../plugins/google-storage/google-storage.module';
 import { EventMessageModule } from '../../event-message/event-message.module';
 import { LoanModule } from '../loan/loan.module';
 import { FrenchAmortizationSystemModule } from '../french-amortization-system/french-amortization-system.module';
@@ -23,6 +24,7 @@ import { FrenchAmortizationSystemModule } from '../french-amortization-system/fr
     ConfigModule.forFeature(appConfig),
     TypeOrmModule.forFeature([Movement]),
     RabbitMQLocalModule,
+    GoogleStorageModule,
     EventMessageModule,
     LoanModule,
     FrenchAmortizationSystemModule,

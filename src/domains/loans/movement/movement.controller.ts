@@ -2,13 +2,17 @@ import {
   Body,
   Controller,
   Get,
+  ParseFilePipeBuilder,
   Post,
   Query,
+  UploadedFile,
+  UseInterceptors,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { PermissionName } from 'nestjs-basic-acl-sdk';
 import { ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 import { MovementService } from './services/movement.service';
 
@@ -28,9 +32,23 @@ export class MovementController {
     summary: 'Create a payment',
   })
   @PermissionName('movements:createPayment')
+  @UseInterceptors(FileInterceptor('file'))
   @Post('payment')
-  createPayment(@Body() input: CreatePaymentMovementInput) {
-    return this.movementService.createService.createPayment(input);
+  createPayment(
+    @Body() input: CreatePaymentMovementInput,
+    @UploadedFile(
+      new ParseFilePipeBuilder()
+        .addFileTypeValidator({
+          fileType: /^image\b/,
+        })
+        .addMaxSizeValidator({ maxSize: 15000000 })
+        .build({
+          fileIsRequired: false,
+        }),
+    )
+    file?: any,
+  ) {
+    return this.movementService.createService.createPayment({ ...input, file });
   }
 
   @ApiExcludeEndpoint()

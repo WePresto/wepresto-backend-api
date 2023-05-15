@@ -122,6 +122,14 @@ export class Movement extends BaseEntity {
   })
   comment?: string;
 
+  @Column({
+    name: 'proof_url',
+    type: 'text', // 'varchar
+    default: null,
+    nullable: true,
+  })
+  proofURL?: string;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
