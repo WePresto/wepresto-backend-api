@@ -76,7 +76,7 @@ export class BorrowerReadService extends BaseService<Borrower> {
 
     return {
       count: loans.length,
-      data: loans.slice(+skip, +skip + +take),
+      loans: loans.slice(+skip, +skip + +take),
     };
   }
 

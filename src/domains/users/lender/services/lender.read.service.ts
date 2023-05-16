@@ -10,6 +10,7 @@ import { Lender } from '../lender.entity';
 import { BaseService } from '../../../../common/base.service';
 
 import { GetOneLenderInput } from '../dto/get-one-lender-input.dto';
+import { GetParticipationsInput } from '../dto/get-participations-input.dto';
 
 @Injectable()
 export class LenderReadService extends BaseService<Lender> {
@@ -30,6 +31,7 @@ export class LenderReadService extends BaseService<Lender> {
         uid,
       },
       checkIfExists: true,
+      relations: ['user'],
       loadRelationIds: false,
     });
 
@@ -111,8 +113,8 @@ export class LenderReadService extends BaseService<Lender> {
     return resume;
   }
 
-  public async getParticipations(input: GetOneLenderInput) {
-    const { uid } = input;
+  public async getParticipations(input: GetParticipationsInput) {
+    const { uid, take = '10', skip = '0' } = input;
 
     const existingLender = await this.getOneByFields({
       fields: {
@@ -167,6 +169,9 @@ export class LenderReadService extends BaseService<Lender> {
       };
     });
 
-    return participations;
+    return {
+      count: participations.length,
+      participations: participations.slice(+skip, +skip + +take),
+    };
   }
 }
