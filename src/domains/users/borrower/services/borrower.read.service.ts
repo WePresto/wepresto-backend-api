@@ -102,6 +102,8 @@ export class BorrowerReadService extends BaseService<Borrower> {
       });
     }
 
+    query.orderBy('user.createdAt', 'ASC');
+
     const [borrowers, count] = await query.getManyAndCount();
 
     return {
