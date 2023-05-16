@@ -23,5 +23,5 @@ export class DisburseLoanInput {
     format: 'YYYY-MM-DD',
     length: 10,
   })
-  readonly startDate: string;
+  readonly disbursementDate?: string;
 }

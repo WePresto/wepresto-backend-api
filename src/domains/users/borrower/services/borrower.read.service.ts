@@ -33,6 +33,7 @@ export class BorrowerReadService extends BaseService<Borrower> {
         uid,
       },
       checkIfExists: true,
+      relations: ['user'],
       loadRelationIds: false,
     });
 
@@ -40,7 +41,7 @@ export class BorrowerReadService extends BaseService<Borrower> {
   }
 
   public async getLoans(input: GetBorrowerLoansInput) {
-    const { uid, statuses, q, take, skip } = input;
+    const { uid, statuses, q, take = '10', skip = '0' } = input;
 
     let parsedStatuses: string[] = [];
     if (statuses) {
@@ -75,10 +76,7 @@ export class BorrowerReadService extends BaseService<Borrower> {
 
     return {
       count: loans.length,
-      data: loans.slice(
-        skip ? +skip : 0,
-        (skip ? +skip : 0) + (take ? +take : 0),
-      ),
+      data: loans.slice(+skip, +skip + +take),
     };
   }
 

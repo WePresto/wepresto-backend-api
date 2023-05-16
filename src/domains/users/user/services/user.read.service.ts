@@ -49,7 +49,7 @@ export class UserReadService extends BaseService<User> {
   }
 
   public async getMany(input: GetManyUsersInput) {
-    const { q, take, skip } = input;
+    const { q, take = '10', skip = '0' } = input;
 
     const query = this.userRepository
       .createQueryBuilder('user')

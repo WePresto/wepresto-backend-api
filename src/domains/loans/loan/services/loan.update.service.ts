@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 
 import appConfig from '../../../../config/app.config';
 
-import { Loan, LoanStatus, InterstRate } from '../loan.entity';
+import { Loan, LoanStatus } from '../loan.entity';
 
 import { LoanReadService } from './loan.read.service';
 
@@ -105,7 +105,7 @@ export class LoanUpdateService {
   }
 
   public async disburse(input: DisburseLoanInput) {
-    const { uid, comment, startDate } = input;
+    const { uid, comment, disbursementDate } = input;
 
     // get loan
     const existingLoan = await this.readService.getOne({ uid });
@@ -120,7 +120,9 @@ export class LoanUpdateService {
     // update loan
     const preloadedLoan = await this.loanRepository.preload({
       id: existingLoan.id,
-      startDate: startDate ? new Date(startDate) : getReferenceDate(new Date()),
+      startDate: disbursementDate
+        ? new Date(disbursementDate)
+        : getReferenceDate(new Date()),
       status: LoanStatus.DISBURSED,
       comment,
     });
