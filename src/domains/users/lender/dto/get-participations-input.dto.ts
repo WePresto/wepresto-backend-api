@@ -13,6 +13,20 @@ export class GetParticipationsInput {
   })
   @IsOptional()
   @IsNumberString()
+  readonly startAmount?: string;
+
+  @ApiPropertyOptional({
+    example: '0',
+  })
+  @IsOptional()
+  @IsNumberString()
+  readonly endAmount?: string;
+
+  @ApiPropertyOptional({
+    example: '0',
+  })
+  @IsOptional()
+  @IsNumberString()
   readonly take?: string;
 
   @ApiPropertyOptional({

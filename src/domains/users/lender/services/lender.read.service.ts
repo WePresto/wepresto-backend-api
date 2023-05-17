@@ -114,7 +114,17 @@ export class LenderReadService extends BaseService<Lender> {
   }
 
   public async getParticipations(input: GetParticipationsInput) {
-    const { uid, take = '10', skip = '0' } = input;
+    const { uid, startAmount, endAmount, take = '10', skip = '0' } = input;
+
+    let parsedStartAmount: number | undefined;
+    if (startAmount) {
+      parsedStartAmount = +startAmount;
+    }
+
+    let parsedEndAmount: number | undefined;
+    if (endAmount) {
+      parsedEndAmount = +endAmount;
+    }
 
     const existingLender = await this.getOneByFields({
       fields: {
@@ -128,13 +138,26 @@ export class LenderReadService extends BaseService<Lender> {
       throw new BadRequestException('Lender not found');
     }
 
-    const queryResult = await this.lenderRepository
+    const query = await this.lenderRepository
       .createQueryBuilder('lender')
       .leftJoinAndSelect('lender.loanParticipations', 'loanParticipation')
       .leftJoinAndSelect('loanParticipation.loan', 'loan')
       .leftJoinAndSelect('loan.movements', 'movement')
-      .where('lender.uid = :uid', { uid })
-      .getOne();
+      .where('lender.uid = :uid', { uid });
+
+    if (parsedStartAmount) {
+      query.andWhere('loanParticipation.amount >= :startAmount', {
+        startAmount: parsedStartAmount,
+      });
+    }
+
+    if (parsedEndAmount) {
+      query.andWhere('loanParticipation.amount <= :endAmount', {
+        endAmount: parsedEndAmount,
+      });
+    }
+
+    const queryResult = await query.getOne();
 
     let loanParticipations = [];
 
