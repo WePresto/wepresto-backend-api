@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Inject,
   Injectable,
   PreconditionFailedException,
@@ -10,6 +11,8 @@ import { Repository } from 'typeorm';
 import appConfig from '../../../../config/app.config';
 
 import { LoanParticipation } from '../loan-participation.entity';
+
+import { validateAmountByCountry } from '../../../../utils/validate-amount-by-country';
 
 import { LoanService } from '../../loan/services/loan.service';
 import { LenderService } from '../../../users/lender/services/lender.service';
@@ -29,6 +32,12 @@ export class LoanParticipationCreateService {
 
   public async create(input: CreateLoanParticipationInput) {
     const { loanUid, lenderUid, amount } = input;
+
+    try {
+      validateAmountByCountry('CO', amount);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
 
     // get loan
     const existingLoan = await this.loanService.readService.getOne({
@@ -61,7 +70,7 @@ export class LoanParticipationCreateService {
     // check the total participation amount vs the loan amount
     if (totalParticipationAmount + amount > existingLoan.amount) {
       throw new PreconditionFailedException(
-        'total participation amount cannot be greater than loan amount',
+        'total participation amount cannot be greater than loan amount, the loan is already fully funded',
       );
     }
 

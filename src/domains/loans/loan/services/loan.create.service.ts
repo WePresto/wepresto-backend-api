@@ -12,6 +12,9 @@ import appConfig from '../../../../config/app.config';
 
 import { Loan, LoanStatus, InterstRate } from '../loan.entity';
 
+import { validateAmountByCountry } from '../../../../utils/validate-amount-by-country';
+import { getPlatformFeeByCountry } from 'src/utils/get-plaform-fee-by-country';
+
 import { RabbitMQLocalService } from '../../../../plugins/rabbit-local/rabbit-mq-local.service';
 import { FrenchAmortizationSystemService } from '../../french-amortization-system/french-amortization-system.service';
 import { BorrowerService } from '../../../users/borrower/services/borrower.service';
@@ -32,10 +35,22 @@ export class LoanCreateService {
   ) {}
 
   public async apply(input: ApplyLoanInput) {
-    const { borrowerUid, amount, term, alias } = input;
+    const { borrowerUid, amount: requestedAmount, term, alias } = input;
+
+    try {
+      validateAmountByCountry('CO', requestedAmount);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
 
     // validate term and amount
-    this.validateTermAndAmount(term, amount);
+    this.validateTermAndAmount(term, requestedAmount);
+
+    // get platform usage fee
+    const platformUsageFee = getPlatformFeeByCountry('CO');
+
+    // calculate total amount of the loan
+    const amount = requestedAmount + platformUsageFee;
 
     // get borrower
     const existingBorrower = await this.borrowerService.readService.getOne({
@@ -67,8 +82,10 @@ export class LoanCreateService {
       term,
       annualInterestRate: InterstRate[term],
       annualInterestOverdueRate: InterstRate[term] * 1.5, // TODO: this should be a config
+      platformFee: platformUsageFee,
     });
 
+    // save loan
     const savedLoan = await this.loanRepository.save(createdLoan);
 
     // publish loan application event
@@ -102,10 +119,23 @@ export class LoanCreateService {
   }
 
   public simulate(input: SimulateLoanInput) {
-    const { amount, term } = input;
+    const { amount: requestedAmount, term } = input;
+
+    // validate amount
+    try {
+      validateAmountByCountry('CO', requestedAmount);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
 
     // validate term and amount
-    this.validateTermAndAmount(term, amount);
+    this.validateTermAndAmount(term, requestedAmount);
+
+    // get platform usage fee
+    const platformUsageFee = getPlatformFeeByCountry('CO');
+
+    // calculate total amount of the loan
+    const amount = requestedAmount + platformUsageFee;
 
     const currentDate = new Date();
 
@@ -118,6 +148,8 @@ export class LoanCreateService {
       });
 
     return {
+      requestedAmount,
+      platformUsageFee,
       amount,
       term,
       referenceDate: currentDate.toISOString(),

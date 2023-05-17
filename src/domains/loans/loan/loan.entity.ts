@@ -125,6 +125,21 @@ export class Loan extends BaseEntity {
   })
   alias?: string;
 
+  @Column({
+    name: 'platform_fee',
+    type: 'decimal',
+    precision: 15,
+    scale: 3,
+    transformer: {
+      from: (value: string) =>
+        value === null || value === undefined ? value : parseFloat(value),
+      to: (value: number) => value,
+    },
+    nullable: true,
+    default: 0,
+  })
+  platformFee?: number;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
