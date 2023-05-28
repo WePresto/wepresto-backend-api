@@ -119,7 +119,7 @@ export class LoanCreateService {
   }
 
   public simulate(input: SimulateLoanInput) {
-    const { amount: requestedAmount, term } = input;
+    const { alias, amount: requestedAmount, term } = input;
 
     // validate amount
     try {
@@ -148,6 +148,7 @@ export class LoanCreateService {
       });
 
     return {
+      alias,
       requestedAmount,
       platformUsageFee,
       amount,
