@@ -111,4 +111,29 @@ export class BorrowerReadService extends BaseService<Borrower> {
       borrowers,
     };
   }
+
+  public async getLoansInProcess(input: GetBorrowerLoansInput) {
+    const { uid, take = '10', skip = '0' } = input;
+
+    const query = this.borrowerRepository
+      .createQueryBuilder('borrower')
+      .leftJoinAndSelect('borrower.loans', 'loan')
+      .where('borrower.uid = :uid', { uid })
+      .andWhere('loan.status IN (:...statuses)', {
+        statuses: [
+          LoanStatus.APPLIED,
+          LoanStatus.REVIEWING,
+          LoanStatus.APPROVED,
+        ],
+      })
+      .take(+take)
+      .skip(+skip);
+
+    const { loans } = (await query.getOne()) || { loans: [] };
+
+    return {
+      count: loans.length,
+      loans: loans.slice(+skip, +skip + +take),
+    };
+  }
 }

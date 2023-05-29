@@ -7,7 +7,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { PermissionName } from 'nestjs-basic-acl-sdk';
+import { PermissionName, Public } from 'nestjs-basic-acl-sdk';
 
 import { RedisCacheTTL } from '../../../plugins/redis-cache/decorators/redis-cache-ttl.decorator';
 
@@ -51,6 +51,16 @@ export class BorrowerController {
   @Get(':uid')
   getOne(@Param() input: GetOneBorrowerInput) {
     return this.borrowerService.readService.getOne(input);
+  }
+
+  @ApiOperation({
+    summary: 'Get borrower loans in progress',
+  })
+  @RedisCacheTTL(0)
+  @Public()
+  @Get('loans/in-progress')
+  getLoansInProcess(@Query() input: GetBorrowerLoansInput) {
+    return this.borrowerService.readService.getLoansInProcess(input);
   }
 
   /* READ RELATED ENDPOINTS */
