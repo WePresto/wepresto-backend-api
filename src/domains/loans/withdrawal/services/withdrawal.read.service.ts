@@ -35,7 +35,7 @@ export class WithdrawalReadService {
     // get the total withdrawn for the lender
     const { totalWithdrawn = 0 } = await this.withdrawalRepository
       .createQueryBuilder('withdrawal')
-      .select('SUM(withdrawal.amount)', 'totalWithdrawn')
+      .select('COALESCE(SUM(withdrawal.amount), 0)', 'totalWithdrawn')
       .where('withdrawal.status IN (:...statuses)', {
         statuses: [
           WithdrawalStatus.REQUESTED,
