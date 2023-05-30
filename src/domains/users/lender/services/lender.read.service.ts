@@ -169,11 +169,25 @@ export class LenderReadService extends BaseService<Lender> {
       // get participation percentage based on loan amount and participation amount
       const participationRate = this.getParticipationRate(amount, loan.amount);
 
+      // get interest
+      const interest = loan.movements.reduce((pre, cur) => {
+        const { interest } = cur;
+
+        return pre + interest;
+      }, 0);
+
       // get paid interest
       const paidInterest = loan.movements.reduce((pre, cur) => {
         const { interest, paid } = cur;
 
         return pre + (paid ? interest : 0);
+      }, 0);
+
+      // get paid principal
+      const paidPrincipal = loan.movements.reduce((pre, cur) => {
+        const { principal, paid } = cur;
+
+        return pre + (paid ? principal : 0);
       }, 0);
 
       return {
@@ -182,12 +196,14 @@ export class LenderReadService extends BaseService<Lender> {
         annualInterestParticipationRate:
           loan.annualInterestRate * participationRate,
         loan: {
+          uid: loan.uid,
           amount: loan.amount,
-          interest: loan.interest,
+          interest: interest * participationRate,
           term: loan.term,
           annualInterestRate: loan.annualInterestRate,
           annualInterestOverdueRate: loan.annualInterestOverdueRate,
           paidInterest: paidInterest * participationRate,
+          paidPrincipal: paidPrincipal * participationRate,
         },
       };
     });
