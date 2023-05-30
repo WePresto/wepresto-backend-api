@@ -49,7 +49,7 @@ export class WithdrawalReadService {
       .getRawOne();
 
     return {
-      totalWithdrawn,
+      totalWithdrawn: Number(totalWithdrawn),
     };
   }
 
