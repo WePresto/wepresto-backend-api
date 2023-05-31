@@ -82,31 +82,38 @@ export class LenderReadService extends BaseService<Lender> {
           loan.amount,
         );
 
+        // get the total collected
+        const totalCollected =
+          loan.movements.reduce((pre, cur) => {
+            const { type, processed, amount } = cur;
+
+            if (type?.includes('PAYMENT') && processed) {
+              return pre + Math.abs(amount);
+            }
+
+            return pre;
+          }, 0) * participationRate;
+
         // get paid interest
-        const paidInterest = loan.movements.reduce((pre, cur) => {
-          const { interest, paid } = cur;
+        const paidInterest =
+          loan.movements.reduce((pre, cur) => {
+            const { interest, paid } = cur;
 
-          return pre + (paid ? interest : 0);
-        }, 0);
-
-        // get paid principal
-        const paidPrincipal = loan.movements.reduce((pre, cur) => {
-          const { principal, paid } = cur;
-
-          return pre + (paid ? principal : 0);
-        }, 0);
+            return pre + (paid ? interest : 0);
+          }, 0) * participationRate;
 
         return {
           totalInvested: pre.totalInvested + amount,
-          totalPrincipal:
-            pre.totalPrincipal + paidPrincipal * participationRate,
-          totalInterest: pre.totalInterest + paidInterest * participationRate,
+          totalPrincipal: pre.totalPrincipal + (totalCollected - paidInterest),
+          totalInterest: pre.totalInterest + paidInterest,
+          totalCollected: pre.totalCollected + totalCollected,
         };
       },
       {
         totalInvested: 0,
         totalPrincipal: 0,
         totalInterest: 0,
+        totalCollected: 0,
       },
     );
 
