@@ -39,20 +39,7 @@ export class MovementConsumerService {
     private readonly loanService: LoanService,
     private readonly frenchAmortizationSystemService: FrenchAmortizationSystemService,
   ) {}
-  /**
- *
- * 
- *
- * @param {*} input
- * @return {*} 
- * @memberof MovementConsumerService
-/**
- *
- *
- * @param {*} input
- * @return {*} 
- * @memberof MovementConsumerService
- */
+
   @RabbitRPC({
     exchange: RABBITMQ_EXCHANGE,
     routingKey: `${RABBITMQ_EXCHANGE}.payment_created`,
@@ -97,7 +84,9 @@ export class MovementConsumerService {
         movements: minimalMovementsToPay,
       } = await this.loanService.readService.getMinimumPaymentAmount({
         uid: loan.uid,
-        referenceDate: getReferenceDate(new Date()),
+        referenceDate: existingPayment.movementDate
+          ? getReferenceDate(new Date(existingPayment.movementDate), 'UTC')
+          : getReferenceDate(new Date()),
       });
 
       Logger.log(

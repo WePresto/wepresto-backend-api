@@ -10,6 +10,8 @@ import { Movement, MovementType } from '../../movement/movement.entity';
 
 import { BaseService } from '../../../../common/base.service';
 
+import { getYearMonthDayFromDateISOString } from '../../../../utils/get-year-month-day-from-date-iso-string.util';
+
 import { GetOneLoanInput } from '../dto/get-one-loan-input.dto';
 import { GetMinimumPaymentAmountOutput } from '../dto/get-minimum-payment-amount-output.dto';
 import { GetManyLoansInput } from '../dto/get-many-loans-input.dto';
@@ -50,7 +52,8 @@ export class LoanReadService extends BaseService<Loan> {
     const existingLoan = await this.getOne({ uid });
 
     const referenceDateISO = new Date(referenceDate).toISOString();
-    const [year, month] = referenceDateISO.split('-');
+    const { year, month, day } =
+      getYearMonthDayFromDateISOString(referenceDateISO);
 
     const nextLoanInstallmentQuery = this.loanRepository
       .createQueryBuilder('loan')
@@ -73,6 +76,9 @@ export class LoanReadService extends BaseService<Loan> {
       .andWhere('movement.paid = :paid', { paid: false })
       .andWhere(`extract('year' from movement.due_date) <= :year`, { year })
       .andWhere(`extract('month' from movement.due_date) <= :month`, { month })
+      .andWhere(`extract('day' from movement.due_date) <= :day`, {
+        day,
+      })
       .orderBy('movement.due_date', 'ASC')
       .getOne();
 
