@@ -17,6 +17,7 @@ import {
   isSameDay,
 } from '../../../../utils';
 import { getFileExtensionByMimeType } from '../../../../utils/get-file-extension.util';
+import { getAmountToForgive } from '../../../../utils/get-amount-to-forgive.util';
 
 import { MovementReadService } from './movement.read.service';
 import { GoogleStorageService } from '../../../../plugins/google-storage/google-storage.service';
@@ -121,58 +122,53 @@ export class MovementConsumerService {
       let comment;
 
       // if the payment is greater than the minimum amount to pay...
-      if (existingPayment.amount * -1 > minimumPaymentAmount) {
-        Logger.log(
-          `paymentCreatedConsumer: the payment ${existingPayment.uid} is greater than the minimum amount to pay`,
-          MovementConsumerService.name,
-        );
 
-        // get the missing installments to pay  (if any)
-        const missingInstallments = await this.movementRepository.find({
-          where: {
-            loan: { id: loan.id },
-            paid: false,
-            type: MovementType.LOAN_INSTALLMENT,
-          },
-        });
+      Logger.log(
+        `paymentCreatedConsumer: the payment ${existingPayment.uid} is greater than the minimum amount to pay`,
+        MovementConsumerService.name,
+      );
 
-        Logger.log(
-          `paymentCreatedConsumer: missingInstallments: ${missingInstallments.length}`,
-          MovementConsumerService.name,
-        );
+      // get the missing installments to pay  (if any)
+      const missingInstallments = await this.movementRepository.find({
+        where: {
+          loan: { id: loan.id },
+          paid: false,
+          type: MovementType.LOAN_INSTALLMENT,
+        },
+      });
 
-        if (!missingInstallments.length) {
-          // TODO: update the loan as paid
+      Logger.log(
+        `paymentCreatedConsumer: missingInstallments: ${missingInstallments.length}`,
+        MovementConsumerService.name,
+      );
 
-          Logger.log(
-            `paymentCreatedConsumer: the loan ${loan.uid} is now paid`,
-            MovementConsumerService.name,
-          );
-        }
+      // get the total principal amount of the loan
+      const totalPrincipalDebt = missingInstallments.reduce(
+        (total, movement) => total + movement.principal,
+        0,
+      );
 
-        // get the total principal amount of the loan
-        const totalPrincipalDebt = missingInstallments.reduce(
-          (total, movement) => total + movement.principal,
-          0,
-        );
+      Logger.log(
+        `paymentCreatedConsumer: totalPrincipalDebt: ${totalPrincipalDebt}`,
+        MovementConsumerService.name,
+      );
 
-        Logger.log(
-          `paymentCreatedConsumer: totalPrincipalDebt: ${totalPrincipalDebt}`,
-          MovementConsumerService.name,
-        );
+      // determine the amount to re calculate the installments
+      const newPrincipalDebt =
+        totalPrincipalDebt -
+        (Math.abs(existingPayment.amount) - minimumPaymentAmount);
 
-        // determine the amount to re calculate the installments
-        const newPrincipalDebt =
-          totalPrincipalDebt -
-          (existingPayment.amount * -1 - minimumPaymentAmount);
+      Logger.log(
+        `paymentCreatedConsumer: newPrincipalDebt: ${newPrincipalDebt}`,
+        MovementConsumerService.name,
+      );
 
-        Logger.log(
-          `paymentCreatedConsumer: newPrincipalDebt: ${newPrincipalDebt}`,
-          MovementConsumerService.name,
-        );
+      if (newPrincipalDebt > getAmountToForgive('CO')) {
+        // if the new principal debt is greater than zero
+        // means the loan is not paid yet
 
         // re calculate the installments
-        let newInstallments;
+        let newInstallments = [];
         if (existingPayment.type === MovementType.PAYMENT_TERM_REDUCTION) {
           // IF THE EXTRA PAYMENT IS TO REDUCE THE NUMBER OF THE INSTALLMENTS
 
@@ -235,9 +231,10 @@ export class MovementConsumerService {
               newPrincipalDebtInInstallments = 0;
             }
           }
-        } else {
-          // IF THE EXTRA PAYMENT IS TO REDUCE THE AMOUNT OF THE INSTALLMENTS
-
+        } else if (
+          existingPayment.type ===
+          MovementType.PAYMENT_INSTALLMENT_AMOUNT_REDUCTION
+        ) {
           Logger.log(
             `paymentCreatedConsumer: the payment ${existingPayment.uid} is to reduce the amount of the installments`,
             MovementConsumerService.name,
@@ -280,6 +277,11 @@ export class MovementConsumerService {
               term: missingInstallments.length,
               referenceDate,
             });
+        } else {
+          Logger.log(
+            `paymentCreatedConsumer: the payment ${existingPayment.uid} has an invalid type wich is ${existingPayment.type} and is not supported`,
+            MovementConsumerService.name,
+          );
         }
 
         Logger.log(
@@ -288,7 +290,7 @@ export class MovementConsumerService {
         );
 
         // create the new installments
-        const createdInstallments = newInstallments.map((installment) => {
+        const createdInstallments = newInstallments?.map((installment) => {
           return this.movementRepository.create({
             ...installment,
             loan: { id: loan.id },
@@ -303,7 +305,7 @@ export class MovementConsumerService {
             id: In(missingInstallments.map((movement) => movement.id)),
           }),
           // save the new installments
-          this.movementRepository.save(createdInstallments),
+          this.movementRepository.save(createdInstallments as any),
         ]);
 
         Logger.log(
@@ -312,6 +314,23 @@ export class MovementConsumerService {
         );
 
         comment = `The payment was greater than the minimum amount to pay, so the installments were recalculated`;
+      } else {
+        // otherwise, the new principal debt is less than or equal to zero
+        // means the loan is paid
+
+        // soft delete the installments
+        await this.movementRepository.softDelete({
+          id: In(missingInstallments.map((movement) => movement.id)),
+        });
+
+        // update the loan as paid
+        await this.loanService.updateService.pay({
+          uid: loan.uid,
+          comment: 'loan is paid',
+        });
+
+        // set the comment
+        comment = 'this payment paid the loan';
       }
 
       // update the movement as processed

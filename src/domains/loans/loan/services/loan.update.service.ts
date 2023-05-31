@@ -136,4 +136,31 @@ export class LoanUpdateService {
 
     return savedLoan;
   }
+
+  public async pay(input: any) {
+    const { uid, comment } = input;
+
+    // get loan
+    const existingLoan = await this.readService.getOne({ uid });
+
+    // check loan status
+    if (existingLoan.status !== LoanStatus.DISBURSED) {
+      throw new ConflictException(
+        `loan is not in ${LoanStatus.DISBURSED} status`,
+      );
+    }
+
+    // update loan
+    const preloadedLoan = await this.loanRepository.preload({
+      id: existingLoan.id,
+      status: LoanStatus.PAID,
+      comment,
+    });
+
+    const savedLoan = await this.loanRepository.save(preloadedLoan);
+
+    // TODO: publish loan payment event (to send email notifications)
+
+    return savedLoan;
+  }
 }
