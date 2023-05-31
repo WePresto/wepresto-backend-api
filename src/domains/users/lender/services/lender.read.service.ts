@@ -183,19 +183,25 @@ export class LenderReadService extends BaseService<Lender> {
         return pre + interest;
       }, 0);
 
+      // get the total collected
+      const totalCollected =
+        loan.movements.reduce((pre, cur) => {
+          const { type, processed, amount } = cur;
+
+          if (type?.includes('PAYMENT') && processed) {
+            return pre + Math.abs(amount);
+          }
+
+          return pre;
+        }, 0) * participationRate;
+
       // get paid interest
-      const paidInterest = loan.movements.reduce((pre, cur) => {
-        const { interest, paid } = cur;
+      const paidInterest =
+        loan.movements.reduce((pre, cur) => {
+          const { interest, paid } = cur;
 
-        return pre + (paid ? interest : 0);
-      }, 0);
-
-      // get paid principal
-      const paidPrincipal = loan.movements.reduce((pre, cur) => {
-        const { principal, paid } = cur;
-
-        return pre + (paid ? principal : 0);
-      }, 0);
+          return pre + (paid ? interest : 0);
+        }, 0) * participationRate;
 
       return {
         ...loanParticipation,
@@ -209,8 +215,9 @@ export class LenderReadService extends BaseService<Lender> {
           term: loan.term,
           annualInterestRate: loan.annualInterestRate,
           annualInterestOverdueRate: loan.annualInterestOverdueRate,
-          paidInterest: paidInterest * participationRate,
-          paidPrincipal: paidPrincipal * participationRate,
+          totalCollected: totalCollected,
+          paidInterest: paidInterest,
+          paidPrincipal: totalCollected - paidInterest,
         },
       };
     });
