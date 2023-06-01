@@ -60,9 +60,8 @@ export class WeprestoSlackService {
     input: SendNewWithdrawalRequestMessageInput,
   ) {
     const { withdrawal } = input;
-    const {
-      lender: { user },
-    } = withdrawal;
+    const { lender } = withdrawal;
+    const { user } = lender;
 
     Logger.log(
       `sending new withdrawal request message to slack`,
@@ -72,7 +71,7 @@ export class WeprestoSlackService {
     const message =
       '<!here> *New Withdrawal Request* :money_with_wings: \n' +
       `Hello team! :wave::skin-tone-2: A new withdrawal request has been submitted by *${user.fullName}* ` +
-      `for *${formatCurrency(withdrawal.amount, 'COP')}*. ` +
+      `for *${formatCurrency(withdrawal.depositAmount, 'COP')}*. ` +
       // eslint-disable-next-line prettier/prettier
       `The request was submitted on *${formatDateTime(withdrawal.createdAt)}*. ` +
       `Please review the request and take any necessary actions. \n\n` +
@@ -80,7 +79,7 @@ export class WeprestoSlackService {
       `- Bank: *${withdrawal.accountInfo.bank}*\n` +
       `- Account: *${withdrawal.accountInfo.accountNumber}*\n` +
       `- Amount: *${formatCurrency(withdrawal.amount, 'COP')}*\n\n` +
-      `<https://wepresto.retool.com/apps/1234|View Withdrawal Request> :eyes:`;
+      `<https://admin.wepresto.com/lenders/${lender.uid}|View Withdrawal Request> :eyes:`;
 
     await this.webClient.chat.postMessage({
       channel: '#notifications',
