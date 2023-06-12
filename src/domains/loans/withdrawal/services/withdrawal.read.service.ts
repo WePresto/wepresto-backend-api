@@ -11,6 +11,7 @@ import { LenderService } from '../../../users/lender/services/lender.service';
 
 import { GetTotalWithdrawnInput } from '../dto/get-total-withdrawn-input.dto';
 import { GetAvailableToWithdrawInput } from '../dto/get-available-to-withdraw-input.dto';
+import { GetLenderWithdrawalsInput } from '../dto/get-lender-withdrawals-input.dto';
 
 @Injectable()
 export class WithdrawalReadService {
@@ -74,5 +75,29 @@ export class WithdrawalReadService {
     const totalAvailable = totalPrincipal + totalInterest - totalWithdrawn;
 
     return { availableToWithdraw: totalAvailable };
+  }
+
+  public async getLenderWithdrawals(input: GetLenderWithdrawalsInput) {
+    const { lenderUid, take = '10', skip = '0' } = input;
+
+    // get the lender
+    const existingLender = await this.lenderService.readService.getOne({
+      uid: lenderUid,
+    });
+
+    // get the withdrawals for the lender
+    const [withdrawals, count] = await this.withdrawalRepository
+      .createQueryBuilder('withdrawal')
+      .innerJoin('withdrawal.lender', 'lender')
+      .where('lender.id = :lenderId', { lenderId: existingLender.id })
+      .orderBy('withdrawal.createdAt', 'DESC')
+      .take(+take)
+      .skip(+skip)
+      .getManyAndCount();
+
+    return {
+      count,
+      withdrawals,
+    };
   }
 }
