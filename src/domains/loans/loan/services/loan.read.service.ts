@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 
 import appConfig from '../../../../config/app.config';
 
-import { Loan, LoanTerm } from '../loan.entity';
+import { Loan, LoanStatus, LoanTerm } from '../loan.entity';
 import { Movement, MovementType } from '../../movement/movement.entity';
 
 import { BaseService } from '../../../../common/base.service';
@@ -264,6 +264,43 @@ export class LoanReadService extends BaseService<Loan> {
     return {
       ...reducedMovements,
       movements,
+    };
+  }
+
+  public async getLoansNeedingFunding(input: any) {
+    const { take = '10', skip = '0' } = input;
+
+    const [loans, count] = await this.loanRepository
+      .createQueryBuilder('loan')
+      .where('loan.status = :status', { status: LoanStatus.FUNDING })
+      .take(+take)
+      .skip(+skip)
+      .getManyAndCount();
+
+    return {
+      count,
+      loans: await Promise.all(
+        loans.map(async (loan) => {
+          const { id, amount } = loan;
+
+          const { fundedAmount } = await this.loanRepository
+            .createQueryBuilder('loan')
+            .select(
+              'COALESCE(SUM(loanParticipation.amount), 0)',
+              'fundedAmount',
+            )
+            .leftJoin('loan.loanParticipations', 'loanParticipation')
+            .where('loan.id = :id', { id })
+            .getRawOne();
+
+          return {
+            ...loan,
+            fundedAmount: +fundedAmount,
+            remainingAmount: amount - fundedAmount,
+            fundedPercentage: (+fundedAmount / amount) * 100,
+          };
+        }),
+      ),
     };
   }
 }

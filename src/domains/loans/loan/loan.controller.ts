@@ -107,6 +107,15 @@ export class LoanController {
   }
 
   @ApiOperation({
+    summary: 'Get the loans that need funding',
+  })
+  @PermissionName('loans:getLoansNeedingFunding')
+  @Get('needing-funding')
+  getLoansNeedingFunding(@Query() input: any) {
+    return this.loanService.readService.getLoansNeedingFunding(input);
+  }
+
+  @ApiOperation({
     summary: 'Get the loan',
   })
   @PermissionName('loans:getOne')
