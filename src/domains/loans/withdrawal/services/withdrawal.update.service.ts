@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { ConflictException, Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -32,6 +32,13 @@ export class WithdrawalUpdateService {
       checkIfExists: true,
       loadRelationIds: false,
     });
+
+    // check the withdrawal status
+    if (existingWithdrawal.status !== WithdrawalStatus.REQUESTED) {
+      throw new ConflictException(
+        `withdrawal is not in ${WithdrawalStatus.REQUESTED} status`,
+      );
+    }
 
     const base64File = file ? file.buffer.toString('base64') : undefined;
 

@@ -79,7 +79,7 @@ export class WeprestoSlackService {
       `- Bank: *${withdrawal.accountInfo.bank}*\n` +
       `- Account: *${withdrawal.accountInfo.accountNumber}*\n` +
       `- Amount: *${formatCurrency(withdrawal.depositAmount, 'COP')}*\n\n` +
-      `<https://admin.wepresto.com/lenders/${lender.uid}|View Withdrawal Request> :eyes:`;
+      `<https://admin.wepresto.com/lenders/${lender.uid}/withdrawals|View Withdrawal Request> :eyes:`;
 
     await this.webClient.chat.postMessage({
       channel: '#notifications',
