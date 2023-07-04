@@ -25,20 +25,14 @@ export class GetLoanMovementsInput {
     example: '2020-01-01',
   })
   @IsOptional()
-  @IsDateString({
-    format: 'YYYY-MM-DD',
-    length: 10,
-  })
+  @IsDateString()
   readonly startDate?: string;
 
   @ApiPropertyOptional({
     example: '2020-01-01',
   })
   @IsOptional()
-  @IsDateString({
-    format: 'YYYY-MM-DD',
-    length: 10,
-  })
+  @IsDateString()
   readonly endDate?: string;
 
   @ApiPropertyOptional({

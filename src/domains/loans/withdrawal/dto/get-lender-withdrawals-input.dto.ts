@@ -9,6 +9,20 @@ export class GetLenderWithdrawalsInput {
   readonly lenderUid: string;
 
   @ApiPropertyOptional({
+    example: '0',
+  })
+  @IsOptional()
+  @IsNumberString()
+  readonly startAmount?: string;
+
+  @ApiPropertyOptional({
+    example: '0',
+  })
+  @IsOptional()
+  @IsNumberString()
+  readonly endAmount?: string;
+
+  @ApiPropertyOptional({
     example: '1',
   })
   @IsOptional()

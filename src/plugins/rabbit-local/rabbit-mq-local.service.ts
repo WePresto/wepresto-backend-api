@@ -16,6 +16,7 @@ import { PublishLoanRequestOnReviewInput } from './dto/publish-loan-request-on-r
 import { PublishLoanRequestRejectedInput } from './dto/publish-loan-request-rejected-input.dto';
 import { PublishLoanRequestApprovedInput } from './dto/publish-loan-request-approved-input.dto';
 import { PublishSettleLatePaymentInterestInput } from './dto/publish-settle-late-payment-interest-input.dto';
+import { PublishWithdrawalCompletedInput } from './dto/publish-withdrawal-completed-input.dto';
 
 @Injectable()
 export class RabbitMQLocalService {
@@ -117,6 +118,24 @@ export class RabbitMQLocalService {
     Logger.log(
       `message published to exchange ${exchangeName} ` +
         `for routing key ${routingKey}`,
+      RabbitMQLocalService.name,
+    );
+  }
+
+  public async publishWithdrawalCompleted(
+    input: PublishWithdrawalCompletedInput,
+  ): Promise<void> {
+    const { exchangeName } = this;
+
+    const routingKey = `${exchangeName}.withdrawal_completed`;
+
+    await this.amqpConnection.publish(exchangeName, routingKey, {
+      ...input,
+    });
+
+    Logger.log(
+      `message published to exchange ${exchangeName} ` +
+        `for routing key ${routingKey} with input: ${JSON.stringify(input)}`,
       RabbitMQLocalService.name,
     );
   }

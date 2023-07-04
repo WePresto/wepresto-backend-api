@@ -15,8 +15,6 @@ import { Lender } from '../../users/lender/lender.entity';
 
 export enum WithdrawalStatus {
   REQUESTED = 'REQUESTED',
-  IN_PROGRESS = 'IN_PROGRESS',
-  ERROR = 'ERROR',
   COMPLETED = 'COMPLETED',
 }
 
@@ -79,6 +77,14 @@ export class Withdrawal extends BaseEntity {
     type: 'json',
   })
   accountInfo: any;
+
+  @Column({
+    name: 'proof_url',
+    type: 'text', // 'varchar
+    default: null,
+    nullable: true,
+  })
+  proofURL?: string;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;

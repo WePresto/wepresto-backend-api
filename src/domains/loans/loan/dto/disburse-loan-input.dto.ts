@@ -19,9 +19,6 @@ export class DisburseLoanInput {
     example: '2020-10-10',
   })
   @IsOptional()
-  @IsDateString({
-    format: 'YYYY-MM-DD',
-    length: 10,
-  })
+  @IsDateString()
   readonly disbursementDate?: string;
 }

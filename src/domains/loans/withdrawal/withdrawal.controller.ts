@@ -2,13 +2,18 @@ import {
   Body,
   Controller,
   Get,
+  Param,
+  ParseFilePipeBuilder,
+  Patch,
   Post,
   Query,
+  UploadedFile,
+  UseInterceptors,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { PermissionName, Public } from 'nestjs-basic-acl-sdk';
+import { PermissionName } from 'nestjs-basic-acl-sdk';
 
 import { WithdrawalService } from './services/withdrawal.service';
 
@@ -16,6 +21,9 @@ import { RequestWithdrawalInput } from './dto/request-withdrawal-input.dto';
 import { GetTotalWithdrawnInput } from './dto/get-total-withdrawn-input.dto';
 import { GetAvailableToWithdrawInput } from './dto/get-available-to-withdraw-input.dto';
 import { GetLenderWithdrawalsInput } from './dto/get-lender-withdrawals-input.dto';
+import { GetOneWithdrawalInput } from './dto/get-one-withdrawal-input.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { CompleteWithdrawalInput } from './dto/complete-withdrawal-input.dto';
 
 @ApiTags('withdrawals')
 @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
@@ -65,5 +73,41 @@ export class WithdrawalController {
     return this.withdrawalService.readService.getLenderWithdrawals(input);
   }
 
+  @ApiOperation({
+    summary: 'Get a withdrawal',
+  })
+  @PermissionName('withdrawals:getOne')
+  @Get(':uid')
+  getOne(@Param() input: GetOneWithdrawalInput) {
+    return this.withdrawalService.readService.getOne(input);
+  }
+
   /* READ RELATED ENDPOINTS */
+
+  /* UPDATE RELATED ENDPOINTS */
+
+  @ApiOperation({
+    summary: 'Create a payment',
+  })
+  @PermissionName('withdrawals:complete')
+  @UseInterceptors(FileInterceptor('file'))
+  @Patch('withdrawal-complete')
+  complete(
+    @Body() input: CompleteWithdrawalInput,
+    @UploadedFile(
+      new ParseFilePipeBuilder()
+        .addFileTypeValidator({
+          fileType: /^image\b/,
+        })
+        .addMaxSizeValidator({ maxSize: 15000000 })
+        .build({
+          fileIsRequired: false,
+        }),
+    )
+    file?: any,
+  ) {
+    return this.withdrawalService.updateService.complete({ ...input, file });
+  }
+
+  /* UPDATE RELATED ENDPOINTS */
 }

@@ -29,10 +29,7 @@ export class CreatePaymentMovementInput {
   @ApiProperty({
     example: '2020-01-01',
   })
-  @IsDateString({
-    format: 'YYYY-MM-DD',
-    length: 10,
-  })
+  @IsDateString()
   readonly paymentDate: string;
 
   @ApiProperty({

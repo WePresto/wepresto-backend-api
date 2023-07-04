@@ -126,7 +126,7 @@ export class UserController {
     summary: 'Change user password',
   })
   @PermissionName('users:changePassword')
-  @Patch('/password')
+  @Patch('password')
   changePassword(@Body() input: ChangeUserPasswordInput) {
     return this.userService.updateService.changePassword(input);
   }
