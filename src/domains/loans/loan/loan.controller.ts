@@ -156,6 +156,15 @@ export class LoanController {
   }
 
   @ApiOperation({
+    summary: 'Fund a loan',
+  })
+  @PermissionName('loans:fund')
+  @Patch('loan-fund')
+  fund(@Body() input: ApproveLoanInput) {
+    return this.loanService.updateService.fund(input);
+  }
+
+  @ApiOperation({
     summary: 'Disburse a loan',
   })
   @PermissionName('loans:disburse')

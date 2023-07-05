@@ -17,6 +17,7 @@ import { ReviewLoanInput } from '../dto/review-loan-input.dto';
 import { RejectLoanInput } from '../dto/reject-loan-input.dto';
 import { ApproveLoanInput } from '../dto/approve-loan-input.dto';
 import { DisburseLoanInput } from '../dto/disburse-loan-input.dto';
+import { FundLoanInput } from '../dto/fund-loan-input.dto';
 
 @Injectable()
 export class LoanUpdateService {
@@ -104,8 +105,8 @@ export class LoanUpdateService {
     return savedLoan;
   }
 
-  public async disburse(input: DisburseLoanInput) {
-    const { uid, comment, disbursementDate } = input;
+  public async fund(input: FundLoanInput) {
+    const { uid, comment } = input;
 
     // get loan
     const existingLoan = await this.readService.getOne({ uid });
@@ -114,6 +115,31 @@ export class LoanUpdateService {
     if (existingLoan.status !== LoanStatus.APPROVED) {
       throw new ConflictException(
         `loan is not in ${LoanStatus.APPROVED} status`,
+      );
+    }
+
+    // update loan
+    const preloadedLoan = await this.loanRepository.preload({
+      id: existingLoan.id,
+      status: LoanStatus.FUNDING,
+      comment,
+    });
+
+    const savedLoan = await this.loanRepository.save(preloadedLoan);
+
+    return savedLoan;
+  }
+
+  public async disburse(input: DisburseLoanInput) {
+    const { uid, comment, disbursementDate } = input;
+
+    // get loan
+    const existingLoan = await this.readService.getOne({ uid });
+
+    // check loan status
+    if (existingLoan.status !== LoanStatus.FUNDING) {
+      throw new ConflictException(
+        `loan is not in ${LoanStatus.FUNDING} status`,
       );
     }
 

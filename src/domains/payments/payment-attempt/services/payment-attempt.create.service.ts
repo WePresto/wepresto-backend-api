@@ -1,8 +1,4 @@
-import {
-  Inject,
-  Injectable,
-  PreconditionFailedException,
-} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
