@@ -139,7 +139,7 @@ export class UserController {
     summary: 'Delete user',
   })
   @PermissionName('users:delete')
-  @Delete('borrower')
+  @Delete()
   delete(@Query() input: GetOneUserInput) {
     return this.userService.deleteService.delete(input);
   }

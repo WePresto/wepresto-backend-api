@@ -25,8 +25,6 @@ export class UserCreateService {
   ) {}
 
   public async createLender(input: CreateLenderInput) {
-    console.log('input', input);
-
     const {
       documentType,
       documentNumber,

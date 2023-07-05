@@ -1,8 +1,8 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigType } from '@nestjs/config';
-import { Repository } from 'typeorm';
 import { BasicAclService } from 'nestjs-basic-acl-sdk';
+import { Repository } from 'typeorm';
 
 import appConfig from '../../../../config/app.config';
 
@@ -30,13 +30,32 @@ export class UserDeleteService {
         authUid: input.authUid,
       },
       checkIfExists: true,
-      loadRelationIds: false,
+      relations: ['lender', 'borrower'],
     });
 
     // check if the user exists
     if (!existingUser) {
       throw new NotFoundException(
         `the user with the authUid ${input.authUid} does not exist.`,
+      );
+    }
+
+    if (existingUser.lender) {
+      // delete the lender
+      await this.userRepository.query(
+        `DELETE FROM lender WHERE id = '${existingUser.lender.id}'`,
+      );
+    }
+
+    if (existingUser.borrower) {
+      // delete the loans
+      await this.userRepository.query(
+        `DELETE FROM loan WHERE borrower_id = '${existingUser.borrower.id}'`,
+      );
+
+      // delete the borrower
+      await this.userRepository.query(
+        `DELETE FROM borrower WHERE id = '${existingUser.borrower.id}'`,
       );
     }
 
