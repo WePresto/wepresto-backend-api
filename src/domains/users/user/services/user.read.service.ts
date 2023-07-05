@@ -69,6 +69,19 @@ export class UserReadService extends BaseService<User> {
 
     const [users, count] = await query.getManyAndCount();
 
+    const overdueUsers = await this.userRepository.query(
+      'select  u.id, ' +
+        'count(m.id) ' +
+        'from "user" u ' +
+        'inner join borrower b on u.id = b.user_id ' +
+        'inner join loan l on b.id = l.borrower_id ' +
+        'inner join movement m on l.id = m.loan_id ' +
+        'where m.paid = false ' +
+        `and m.type = 'OVERDUE_INTEREST' ` +
+        `and u.id in (${users.map((user) => user.id).join(', ')}) ` +
+        'group by u.id',
+    );
+
     return {
       count,
       users: users.map((user) => {
@@ -83,6 +96,9 @@ export class UserReadService extends BaseService<User> {
         return {
           ...user,
           type,
+          isOverdue: overdueUsers.some(
+            (overdueUser) => overdueUser.id === user.id,
+          ),
         };
       }),
     };
