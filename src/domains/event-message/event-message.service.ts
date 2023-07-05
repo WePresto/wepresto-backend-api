@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -60,5 +60,23 @@ export class EventMessageService {
     );
 
     return updatedEventMessage;
+  }
+
+  public async clearOldMessages(): Promise<void> {
+    // delete messages older than 30 days
+
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const result = await this.eventMessageModel.deleteMany({
+      createdAt: {
+        $lte: thirtyDaysAgo,
+      },
+    });
+
+    Logger.log(
+      `Deleted ${result.deletedCount} messages older than 30 days`,
+      EventMessageService.name,
+    );
   }
 }

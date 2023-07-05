@@ -8,6 +8,8 @@ import { EventMessageSchema } from './event-message.schema';
 
 import { EventMessageService } from './event-message.service';
 
+import { EventMessageController } from './event-message.controller';
+
 @Module({
   imports: [
     ConfigModule.forFeature(appConfig),
@@ -16,6 +18,7 @@ import { EventMessageService } from './event-message.service';
     ]),
   ],
   providers: [EventMessageService],
+  controllers: [EventMessageController],
   exports: [EventMessageService],
 })
 export class EventMessageModule {}
