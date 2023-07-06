@@ -158,7 +158,7 @@ export class Loan extends BaseEntity {
 
   @OneToMany(
     () => LoanParticipation,
-    (loanParticipation) => loanParticipation.lender,
+    (loanParticipation) => loanParticipation.loan,
   )
   loanParticipations: LoanParticipation[];
 
