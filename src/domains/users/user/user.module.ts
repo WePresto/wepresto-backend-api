@@ -15,6 +15,8 @@ import { UserService } from './services/user.service';
 
 import { UserController } from './user.controller';
 
+import { FirebaseAdminModule } from '../../../plugins/firebase-admin/firebase-admin.module';
+
 @Module({
   imports: [
     ConfigModule.forFeature(appConfig),
@@ -29,6 +31,7 @@ import { UserController } from './user.controller';
         };
       },
     }),
+    FirebaseAdminModule,
   ],
   providers: [
     UserReadService,

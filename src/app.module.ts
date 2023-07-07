@@ -16,11 +16,11 @@ import { RedisCacheModule } from './plugins/redis-cache/redis-cache.module';
 import { RabbitMQLocalModule } from './plugins/rabbit-local/rabbit-mq-local.module';
 import { GoogleStorageModule } from './plugins/google-storage/google-storage.module';
 import { WeprestoSlackModule } from './plugins/wepresto-slack/wepresto-slack.module';
+import { FirebaseAdminModule } from './plugins/firebase-admin/firebase-admin.module';
 
 import { UserModule } from './domains/users/user/user.module';
 import { BorrowerModule } from './domains/users/borrower/borrower.module';
 import { LenderModule } from './domains/users/lender/lender.module';
-
 import { LoanModule } from './domains/loans/loan/loan.module';
 import { MovementModule } from './domains/loans/movement/movement.module';
 import { LoanParticipationModule } from './domains/loans/loan-participation/loan-participation.module';
@@ -29,7 +29,6 @@ import { NotificationModule } from './domains/notification/notification.module';
 import { NequiModule } from './domains/payments/nequi/nequi.module';
 import { PaymentAttemptModule } from './domains/payments/payment-attempt/payment-attempt.module';
 import { WithdrawalModule } from './domains/loans/withdrawal/withdrawal.module';
-
 @Module({
   imports: [
     // config
@@ -71,6 +70,9 @@ import { WithdrawalModule } from './domains/loans/withdrawal/withdrawal.module';
 
     // Google storage
     GoogleStorageModule,
+
+    // Firebase admin
+    FirebaseAdminModule,
 
     // Cache
     /*

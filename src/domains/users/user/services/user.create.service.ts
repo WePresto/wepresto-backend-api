@@ -1,7 +1,7 @@
 import { ConflictException, Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Not, Repository } from 'typeorm';
 import { BasicAclService } from 'nestjs-basic-acl-sdk';
 
 import appConfig from '../../../../config/app.config';
@@ -10,8 +10,11 @@ import { User } from '../user.entity';
 
 import { UserReadService } from './user.read.service';
 
+import { FirebaseAdminService } from '../../../../plugins/firebase-admin/firebase-admin.service';
+
 import { CreateBorrowerInput } from '../dto/create-borrower-input.dto';
 import { CreateLenderInput } from '../dto/create-lender-input.dto';
+import { CreateGeneralPushNotificationInput } from '../dto/create-general-push-notification-input.dto';
 
 @Injectable()
 export class UserCreateService {
@@ -22,6 +25,7 @@ export class UserCreateService {
     private readonly userRepository: Repository<User>,
     private readonly readService: UserReadService,
     private readonly basicAclService: BasicAclService,
+    private readonly firebaseAdminService: FirebaseAdminService,
   ) {}
 
   public async createLender(input: CreateLenderInput) {
@@ -236,6 +240,37 @@ export class UserCreateService {
 
       await this.basicAclService.deleteUser({
         authUid: aclUser.authUid,
+      });
+    }
+  }
+
+  public async createGeneralPushNotification(
+    input: CreateGeneralPushNotificationInput,
+  ) {
+    const { title, body, link } = input;
+
+    const users = await this.userRepository.find({
+      where: {
+        fcmToken: Not(IsNull()),
+      },
+    });
+
+    for (const user of users) {
+      await this.firebaseAdminService.sendPushNotification({
+        title,
+        body,
+        fcmToken: user.fcmToken,
+        requireInteraction: true,
+        actions: [
+          {
+            title: 'Ver 👀',
+            action: 'open',
+          },
+        ],
+        data: {
+          open_link: link,
+          link,
+        },
       });
     }
   }

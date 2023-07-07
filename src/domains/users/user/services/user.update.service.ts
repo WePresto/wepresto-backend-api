@@ -20,6 +20,7 @@ import { ChangeUserPhoneInput } from '../dto/change-user-phone-input.dto';
 import { ChangeUserAddressInput } from '../dto/change-user-address-input.dto';
 import { SendUserResetPasswordEmail } from '../dto/send-user-reset-password-email-input.dto';
 import { ChangeUserPasswordInput } from '../dto/change-user-password-input.dto';
+import { ChangeUserFcmTokenInput } from '../dto/change-user-fcm-token.input.dto';
 
 @Injectable()
 export class UserUpdateService {
@@ -185,5 +186,27 @@ export class UserUpdateService {
     return {
       message: 'password was changed',
     };
+  }
+
+  public async changeFcmToken(input: ChangeUserFcmTokenInput) {
+    const { authUid, fcmToken } = input;
+
+    const existingUser = await this.readService.getOneByFields({
+      fields: {
+        authUid,
+      },
+      checkIfExists: true,
+      loadRelationIds: false,
+    });
+
+    // update the user in DB
+    const preloadedUser = await this.userRepository.preload({
+      id: existingUser.id,
+      fcmToken,
+    });
+
+    const updatedUser = await this.userRepository.save(preloadedUser);
+
+    return updatedUser;
   }
 }

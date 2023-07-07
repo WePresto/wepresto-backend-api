@@ -16,6 +16,7 @@ import { UserService } from './services/user.service';
 
 import { CreateLenderInput } from './dto/create-lender-input.dto';
 import { CreateBorrowerInput } from './dto/create-borrower-input.dto';
+import { CreateGeneralPushNotificationInput } from './dto/create-general-push-notification-input.dto';
 import { GetOneUserInput } from './dto/get-one-user-input.dto';
 import { ChangeUserEmailInput } from './dto/change-user-email-input.dto';
 import { ChangeUserPhoneInput } from './dto/change-user-phone-input.dto';
@@ -24,6 +25,7 @@ import { SendUserResetPasswordEmail } from './dto/send-user-reset-password-email
 import { ChangeUserPasswordInput } from './dto/change-user-password-input.dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { GetManyUsersInput } from './dto/get-many-users-input.dto';
+import { ChangeUserFcmTokenInput } from './dto/change-user-fcm-token.input.dto';
 
 @ApiTags('users')
 @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
@@ -49,6 +51,17 @@ export class UserController {
   @Post('borrower')
   createBorrower(@Body() input: CreateBorrowerInput) {
     return this.userService.createService.createBorrower(input);
+  }
+
+  @ApiOperation({
+    summary: 'Create a new general push notification',
+  })
+  @Public()
+  @Post('general-push-notification')
+  createGeneralPushNotification(
+    @Body() input: CreateGeneralPushNotificationInput,
+  ) {
+    return this.userService.createService.createGeneralPushNotification(input);
   }
 
   /* CREATE RELATED ENDPOINTS */
@@ -129,6 +142,15 @@ export class UserController {
   @Patch('password')
   changePassword(@Body() input: ChangeUserPasswordInput) {
     return this.userService.updateService.changePassword(input);
+  }
+
+  @ApiOperation({
+    summary: 'Change user fcm token',
+  })
+  @PermissionName('users:changeFcmToken')
+  @Patch('fcm-token')
+  changeFcmtoken(@Body() input: ChangeUserFcmTokenInput) {
+    return this.userService.updateService.changeFcmToken(input);
   }
 
   /* UPDATE RELATED ENDPOINTS */

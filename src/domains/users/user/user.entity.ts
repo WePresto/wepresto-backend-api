@@ -70,6 +70,9 @@ export class User extends BaseEntity {
   @Column({ type: 'varchar', length: 100, nullable: true })
   address?: string;
 
+  @Column({ name: 'fcm_token', type: 'varchar', length: 255, nullable: true })
+  fcmToken?: string;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 

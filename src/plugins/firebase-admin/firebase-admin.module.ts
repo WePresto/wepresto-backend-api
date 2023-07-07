@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
-import { GoogleStorageService } from './google-storage.service';
+import { FirebaseAdminService } from './firebase-admin.service';
 
 import appConfig from '../../config/app.config';
 
 @Module({
   imports: [ConfigModule.forFeature(appConfig)],
-  providers: [GoogleStorageService],
-  exports: [GoogleStorageService],
+  providers: [FirebaseAdminService],
+  exports: [FirebaseAdminService],
 })
-export class GoogleStorageModule {}
+export class FirebaseAdminModule {}
