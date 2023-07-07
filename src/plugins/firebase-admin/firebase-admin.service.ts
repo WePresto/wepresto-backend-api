@@ -1,6 +1,6 @@
 import * as firebaseAdmin from 'firebase-admin';
 
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { App } from 'firebase-admin/app';
 import { credential } from 'firebase-admin';
@@ -32,23 +32,33 @@ export class FirebaseAdminService {
   public async sendPushNotification(input: SendPushNotificationInput) {
     const { fcmToken, title, body, requireInteraction, actions, data } = input;
 
-    const messaging = getMessaging(this.admin);
+    try {
+      const messaging = getMessaging(this.admin);
 
-    const result = await messaging.send({
-      webpush: {
-        notification: {
-          title,
-          body,
-          icon: 'https://www.wepresto.com/images/icons/icon-72x72.png',
-          requireInteraction: requireInteraction ?? false,
-          actions,
-          data,
+      const messageId = await messaging.send({
+        webpush: {
+          notification: {
+            title,
+            body,
+            icon: 'https://www.wepresto.com/images/icons/icon-72x72.png',
+            requireInteraction: requireInteraction ?? false,
+            actions,
+            data,
+          },
         },
-      },
-      token: fcmToken,
-    });
+        token: fcmToken,
+      });
 
-    // eslint-disable-next-line no-console
-    console.log('result', result);
+      Logger.log(
+        `push notification successfully sent: ${messageId}`,
+        FirebaseAdminService.name,
+      );
+    } catch (error) {
+      Logger.error(
+        `error sending push notification: ${error.message}`,
+        error.stack,
+        FirebaseAdminService.name,
+      );
+    }
   }
 }
