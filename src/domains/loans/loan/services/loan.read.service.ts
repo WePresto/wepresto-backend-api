@@ -297,7 +297,7 @@ export class LoanReadService extends BaseService<Loan> {
             ...loan,
             fundedAmount: +fundedAmount,
             remainingAmount: amount - fundedAmount,
-            fundedPercentage: (+fundedAmount / amount) * 100,
+            fundedPercentage: +fundedAmount / amount,
           };
         }),
       ),

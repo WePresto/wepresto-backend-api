@@ -154,8 +154,8 @@ export class LoanCreateService {
       amount,
       term,
       referenceDate: currentDate.toISOString(),
-      annualInterestRate: InterstRate[term] * 100,
-      annualInterestOverdueRate: InterstRate[term] * 100 * 1.5,
+      annualInterestRate: InterstRate[term],
+      annualInterestOverdueRate: InterstRate[term] * 1.5,
       totalAmountToPay: loanInstallments.reduce(
         (acc, curr) => acc + curr.amount,
         0,
