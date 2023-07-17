@@ -1,11 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsNotEmpty,
-  IsString,
-  IsOptional,
-  IsNumberString,
-  IsUUID,
-} from 'class-validator';
+import { IsString, IsOptional, IsNumberString, IsUUID } from 'class-validator';
 
 export class GetBorrowerLoansInput {
   @ApiProperty({

@@ -29,7 +29,7 @@ async function bootstrap() {
   app.enableCors();
 
   await app.listen(PORT, () => {
-    Logger.log(`app listening at ${PORT} in ${ENV}`, 'main.ts');
+    Logger.log(`app listening at ${PORT} in ${ENV}.`, 'main.ts');
   });
 }
 

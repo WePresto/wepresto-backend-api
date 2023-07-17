@@ -7,7 +7,7 @@ import appConfig from '../../../config/app.config';
 
 import { EventMessageService } from '../../event-message/event-message.service';
 
-import { getReferenceDate, getMacAddress } from '../../../utils';
+import { getReferenceDate } from '../../../utils';
 
 import { SendPaymentPushNotificationInput } from './dto/send-payment-push-notification-input.dto';
 import { GetPaymentStatusInput } from './dto/get-payment-status-input.dto';
@@ -68,7 +68,7 @@ export class NequiService {
 
     const accessToken = await this.getAccessToken();
 
-    const macAddress = getMacAddress();
+    // const macAddress = getMacAddress();
 
     const observable = this.httpService.post(
       `${url}payments/v2/-services-paymentservice-unregisteredpayment`,

@@ -28,11 +28,13 @@ export class BaseService<Entity extends BaseEntity> {
       }
     }
 
+    /*
     const options = {
       where: { ...(fieldsToDoWhere as any) },
       relations,
       loadRelationIds: !relations?.length && loadRelationIds ? true : false,
     };
+    */
 
     // console.log('options', options);
 

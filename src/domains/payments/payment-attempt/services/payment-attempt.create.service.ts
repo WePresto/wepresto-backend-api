@@ -20,7 +20,7 @@ export class PaymentAttemptCreateService {
   ) {}
 
   public async create(input: any) {
-    const { loanUid, amount } = input;
+    const { loanUid } = input;
 
     // get loan
     const existingLoan = await this.loanService.readService.getOne({
