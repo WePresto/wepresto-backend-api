@@ -36,6 +36,14 @@ export class LoanParticipation extends BaseEntity {
   })
   amount: number;
 
+  @Column({
+    name: 'proof_url',
+    type: 'text', // 'varchar
+    default: null,
+    nullable: true,
+  })
+  proofURL?: string;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 

@@ -1,4 +1,4 @@
-import { IsNumber, IsUUID } from 'class-validator';
+import { IsNumberString, IsOptional, IsUUID } from 'class-validator';
 
 export class CreateLoanParticipationInput {
   @IsUUID()
@@ -7,6 +7,9 @@ export class CreateLoanParticipationInput {
   @IsUUID()
   readonly lenderUid: string;
 
-  @IsNumber()
+  @IsNumberString()
   readonly amount: number;
+
+  @IsOptional()
+  readonly file?: any;
 }

@@ -31,7 +31,7 @@ export class LoanParticipationCreateService {
   ) {}
 
   public async create(input: CreateLoanParticipationInput) {
-    const { loanUid, lenderUid, amount } = input;
+    const { loanUid, lenderUid, amount, file } = input;
 
     try {
       validateAmountByCountry('CO', amount);
@@ -43,6 +43,10 @@ export class LoanParticipationCreateService {
     const existingLoan = await this.loanService.readService.getOne({
       uid: loanUid,
     });
+
+    // const base64File = file ? file.buffer.toString('base64') : undefined;
+
+    // console.log('base64File', base64File);
 
     // check the participation amount vs the loan amount
     if (amount > existingLoan.amount) {
