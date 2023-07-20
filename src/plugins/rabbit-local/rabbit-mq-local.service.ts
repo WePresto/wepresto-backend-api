@@ -8,15 +8,9 @@ import { getRabbitMQExchangeName } from '../../utils';
 
 import { PublishLoanDisbursementInput } from './dto/publish-loan-disbursement-input.dto';
 import { PublishPaymentCreatedInput } from './dto/publish-payment-created-input.dto';
-import { PublishOverdueLoanInput } from './dto/publish-overdue-loan-input.dto';
-import { PublishSettleLoanInterestsInput } from './dto/publish-settle-loan-interests-input.dto';
-import { PublishLoanRequestCreatedInput } from './dto/publish-loan-request-created-input.dto';
-import { PublishReceivedPaymentInput } from './dto/publish-received-payment-input.dto';
-import { PublishLoanRequestOnReviewInput } from './dto/publish-loan-request-on-review-input.dto';
-import { PublishLoanRequestRejectedInput } from './dto/publish-loan-request-rejected-input.dto';
-import { PublishLoanRequestApprovedInput } from './dto/publish-loan-request-approved-input.dto';
 import { PublishSettleLatePaymentInterestInput } from './dto/publish-settle-late-payment-interest-input.dto';
 import { PublishWithdrawalCompletedInput } from './dto/publish-withdrawal-completed-input.dto';
+import { PublishLoanParticipationCreatedInput } from './dto/publish-loan-participation-created-input.dto';
 
 @Injectable()
 export class RabbitMQLocalService {
@@ -140,144 +134,12 @@ export class RabbitMQLocalService {
     );
   }
 
-  /*
-  ----OLD CODE----
-  */
-
-  public async publishOverdueLoan(
-    input: PublishOverdueLoanInput,
+  public async publishLoanParticipationCreated(
+    input: PublishLoanParticipationCreatedInput,
   ): Promise<void> {
     const { exchangeName } = this;
 
-    const { loanUid } = input;
-
-    const routingKey = `${exchangeName}.overdue_loan`;
-
-    await this.amqpConnection.publish(this.exchangeName, routingKey, {
-      loanUid,
-    });
-
-    Logger.log(
-      `message published to exchange ${exchangeName} ` +
-        `for routing key ${routingKey} with input: ${JSON.stringify(input)}`,
-      RabbitMQLocalService.name,
-    );
-  }
-
-  public async publishSettleLoanInterests(
-    input: PublishSettleLoanInterestsInput,
-  ): Promise<void> {
-    const { exchangeName } = this;
-
-    const { loanUid } = input;
-
-    const routingKey = `${exchangeName}.settle_loan_interests`;
-
-    await this.amqpConnection.publish(exchangeName, routingKey, {
-      loanUid,
-    });
-
-    Logger.log(
-      `message published to exchange ${exchangeName} ` +
-        `for routing key ${routingKey} with input: ${JSON.stringify(input)}`,
-      RabbitMQLocalService.name,
-    );
-  }
-
-  public async publishPaymentConfirmation(input: any): Promise<void> {
-    const { exchangeName } = this;
-
-    const routingKey = `${exchangeName}.payment_confirmation`;
-
-    await this.amqpConnection.publish(exchangeName, routingKey, {
-      ...input,
-    });
-
-    Logger.log(
-      `message published to exchange ${exchangeName} ` +
-        `for routing key ${routingKey} with input: ${JSON.stringify(input)}`,
-      RabbitMQLocalService.name,
-    );
-  }
-
-  public async publishLoanRequestCreated(
-    input: PublishLoanRequestCreatedInput,
-  ): Promise<void> {
-    const { exchangeName } = this;
-
-    const routingKey = `${exchangeName}.loan_request_created`;
-
-    await this.amqpConnection.publish(exchangeName, routingKey, {
-      ...input,
-    });
-
-    Logger.log(
-      `message published to exchange ${exchangeName} ` +
-        `for routing key ${routingKey} with input: ${JSON.stringify(input)}`,
-      RabbitMQLocalService.name,
-    );
-  }
-
-  public async publishReceivedPayment(
-    input: PublishReceivedPaymentInput,
-  ): Promise<void> {
-    const { exchangeName } = this;
-
-    const routingKey = `${exchangeName}.received_payment`;
-
-    await this.amqpConnection.publish(exchangeName, routingKey, {
-      ...input,
-    });
-
-    Logger.log(
-      `message published to exchange ${exchangeName} ` +
-        `for routing key ${routingKey} with input: ${JSON.stringify(input)}`,
-      RabbitMQLocalService.name,
-    );
-  }
-
-  public async publishLoanRequestOnReview(
-    input: PublishLoanRequestOnReviewInput,
-  ): Promise<void> {
-    const { exchangeName } = this;
-
-    const routingKey = `${exchangeName}.loan_request_on_review`;
-
-    await this.amqpConnection.publish(exchangeName, routingKey, {
-      ...input,
-    });
-
-    Logger.log(
-      `message published to exchange ${exchangeName} ` +
-        `for routing key ${routingKey} with input: ${JSON.stringify(input)}`,
-      RabbitMQLocalService.name,
-    );
-  }
-
-  public async publishLoanRequestRejected(
-    input: PublishLoanRequestRejectedInput,
-  ): Promise<void> {
-    const { exchangeName } = this;
-
-    const routingKey = `${exchangeName}.loan_request_rejected`;
-
-    await this.amqpConnection.publish(exchangeName, routingKey, {
-      ...input,
-    });
-
-    Logger.log(
-      `message published to exchange ${exchangeName} ` +
-        `for routing key ${routingKey} with input: ${JSON.stringify(input)}`,
-      RabbitMQLocalService.name,
-    );
-  }
-
-  public async publishLoanRequestApproved(
-    input: PublishLoanRequestApprovedInput,
-  ): Promise<void> {
-    const { exchangeName } = this;
-
-    const routingKey = `${exchangeName}.loan_request_approved`;
+    const routingKey = `${exchangeName}.loan_participation_created`;
 
     await this.amqpConnection.publish(exchangeName, routingKey, {
       ...input,

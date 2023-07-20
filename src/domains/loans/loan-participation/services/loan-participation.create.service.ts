@@ -14,6 +14,7 @@ import { LoanParticipation } from '../loan-participation.entity';
 
 import { validateAmountByCountry } from '../../../../utils/validate-amount-by-country';
 
+import { RabbitMQLocalService } from '../../../../plugins/rabbit-local/rabbit-mq-local.service';
 import { LoanService } from '../../loan/services/loan.service';
 import { LenderService } from '../../../users/lender/services/lender.service';
 
@@ -26,6 +27,7 @@ export class LoanParticipationCreateService {
     private readonly appConfiguration: ConfigType<typeof appConfig>,
     @InjectRepository(LoanParticipation)
     private readonly loanParticipationRepository: Repository<LoanParticipation>,
+    private readonly rabbitMQLocalService: RabbitMQLocalService,
     private readonly loanService: LoanService,
     private readonly lenderService: LenderService,
   ) {}
@@ -44,9 +46,7 @@ export class LoanParticipationCreateService {
       uid: loanUid,
     });
 
-    // const base64File = file ? file.buffer.toString('base64') : undefined;
-
-    // console.log('base64File', base64File);
+    const base64File = file ? file.buffer.toString('base64') : undefined;
 
     // check the participation amount vs the loan amount
     if (amount > existingLoan.amount) {
@@ -105,6 +105,12 @@ export class LoanParticipationCreateService {
     const savedLoanParticipation = await this.loanParticipationRepository.save(
       createLoanParticipation,
     );
+
+    // publish the withdrawal completed event
+    await this.rabbitMQLocalService.publishLoanParticipationCreated({
+      loanParticipationUid: savedLoanParticipation.uid,
+      base64File: base64File,
+    });
 
     return savedLoanParticipation;
   }
