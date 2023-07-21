@@ -185,10 +185,12 @@ export class LoanConsumerService {
         .where('loan.status = :status', { status: LoanStatus.DISBURSED })
         .getMany();
 
-      // just getting the loans that doesn't have any movement with the type OVERDUE_INTEREST
+      // just getting the loans that doesn't have any paid movement with the type OVERDUE_INTEREST
       const filteredLoans = loans.filter((loan) => {
         const overdueInterestMovements = loan.movements.find((movement) => {
-          return movement.type === MovementType.OVERDUE_INTEREST;
+          return (
+            movement.type === MovementType.OVERDUE_INTEREST && !movement.paid
+          );
         });
 
         return !overdueInterestMovements;
