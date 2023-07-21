@@ -38,7 +38,6 @@ export class ApplyLoanInput {
   @ApiPropertyOptional({
     example: '5f9f1c1b0e1c0c0c0c0c0c0c',
   })
-  @IsOptional()
   @IsString()
-  readonly alias?: string;
+  readonly alias: string;
 }
