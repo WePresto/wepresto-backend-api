@@ -92,7 +92,7 @@ export class MailingService {
         ? subject
         : `${this.appConfiguration.environment} | ${subject}`;
 
-    const sendResult = await sgMail.send({
+    await sgMail.send({
       to,
       from,
       subject: subjectToUse,
@@ -101,6 +101,6 @@ export class MailingService {
       attachments,
     });
 
-    Logger.log(`${JSON.stringify(sendResult)}`);
+    Logger.log('sendEmail: email sent successfully', MailingService.name);
   }
 }
