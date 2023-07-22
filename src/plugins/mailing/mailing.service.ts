@@ -1,10 +1,9 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const Mailgun = require('mailgun.js');
+const sgMail = require('@sendgrid/mail');
 
 import * as fs from 'fs';
 import * as path from 'path';
 import * as mjml2html from 'mjml';
-import * as formData from 'form-data';
 import hbs from 'handlebars';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
@@ -24,16 +23,10 @@ export class MailingService {
     private readonly appConfiguration: ConfigType<typeof appConfig>,
   ) {
     const {
-      mailgun: { privateKey, publicKey },
+      sendgrid: { apiKey },
     } = this.appConfiguration;
 
-    const mailgun = new Mailgun(formData);
-
-    this.mg = mailgun.client({
-      username: 'api',
-      key: privateKey,
-      public_key: publicKey,
-    });
+    sgMail.setApiKey(apiKey);
   }
 
   private getEmailTemplateString(input: GetEmailTemplateStringInput): string {
@@ -79,10 +72,10 @@ export class MailingService {
   }
 
   public async sendEmail(input: SendEmailInput): Promise<void> {
-    const { to, subject, templateName, parameters, text, attachment } = input;
+    const { to, subject, templateName, parameters, text, attachments } = input;
 
     const {
-      mailgun: { from, domain },
+      sendgrid: { from },
     } = this.appConfiguration;
 
     const html = this.generateHTML({
@@ -99,15 +92,15 @@ export class MailingService {
         ? subject
         : `${this.appConfiguration.environment} | ${subject}`;
 
-    const msg = await this.mg.messages.create(domain, {
-      from,
+    const sendResult = await sgMail.send({
       to,
+      from,
       subject: subjectToUse,
       text,
       html,
-      attachment,
+      attachments,
     });
 
-    Logger.log(`${JSON.stringify(msg)}`);
+    Logger.log(`${JSON.stringify(sendResult)}`);
   }
 }

@@ -49,6 +49,10 @@ export default registerAs('config', () => {
       privateKey: process.env.MAILGUN_PRIVATE_KEY,
       publicKey: process.env.MAILGUN_PUBLIC_KEY,
     },
+    sendgrid: {
+      apiKey: process.env.SENDGRID_API_KEY,
+      from: process.env.SENDGRID_EMAIL_FROM,
+    },
     mongoDB: {
       uri: process.env.MONGODB_URI,
     },

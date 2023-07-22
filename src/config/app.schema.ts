@@ -38,12 +38,6 @@ export default Joi.object({
   //EPAYCO_PRIVATE_KEY: Joi.required(),
   //EPAYCO_TESTING: Joi.required(),
 
-  // MAILGUN
-  MAILGUN_DOMAIN: Joi.required(),
-  MAILGUN_EMAIL_FROM: Joi.required(),
-  MAILGUN_PRIVATE_KEY: Joi.required(),
-  MAILGUN_PUBLIC_KEY: Joi.required(),
-
   // MONGODB
   MONGODB_URI: Joi.required(),
 
@@ -68,4 +62,8 @@ export default Joi.object({
   GCP_TOKEN_URI: Joi.required(),
   GCP_AUTH_PROVIDER_X509_CERT_URL: Joi.required(),
   GCP_CLIENT_X509_CERT_URL: Joi.required(),
+
+  // SENDGRID
+  SENDGRID_API_KEY: Joi.required(),
+  SENDGRID_EMAIL_FROM: Joi.required(),
 });

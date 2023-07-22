@@ -9,5 +9,5 @@ export class SendEmailInput {
 
   readonly text?: string;
 
-  readonly attachment?;
+  readonly attachments?: any[];
 }
