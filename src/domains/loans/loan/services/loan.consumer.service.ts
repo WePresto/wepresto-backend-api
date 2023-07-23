@@ -303,7 +303,7 @@ export class LoanConsumerService {
           );
         });
 
-        return !overdueInterestMovement;
+        return overdueInterestMovement;
       });
 
       // iterate over the loans
