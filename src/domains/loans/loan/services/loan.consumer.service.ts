@@ -19,6 +19,7 @@ import {
   getNumberOfDays,
   getRabbitMQExchangeName,
   formatDate,
+  getReferenceDate,
 } from '../../../../utils';
 
 const RABBITMQ_EXCHANGE = getRabbitMQExchangeName();
@@ -302,7 +303,7 @@ export class LoanConsumerService {
           );
         });
 
-        return overdueInterestMovement;
+        return !overdueInterestMovement;
       });
 
       // iterate over the loans
@@ -322,34 +323,42 @@ export class LoanConsumerService {
 
         const numberOfDays = getNumberOfDays(dueDate, currentDate);
 
-        switch (numberOfDays) {
-          case 1:
-            await this.notificationService.sendLatePaymentNotificationA({
-              email: loan.borrower.user.email,
-              firstName: loan.borrower.user.fullName.split(' ')[0],
-              link: `${selftWebUrl}/borrower/loans`,
-            });
-            break;
-          case 3:
-            await this.notificationService.sendLatePaymentNotificationB({
-              email: loan.borrower.user.email,
-              firstName: loan.borrower.user.fullName.split(' ')[0],
-              link: `${selftWebUrl}/borrower/loans`,
-            });
-            break;
-          case 5:
-            await this.notificationService.sendLatePaymentNotificationC({
-              email: loan.borrower.user.email,
-              firstName: loan.borrower.user.fullName.split(' ')[0],
-              link: `${selftWebUrl}/borrower/loans`,
-            });
-            break;
-          default:
-            Logger.log(
-              `number of days in due date: ${numberOfDays}, loan: ${loan.uid} has no late payment notification to send`,
-              LoanConsumerService.name,
-            );
-            break;
+        if (numberOfDays === 1) {
+          await this.notificationService.sendLatePaymentNotificationA({
+            email: loan.borrower.user.email,
+            firstName: loan.borrower.user.fullName.split(' ')[0],
+            link: `${selftWebUrl}/borrower/loans`,
+          });
+        } else if (numberOfDays === 3) {
+          await this.notificationService.sendLatePaymentNotificationB({
+            email: loan.borrower.user.email,
+            firstName: loan.borrower.user.fullName.split(' ')[0],
+            link: `${selftWebUrl}/borrower/loans`,
+          });
+        } else if (numberOfDays === 5) {
+          await this.notificationService.sendLatePaymentNotificationC({
+            email: loan.borrower.user.email,
+            firstName: loan.borrower.user.fullName.split(' ')[0],
+            link: `${selftWebUrl}/borrower/loans`,
+          });
+        } else if (numberOfDays > 5) {
+          await this.weprestoSlackService.sendStartCollectionManagement({
+            loan: {
+              ...loan,
+              dueDate: formatDate(dueDate),
+              minimumPaymentAmount: (
+                await this.readService.getMinimumPaymentAmount({
+                  uid: loan.uid,
+                  referenceDate: getReferenceDate(new Date()),
+                })
+              ).totalAmount,
+            },
+          });
+        } else {
+          Logger.log(
+            `number of days in due date: ${numberOfDays}, loan: ${loan.uid} has no late payment notification to send`,
+            LoanConsumerService.name,
+          );
         }
       }
     } catch (error) {

@@ -8,6 +8,7 @@ import { formatCurrency, formatDateTime } from '../../utils';
 
 import { SendNewLoanApplicationMessageInput } from './dto/send-new-loan-application-input.dto';
 import { SendNewWithdrawalRequestMessageInput } from './dto/send-new-withdrawal-request-message-input.dto';
+import { SendStartCollectionManagementInput } from './dto/send-start-collection-management-input.dto';
 
 @Injectable()
 export class WeprestoSlackService {
@@ -91,5 +92,36 @@ export class WeprestoSlackService {
       `new withdrawal request message sent to slack`,
       WeprestoSlackService.name,
     );
+  }
+
+  public async sendStartCollectionManagement(
+    input: SendStartCollectionManagementInput,
+  ) {
+    const { loan } = input;
+
+    Logger.log(
+      `sending start collection management message to slack`,
+      WeprestoSlackService.name,
+    );
+
+    const message =
+      '<!here> *Start Collection Management* :moneybag: \n' +
+      `Hello team! :wave::skin-tone-2: We need to start the collection management process for the loan: ${loan.uid}. ` +
+      `Please review the loan and take any necessary actions. \n\n` +
+      `Some details: \n` +
+      `- Borrower: *${loan?.borrower?.user?.fullName}*\n` +
+      `- Phone number: *${loan?.borrower?.user?.phoneNumber}*\n` +
+      `- Loan: ${loan.uid}\n` +
+      `- Due date: ${loan.dueDate}\n` +
+      `- Amount: *${formatCurrency(loan.amount, 'COP')}*\n` +
+      // eslint-disable-next-line prettier/prettier
+      `- Minimum payment amount: *${formatCurrency(loan.minimumPaymentAmount, 'COP')}*\n\n` +
+      `<https://admin.wepresto.com/loans/${loan.uid}|View Loan> :eyes:`;
+
+    await this.webClient.chat.postMessage({
+      channel: '#notifications',
+      mrkdwn: true,
+      text: message,
+    });
   }
 }
