@@ -59,6 +59,15 @@ export class LoanController {
     return this.loanService.createService.sendEarlyPaymentNotifications();
   }
 
+  @ApiOperation({
+    summary: 'Send late payment notifications',
+  })
+  @PermissionName('loans:sendLatePaymentNotifications')
+  @Post('late-payment-notifications')
+  sendLatePaymentNotifications() {
+    return this.loanService.createService.sendLatePaymentNotifications();
+  }
+
   /* CREATE RELATED ENDPOINTS */
 
   /* READ RELATED ENDPOINTS */

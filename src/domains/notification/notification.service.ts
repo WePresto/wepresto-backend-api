@@ -8,6 +8,9 @@ import { MailingService } from '../../plugins/mailing/mailing.service';
 import { SendEarlyPaymentNotificationAInput } from './dto/send-early-payment-notification-a-input.dto';
 import { SendEarlyPaymentNotificationBInput } from './dto/send-early-payment-notification-b-input.dto';
 import { SendEarlyPaymentNotificationCInput } from './dto/send-early-payment-notification-c-input.dto';
+import { SendLatePaymentNotificationAInput } from './dto/send-late-payment-notification-a-input.dto';
+import { SendLatePaymentNotificationBInput } from './dto/send-late-payment-notification-b-input.dto';
+import { SendLatePaymentNotificationCInput } from './dto/send-late-payment-notification-c-input.dto';
 
 @Injectable()
 export class NotificationService {
@@ -24,7 +27,7 @@ export class NotificationService {
 
     await this.mailingService.sendEmail({
       templateName: 'BORROWER_EARLY_PAYMENT_NOTIFICATION_A',
-      subject: 'Notificación de pronto pago',
+      subject: 'WePresto - Notificación de pronto pago',
       to: email,
       parameters: {
         firstName,
@@ -41,7 +44,7 @@ export class NotificationService {
 
     await this.mailingService.sendEmail({
       templateName: 'BORROWER_EARLY_PAYMENT_NOTIFICATION_B',
-      subject: 'Notificación de pronto pago',
+      subject: 'WePresto - Notificación de pronto pago',
       to: email,
       parameters: {
         firstName,
@@ -58,11 +61,59 @@ export class NotificationService {
 
     await this.mailingService.sendEmail({
       templateName: 'BORROWER_EARLY_PAYMENT_NOTIFICATION_C',
-      subject: 'Notificación de pronto pago',
+      subject: 'WePreso - Notificación de pronto pago',
       to: email,
       parameters: {
         firstName,
         alias,
+        link,
+      },
+    });
+  }
+
+  public async sendLatePaymentNotificationA(
+    input: SendLatePaymentNotificationAInput,
+  ) {
+    const { email, firstName, link } = input;
+
+    await this.mailingService.sendEmail({
+      templateName: 'BORROWER_LATE_PAYMENT_NOTIFICATION_A',
+      subject: 'WePresto - Notificación por impago',
+      to: email,
+      parameters: {
+        firstName,
+        link,
+      },
+    });
+  }
+
+  public async sendLatePaymentNotificationB(
+    input: SendLatePaymentNotificationBInput,
+  ) {
+    const { email, firstName, link } = input;
+
+    await this.mailingService.sendEmail({
+      templateName: 'BORROWER_LATE_PAYMENT_NOTIFICATION_B',
+      subject: 'WePresto - Notificación por impago',
+      to: email,
+      parameters: {
+        firstName,
+        link,
+      },
+    });
+  }
+
+  public async sendLatePaymentNotificationC(
+    input: SendLatePaymentNotificationCInput,
+  ): Promise<void> {
+    const { email, firstName, link } = input;
+
+    await this.mailingService.sendEmail({
+      templateName: 'BORROWER_LATE_PAYMENT_NOTIFICATION_C',
+      subject: 'WePresto - Notificación por impago',
+      to: email,
+      parameters: {
+        firstName,
         link,
       },
     });

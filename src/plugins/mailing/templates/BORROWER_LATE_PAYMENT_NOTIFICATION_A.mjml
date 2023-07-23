@@ -1,0 +1,88 @@
+<mjml>
+
+  <mj-head>
+    <mj-style inline="inline">
+      body {
+        padding: 20px;
+      }
+
+      a {
+        color: #1C69D3
+      }
+    </mj-style>
+  </mj-head>
+
+  <mj-body background-color="#D8D8D8">
+
+    <mj-section background-color="#FFF">
+      <mj-column width="100%">
+        <mj-image align="center" width="200px" src="https://storage.googleapis.com/wepresto_bucket/public/logo.png">
+        </mj-image>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#FFF" padding-top="0">
+      <mj-column>
+        <mj-text>
+          Hola {{firstName}}! 👋🏻
+        </mj-text>
+        <mj-text>
+          Esperamos que estés teniendo un buen día. Lamentablemente, hemos notado que tu préstamo entró en mora hoy. 😔
+        </mj-text>
+        <mj-text>
+          No te preocupes, entendemos que a veces se nos olvidan las cosas. 
+          Te animamos a realizar el pago lo antes posible para ponerlo al día y evitar cargos adicionales.
+          Si necesitas ayuda o tienes alguna pregunta, no dudes en contactarnos. ¡Trabajamos por tí! 💪
+        </mj-text>
+        <mj-text>
+          Realiza el pago haciendo click en el siguiente botón. 🤑
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#FFF" padding-top="0">
+      <mj-column>
+        <mj-button background-color="#388D94" color="white" href="{{link}}">
+          Pagar
+        </mj-button>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#FFF" padding-top="0">
+      <mj-column>
+        <mj-text>
+          Si ya pagaste, por favor ignora este correo.😅
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#FFF" padding-top="0" padding-bottom="0">
+      <mj-column>
+        <mj-text line-height="5px">
+          <p>Saludos,</p>
+          <p>Con ❤️ WePresto team!</p>
+          <br />
+          <p><a href="mailto:soporte@wepresto.com">soporte@wepresto.com</a></p>
+          <a href="tel:+573134086868">+57 313 408 6868</a></p>
+        </mj-text>
+      </mj-column>
+    </mj-section>
+    <mj-section background-color="#FFF" padding-top="0">
+      <mj-column vertical-align="middle">
+        <mj-social icon-size="30px" mode="horizontal" inner-padding="15px">
+          <mj-social-element src="https://storage.googleapis.com/comodin-cristiandi-bucket/public/instagram.jpg" href="https://www.instagram.com/wepresto"></mj-social-element>
+          <mj-social-element src="https://storage.googleapis.com/comodin-cristiandi-bucket/public/twitter.jpg" href="https://twitter.com/wepresto"></mj-social-element>
+          <mj-social-element src="https://storage.googleapis.com/comodin-cristiandi-bucket/public/facebook.jpg" href="https://www.facebook.com/wepresto"></mj-social-element>
+          <!--<mj-social-element src="https://storage.googleapis.com/comodin-cristiandi-bucket/public/linkedin.jpg" href="https://www.linkedin.com/company/wepresto"></mj-social-element> -->
+        </mj-social>
+      </mj-column>
+      <mj-column vertical-align="middle">
+        <mj-button font-weight="bold" font-size="16px" width="180px" background-color="#388D94" color="#FFF" href="https://www.wepresto.com/">
+          WePresto
+        </mj-button>
+      </mj-column>
+    </mj-section>
+
+  </mj-body>
+
+</mjml>

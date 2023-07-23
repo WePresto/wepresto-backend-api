@@ -169,6 +169,10 @@ export class LoanConsumerService {
     queue: `${RABBITMQ_EXCHANGE}.${LoanConsumerService.name}.send_early_payment_notifications`,
   })
   public async sendEarlyPaymentNotificationsConsumer(input: any) {
+    const {
+      app: { selftWebUrl },
+    } = this.appConfiguration;
+
     const eventMessage = await this.eventMessageService.create({
       routingKey: `${RABBITMQ_EXCHANGE}.send_early_payment_notifications`,
       functionName: 'sendEarlyPaymentNotificationsConsumer',
@@ -185,20 +189,20 @@ export class LoanConsumerService {
         .where('loan.status = :status', { status: LoanStatus.DISBURSED })
         .getMany();
 
-      // just getting the loans that doesn't have any paid movement with the type OVERDUE_INTEREST
+      // filter the loans that are up to date
       const filteredLoans = loans.filter((loan) => {
-        const overdueInterestMovements = loan.movements.find((movement) => {
+        const overdueInterestMovement = loan.movements.find((movement) => {
           return (
             movement.type === MovementType.OVERDUE_INTEREST && !movement.paid
           );
         });
 
-        return !overdueInterestMovements;
+        return !overdueInterestMovement;
       });
 
       // iterate over the loans
       for (const loan of filteredLoans) {
-        // the the first movement with the type LOAN_INSTALLMENT is not paid
+        // get the first movement with the type LOAN_INSTALLMENT is not paid
         const firstUnpaidLoanInstallment = loan.movements.find((movement) => {
           return (
             movement.type === MovementType.LOAN_INSTALLMENT && !movement.paid
@@ -213,17 +217,13 @@ export class LoanConsumerService {
 
         const numberOfDays = getNumberOfDays(currentDate, dueDate);
 
-        const {
-          app: { selftWebUrl },
-        } = this.appConfiguration;
-
         switch (numberOfDays) {
           case 0:
             await this.notificationService.sendEarlyPaymentNotificationC({
               email: loan.borrower.user.email,
               firstName: loan.borrower.user.fullName.split(' ')[0],
               alias: loan.alias || '' + loan.id,
-              link: `${selftWebUrl}/home`,
+              link: `${selftWebUrl}/borrower/loans`,
             });
             break;
           case 3:
@@ -231,7 +231,7 @@ export class LoanConsumerService {
               email: loan.borrower.user.email,
               firstName: loan.borrower.user.fullName.split(' ')[0],
               alias: loan.alias || '' + loan.id,
-              link: `${selftWebUrl}/home/loans`,
+              link: `${selftWebUrl}/borrower/loans`,
             });
             break;
           case 10:
@@ -244,7 +244,109 @@ export class LoanConsumerService {
             break;
           default:
             Logger.log(
-              `loan ${loan.uid} has no early payment notification to send`,
+              `number of days to due date: ${numberOfDays}, loan: ${loan.uid} has no early payment notification to send`,
+              LoanConsumerService.name,
+            );
+            break;
+        }
+      }
+    } catch (error) {
+      console.error(error);
+
+      const message = error.message;
+
+      await this.eventMessageService.setError({
+        id: eventMessage._id,
+        error,
+      });
+
+      return {
+        status: error.status || 500,
+        message,
+        data: {},
+      };
+    }
+  }
+
+  @RabbitRPC({
+    exchange: RABBITMQ_EXCHANGE,
+    routingKey: `${RABBITMQ_EXCHANGE}.send_late_payment_notifications`,
+    queue: `${RABBITMQ_EXCHANGE}.${LoanConsumerService.name}.send_late_payment_notifications`,
+  })
+  public async sendLatePaymentNotificationsConsumer(input: any) {
+    const {
+      app: { selftWebUrl },
+    } = this.appConfiguration;
+
+    const eventMessage = await this.eventMessageService.create({
+      routingKey: `${RABBITMQ_EXCHANGE}.send_late_payment_notifications`,
+      functionName: 'sendLatePaymentNotificationsConsumer',
+      data: input || {},
+    });
+
+    try {
+      // get the loans that are in overdue
+      const loans = await this.loanRepository
+        .createQueryBuilder('loan')
+        .innerJoinAndSelect('loan.borrower', 'borrower')
+        .innerJoinAndSelect('borrower.user', 'user')
+        .innerJoinAndSelect('loan.movements', 'movement')
+        .where('loan.status = :status', { status: LoanStatus.DISBURSED })
+        .getMany();
+
+      // filter the loans that are in overdue
+      const filteredLoans = loans.filter((loan) => {
+        const overdueInterestMovement = loan.movements.find((movement) => {
+          return (
+            movement.type === MovementType.OVERDUE_INTEREST && !movement.paid
+          );
+        });
+
+        return overdueInterestMovement;
+      });
+
+      // iterate over the loans
+      for (const loan of filteredLoans) {
+        // get the first loan installment that is overdue
+        const firstUnpaidLoanInstallment = loan.movements.find((movement) => {
+          return (
+            movement.type === MovementType.LOAN_INSTALLMENT && !movement.paid
+          );
+        });
+
+        // get the difference in days between the due date and the current date
+        const { dueDate } = firstUnpaidLoanInstallment;
+
+        const currentDate = new Date();
+        currentDate.setHours(0, 0, 0, 0);
+
+        const numberOfDays = getNumberOfDays(dueDate, currentDate);
+
+        switch (numberOfDays) {
+          case 1:
+            await this.notificationService.sendLatePaymentNotificationA({
+              email: loan.borrower.user.email,
+              firstName: loan.borrower.user.fullName.split(' ')[0],
+              link: `${selftWebUrl}/borrower/loans`,
+            });
+            break;
+          case 3:
+            await this.notificationService.sendLatePaymentNotificationB({
+              email: loan.borrower.user.email,
+              firstName: loan.borrower.user.fullName.split(' ')[0],
+              link: `${selftWebUrl}/borrower/loans`,
+            });
+            break;
+          case 5:
+            await this.notificationService.sendLatePaymentNotificationC({
+              email: loan.borrower.user.email,
+              firstName: loan.borrower.user.fullName.split(' ')[0],
+              link: `${selftWebUrl}/borrower/loans`,
+            });
+            break;
+          default:
+            Logger.log(
+              `number of days in due date: ${numberOfDays}, loan: ${loan.uid} has no late payment notification to send`,
               LoanConsumerService.name,
             );
             break;

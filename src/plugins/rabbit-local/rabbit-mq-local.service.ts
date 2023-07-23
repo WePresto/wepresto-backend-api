@@ -151,4 +151,18 @@ export class RabbitMQLocalService {
       RabbitMQLocalService.name,
     );
   }
+
+  public async publishSendLatePaymentNotifications() {
+    const { exchangeName } = this;
+
+    const routingKey = `${exchangeName}.send_late_payment_notifications`;
+
+    await this.amqpConnection.publish(exchangeName, routingKey, {});
+
+    Logger.log(
+      `message published to exchange ${exchangeName} ` +
+        `for routing key ${routingKey}`,
+      RabbitMQLocalService.name,
+    );
+  }
 }

@@ -169,4 +169,10 @@ export class LoanCreateService {
 
     return { message: 'ok' };
   }
+
+  public async sendLatePaymentNotifications() {
+    await this.rabbitMQLocalService.publishSendLatePaymentNotifications();
+
+    return { message: 'ok' };
+  }
 }
