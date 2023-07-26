@@ -279,6 +279,8 @@ export class LoanConsumerService {
       app: { selftWebUrl },
     } = this.appConfiguration;
 
+    Logger.log('sendLatePaymentNotifications: started');
+
     const eventMessage = await this.eventMessageService.create({
       routingKey: `${RABBITMQ_EXCHANGE}.send_late_payment_notifications`,
       functionName: 'sendLatePaymentNotificationsConsumer',
@@ -324,24 +326,43 @@ export class LoanConsumerService {
         const numberOfDays = getNumberOfDays(dueDate, currentDate);
 
         if (numberOfDays === 1) {
+          Logger.log(
+            `sendLatePaymentNotifications: sending notification A to loan ${loan.uid}`,
+            LoanConsumerService.name,
+          );
           await this.notificationService.sendLatePaymentNotificationA({
             email: loan.borrower.user.email,
             firstName: loan.borrower.user.fullName.split(' ')[0],
             link: `${selftWebUrl}/borrower/loans`,
           });
         } else if (numberOfDays === 3) {
+          Logger.log(
+            `sendLatePaymentNotifications: sending notification B to loan ${loan.uid}`,
+            LoanConsumerService.name,
+          );
+
           await this.notificationService.sendLatePaymentNotificationB({
             email: loan.borrower.user.email,
             firstName: loan.borrower.user.fullName.split(' ')[0],
             link: `${selftWebUrl}/borrower/loans`,
           });
         } else if (numberOfDays === 5) {
+          Logger.log(
+            `sendLatePaymentNotifications: sending notification C to loan ${loan.uid}`,
+            LoanConsumerService.name,
+          );
+
           await this.notificationService.sendLatePaymentNotificationC({
             email: loan.borrower.user.email,
             firstName: loan.borrower.user.fullName.split(' ')[0],
             link: `${selftWebUrl}/borrower/loans`,
           });
         } else if (numberOfDays > 5) {
+          Logger.log(
+            `sendLatePaymentNotifications: sending slack message to start collection management to loan ${loan.uid}`,
+            LoanConsumerService.name,
+          );
+
           await this.weprestoSlackService.sendStartCollectionManagement({
             loan: {
               ...loan,
@@ -356,7 +377,7 @@ export class LoanConsumerService {
           });
         } else {
           Logger.log(
-            `number of days in due date: ${numberOfDays}, loan: ${loan.uid} has no late payment notification to send`,
+            `sendLatePaymentNotifications: number of days in due date: ${numberOfDays}, loan: ${loan.uid} has no late payment notification to send`,
             LoanConsumerService.name,
           );
         }
@@ -376,6 +397,8 @@ export class LoanConsumerService {
         message,
         data: {},
       };
+    } finally {
+      Logger.log(`sendLatePaymentNotifications: completed`);
     }
   }
 }
