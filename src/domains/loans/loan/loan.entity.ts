@@ -36,10 +36,10 @@ export enum LoanTerm {
 }
 
 export const InterstRate = {
-  [LoanTerm.SIX]: 0.4,
-  [LoanTerm.TWELVE]: 0.41,
-  [LoanTerm.EIGHTEEN]: 0.42,
-  [LoanTerm.TWENTY_FOUR]: 0.43,
+  [LoanTerm.SIX]: 0.25,
+  [LoanTerm.TWELVE]: 0.3,
+  [LoanTerm.EIGHTEEN]: 0.35,
+  [LoanTerm.TWENTY_FOUR]: 0.4,
   [LoanTerm.THIRTY_SIX]: 0.44,
 };
 @Entity({ name: 'loan' })
