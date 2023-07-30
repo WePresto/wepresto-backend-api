@@ -12,6 +12,7 @@ import { EventMessageModule } from '../../event-message/event-message.module';
 import { NotificationModule } from '../../notification/notification.module';
 import { FrenchAmortizationSystemModule } from '../french-amortization-system/french-amortization-system.module';
 import { BorrowerModule } from '../../users/borrower/borrower.module';
+import { LenderModule } from '../../users/lender/lender.module';
 
 import { LoanConsumerService } from './services/loan.consumer.service';
 import { LoanCreateService } from './services/loan.create.service';
@@ -31,6 +32,7 @@ import { LoanController } from './loan.controller';
     NotificationModule,
     FrenchAmortizationSystemModule,
     BorrowerModule,
+    LenderModule,
   ],
   providers: [
     LoanConsumerService,

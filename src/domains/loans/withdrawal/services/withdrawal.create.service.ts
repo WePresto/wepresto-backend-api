@@ -13,11 +13,10 @@ import appConfig from '../../../../config/app.config';
 import { Withdrawal, WithdrawalStatus } from '../withdrawal.entity';
 
 import { WithdrawalReadService } from './withdrawal.read.service';
-
+import { WeprestoSlackService } from '../../../../plugins/wepresto-slack/wepresto-slack.service';
 import { LenderService } from '../../../users/lender/services/lender.service';
 
 import { RequestWithdrawalInput } from '../dto/request-withdrawal-input.dto';
-import { WeprestoSlackService } from 'src/plugins/wepresto-slack/wepresto-slack.service';
 
 const MINIMUM_WITHDRAWAL_AMOUNT = 100000;
 const COMISSION_PERCENTAGE = 0.025;
@@ -30,8 +29,8 @@ export class WithdrawalCreateService {
     @InjectRepository(Withdrawal)
     private readonly withdrawalRepository: Repository<Withdrawal>,
     private readonly readService: WithdrawalReadService,
-    private readonly lenderService: LenderService,
     private readonly weprestoSlackService: WeprestoSlackService,
+    private readonly lenderService: LenderService,
   ) {}
 
   public async requestWithdrawal(input: RequestWithdrawalInput) {

@@ -14,6 +14,7 @@ import { WeprestoSlackService } from '../../../../plugins/wepresto-slack/weprest
 import { EventMessageService } from '../../../event-message/event-message.service';
 import { NotificationService } from '../../../notification/notification.service';
 import { FrenchAmortizationSystemService } from '../../french-amortization-system/french-amortization-system.service';
+import { LenderService } from '../../../users/lender/services/lender.service';
 
 import {
   getNumberOfDays,
@@ -36,6 +37,7 @@ export class LoanConsumerService {
     private readonly eventMessageService: EventMessageService,
     private readonly notificationService: NotificationService,
     private readonly frenchAmortizationSystemService: FrenchAmortizationSystemService,
+    private readonly lenderService: LenderService,
   ) {}
 
   @RabbitRPC({
@@ -399,6 +401,81 @@ export class LoanConsumerService {
       };
     } finally {
       Logger.log(`sendLatePaymentNotifications: completed`);
+    }
+  }
+
+  @RabbitRPC({
+    exchange: RABBITMQ_EXCHANGE,
+    routingKey: `${RABBITMQ_EXCHANGE}.loan_in_funding`,
+    queue: `${RABBITMQ_EXCHANGE}.${LoanConsumerService.name}.`,
+  })
+  public async loanInFundingConsumer(input: any) {
+    const {
+      environment,
+      app: { selftWebUrl },
+    } = this.appConfiguration;
+
+    if (environment === 'local') {
+      Logger.log(
+        'loanInFundingConsumer: skipped because environment is local',
+        LoanConsumerService.name,
+      );
+      return;
+    }
+
+    Logger.log('loanInFundingConsumer: started', LoanConsumerService.name);
+
+    const eventMessage = await this.eventMessageService.create({
+      routingKey: `${RABBITMQ_EXCHANGE}.loan_in_funding`,
+      functionName: 'loanInFundingConsumer',
+      data: input || {},
+    });
+
+    try {
+      const { loanUid } = input;
+
+      Logger.log(
+        `loanInFundingConsumer: loan ${loanUid} received`,
+        LoanConsumerService.name,
+      );
+
+      // get lenders
+      const { lenders } = await this.lenderService.readService.getMany({
+        take: '' + 1000 * 1000,
+      });
+
+      for (const lender of lenders) {
+        Logger.log(
+          `loanInFundingConsumer: sending new investment notification to lender ${lender.uid}`,
+          LoanConsumerService.name,
+        );
+
+        await this.notificationService.sendNewInvestmentOpportunityNotification(
+          {
+            email: lender.user.email,
+            firstName: lender.user.fullName.split(' ')[0],
+            loanUid,
+            link: `${selftWebUrl}/lender/opportunities`,
+          },
+        );
+      }
+    } catch (error) {
+      console.error(error);
+
+      const message = error.message;
+
+      await this.eventMessageService.setError({
+        id: eventMessage._id,
+        error,
+      });
+
+      return {
+        status: error.status || 500,
+        message,
+        data: {},
+      };
+    } finally {
+      Logger.log(`loanInFundingConsumer: completed`, LoanConsumerService.name);
     }
   }
 }

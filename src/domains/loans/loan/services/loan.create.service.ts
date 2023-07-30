@@ -13,7 +13,7 @@ import appConfig from '../../../../config/app.config';
 import { Loan, LoanStatus, InterstRate } from '../loan.entity';
 
 import { validateAmountByCountry } from '../../../../utils/validate-amount-by-country';
-import { getPlatformFeeByCountry } from 'src/utils/get-plaform-fee-by-country';
+import { getPlatformFeeByCountry } from '../../../../utils/get-plaform-fee-by-country';
 
 import { RabbitMQLocalService } from '../../../../plugins/rabbit-local/rabbit-mq-local.service';
 import { FrenchAmortizationSystemService } from '../../french-amortization-system/french-amortization-system.service';

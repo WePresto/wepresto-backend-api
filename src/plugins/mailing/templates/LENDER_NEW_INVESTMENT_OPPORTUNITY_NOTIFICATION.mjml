@@ -27,10 +27,14 @@
           Hola {{firstName}}! 👋🏻
         </mj-text>
         <mj-text>
-          Hoy es el ultimo día para pagar tú couta. 😱
+          Esperamos que estés muy bien! 😊
         </mj-text>
         <mj-text>
-          Realiza el pago de tú couta haciendo click en el siguiente botón. 🤑
+          Queremos contarte que tenemos una nueva oportunidad de inversión
+          en el prestamo <strong>{{loanUid}}</strong>, puede interesarte. 🤑
+        </mj-text>
+        <mj-text>
+          Si quieres saber más, haz click en el botón de abajo. 👇🏻
         </mj-text>
       </mj-column>
     </mj-section>
@@ -38,16 +42,8 @@
     <mj-section background-color="#FFF" padding-top="0">
       <mj-column>
         <mj-button background-color="#388D94" color="white" href="{{link}}">
-          Pagar
+          Ver oportunidad
         </mj-button>
-      </mj-column>
-    </mj-section>
-
-    <mj-section background-color="#FFF" padding-top="0">
-      <mj-column>
-        <mj-text>
-          Si ya pagaste, por favor ignora este correo.😅
-        </mj-text>
       </mj-column>
     </mj-section>
 

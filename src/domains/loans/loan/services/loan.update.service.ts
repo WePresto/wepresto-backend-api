@@ -127,6 +127,11 @@ export class LoanUpdateService {
 
     const savedLoan = await this.loanRepository.save(preloadedLoan);
 
+    // publish loan in funding event
+    await this.rabbitMQLocalService.publishLoanInFunding({
+      loanUid: savedLoan.uid,
+    });
+
     return savedLoan;
   }
 

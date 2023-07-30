@@ -11,6 +11,7 @@ import { BaseService } from '../../../../common/base.service';
 
 import { GetOneLenderInput } from '../dto/get-one-lender-input.dto';
 import { GetParticipationsInput } from '../dto/get-participations-input.dto';
+import { GetManyLendersInput } from '../dto/get-many-lenders-input.dto';
 
 @Injectable()
 export class LenderReadService extends BaseService<Lender> {
@@ -225,6 +226,38 @@ export class LenderReadService extends BaseService<Lender> {
     return {
       count: participations.length,
       participations: participations.slice(+skip, +skip + +take),
+    };
+  }
+
+  public async getMany(input: GetManyLendersInput) {
+    const { fullName, documentNumber, take = '10', skip = '0' } = input;
+
+    const query = this.lenderRepository
+      .createQueryBuilder('lender')
+      .innerJoinAndSelect('lender.user', 'user')
+      .where('1 = 1')
+      .take(+take)
+      .skip(+skip);
+
+    if (fullName) {
+      query.andWhere('user.fullName ILIKE :fullName', {
+        fullName: `%${fullName}%`,
+      });
+    }
+
+    if (documentNumber) {
+      query.andWhere('user.documentNumber ILIKE :documentNumber', {
+        documentNumber: `%${documentNumber}%`,
+      });
+    }
+
+    query.orderBy('user.createdAt', 'ASC');
+
+    const [lenders, count] = await query.getManyAndCount();
+
+    return {
+      count,
+      lenders,
     };
   }
 }

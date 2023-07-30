@@ -11,6 +11,7 @@ import { SendEarlyPaymentNotificationCInput } from './dto/send-early-payment-not
 import { SendLatePaymentNotificationAInput } from './dto/send-late-payment-notification-a-input.dto';
 import { SendLatePaymentNotificationBInput } from './dto/send-late-payment-notification-b-input.dto';
 import { SendLatePaymentNotificationCInput } from './dto/send-late-payment-notification-c-input.dto';
+import { SendNewInvestmentOpportunityNotificationInput } from './dto/send-new-investment-opportunity-notification-input.dto';
 
 @Injectable()
 export class NotificationService {
@@ -114,6 +115,23 @@ export class NotificationService {
       to: email,
       parameters: {
         firstName,
+        link,
+      },
+    });
+  }
+
+  public async sendNewInvestmentOpportunityNotification(
+    input: SendNewInvestmentOpportunityNotificationInput,
+  ) {
+    const { email, firstName, loanUid, link } = input;
+
+    await this.mailingService.sendEmail({
+      templateName: 'LENDER_NEW_INVESTMENT_OPPORTUNITY_NOTIFICATION',
+      subject: 'WePresto - Nueva oportunidad de inversión',
+      to: email,
+      parameters: {
+        firstName,
+        loanUid,
         link,
       },
     });
