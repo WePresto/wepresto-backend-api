@@ -11,6 +11,7 @@ import { LoanStatus } from '../../loan/loan.entity';
 
 import {
   addDays,
+  formatCurrency,
   getNumberOfDays,
   getRabbitMQExchangeName,
   getReferenceDate,
@@ -24,6 +25,7 @@ import { GoogleStorageService } from '../../../../plugins/google-storage/google-
 import { EventMessageService } from '../../../event-message/event-message.service';
 import { LoanService } from '../../loan/services/loan.service';
 import { FrenchAmortizationSystemService } from '../../french-amortization-system/french-amortization-system.service';
+import { NotificationService } from '../../../notification/notification.service';
 
 const RABBITMQ_EXCHANGE = getRabbitMQExchangeName();
 
@@ -39,7 +41,77 @@ export class MovementConsumerService {
     private readonly eventMessageService: EventMessageService,
     private readonly loanService: LoanService,
     private readonly frenchAmortizationSystemService: FrenchAmortizationSystemService,
+    private readonly notificationService: NotificationService,
   ) {}
+
+  private async uploadPaymentFile({
+    base64File,
+    existingPayment,
+  }: {
+    base64File: string;
+    existingPayment: Movement;
+  }) {
+    if (!base64File) {
+      Logger.log(
+        `paymentCreatedConsumer. payment ${existingPayment.uid} has no file`,
+        MovementConsumerService.name,
+      );
+
+      return;
+    }
+
+    // get the file extension
+    const fileExtension = getFileExtensionByMimeType(base64File);
+
+    // upload the file to google storage
+    const googleFile = await this.googleStorageService.uploadFileFromBase64({
+      bucketName: 'wepresto_bucket', // TODO: move to env
+      base64: base64File,
+      destinationPath: `${this.appConfiguration.environment}/payments/${existingPayment.uid}.${fileExtension}`,
+    });
+
+    // make the file public
+    await googleFile.makePublic();
+
+    // update the movement with the file url
+    const preloadedPayment = await this.movementRepository.preload({
+      id: existingPayment.id,
+      proofURL: `https://storage.googleapis.com/wepresto_bucket/${this.appConfiguration.environment}/payments/${existingPayment.uid}.${fileExtension}`,
+    });
+
+    await this.movementRepository.save(preloadedPayment);
+  }
+
+  private async sendPaymentReceivedNotification({
+    existingPayment,
+  }: {
+    existingPayment: Movement;
+  }) {
+    const { loan } = existingPayment;
+
+    // get the borrower user
+    const {
+      loan: {
+        borrower: { user },
+      },
+    } = await this.movementRepository
+      .createQueryBuilder('movement')
+      .innerJoinAndSelect('movement.loan', 'loan')
+      .innerJoinAndSelect('loan.borrower', 'borrower')
+      .innerJoinAndSelect('borrower.user', 'user')
+      .where('movement.uid = :movementUid', {
+        movementUid: existingPayment.uid,
+      })
+      .getOne();
+
+    // send the notification
+    await this.notificationService.sendPaymentReceivedNotification({
+      email: user.email,
+      firstName: user.fullName.split(' ')[0],
+      loanUid: loan.uid,
+      paymentAmount: formatCurrency(existingPayment.amount),
+    });
+  }
 
   @RabbitRPC({
     exchange: RABBITMQ_EXCHANGE,
@@ -57,13 +129,15 @@ export class MovementConsumerService {
       const { movementUid, base64File } = input;
 
       Logger.log(
-        `paymentCreatedConsumer: payment ${movementUid} received`,
+        `paymentCreatedConsumer. payment ${movementUid} received`,
         MovementConsumerService.name,
       );
 
       // get the movement
-      const existingPayment = await this.readService.getOne({
-        uid: movementUid,
+      const existingPayment = await this.readService.getOneByFields({
+        fields: { uid: movementUid },
+        checkIfExists: true,
+        relations: ['loan'],
       });
 
       // check if the movement is a payment
@@ -91,13 +165,14 @@ export class MovementConsumerService {
       });
 
       Logger.log(
-        `paymentCreatedConsumer: minimumPaymentAmount: ${minimumPaymentAmount} minimalMovementsToPay: ${minimalMovementsToPay.length}`,
+        `paymentCreatedConsumer. minimumPaymentAmount: ${minimumPaymentAmount} minimalMovementsToPay: ${minimalMovementsToPay.length}`,
         MovementConsumerService.name,
       );
 
       // check if the payment is enough
-      if (existingPayment.amount * -1 < minimumPaymentAmount) {
-        // TODO: update the payment movement to indicate thet the payment must be soft deleted marked as "not enough to pay the loan"
+      if (Math.abs(existingPayment.amount) < minimumPaymentAmount) {
+        // TODO: update the payment movement to indicate the payment
+        // must be soft deleted marked as "not enough to pay the loan"
 
         throw new Error(
           `payment ${existingPayment.uid} is not enough to pay the loan`,
@@ -115,16 +190,15 @@ export class MovementConsumerService {
       );
 
       Logger.log(
-        `paymentCreatedConsumer: minimalMovementsToPay: ${minimalMovementsToPay.length} are now paid`,
+        `paymentCreatedConsumer. minimalMovementsToPay: ${minimalMovementsToPay.length} are now paid`,
         MovementConsumerService.name,
       );
 
       let comment;
 
-      // if the payment is greater than the minimum amount to pay...
-
+      // if the payment is greater or equal than the minimum amount to pay
       Logger.log(
-        `paymentCreatedConsumer: the payment ${existingPayment.uid} is greater than the minimum amount to pay`,
+        `paymentCreatedConsumer. the payment ${existingPayment.uid} is greater or equal than the minimum amount to pay`,
         MovementConsumerService.name,
       );
 
@@ -138,7 +212,7 @@ export class MovementConsumerService {
       });
 
       Logger.log(
-        `paymentCreatedConsumer: missingInstallments: ${missingInstallments.length}`,
+        `paymentCreatedConsumer. missingInstallments: ${missingInstallments.length}`,
         MovementConsumerService.name,
       );
 
@@ -149,7 +223,7 @@ export class MovementConsumerService {
       );
 
       Logger.log(
-        `paymentCreatedConsumer: totalPrincipalDebt: ${totalPrincipalDebt}`,
+        `paymentCreatedConsumer. totalPrincipalDebt: ${totalPrincipalDebt}`,
         MovementConsumerService.name,
       );
 
@@ -159,12 +233,12 @@ export class MovementConsumerService {
         (Math.abs(existingPayment.amount) - minimumPaymentAmount);
 
       Logger.log(
-        `paymentCreatedConsumer: newPrincipalDebt: ${newPrincipalDebt}`,
+        `paymentCreatedConsumer. newPrincipalDebt: ${newPrincipalDebt}`,
         MovementConsumerService.name,
       );
 
       if (newPrincipalDebt > getAmountToForgive('CO')) {
-        // if the new principal debt is greater than zero
+        // if the new principal debt is greater than the amount to forgive
         // means the loan is not paid yet
 
         // re calculate the installments
@@ -173,7 +247,7 @@ export class MovementConsumerService {
           // IF THE EXTRA PAYMENT IS TO REDUCE THE NUMBER OF THE INSTALLMENTS
 
           Logger.log(
-            `paymentCreatedConsumer: the payment ${existingPayment.uid} is to reduce the number of the installments`,
+            `paymentCreatedConsumer. the payment ${existingPayment.uid} is to reduce the number of the installments`,
             MovementConsumerService.name,
           );
 
@@ -236,7 +310,7 @@ export class MovementConsumerService {
           MovementType.PAYMENT_INSTALLMENT_AMOUNT_REDUCTION
         ) {
           Logger.log(
-            `paymentCreatedConsumer: the payment ${existingPayment.uid} is to reduce the amount of the installments`,
+            `paymentCreatedConsumer. the payment ${existingPayment.uid} is to reduce the amount of the installments`,
             MovementConsumerService.name,
           );
 
@@ -265,7 +339,7 @@ export class MovementConsumerService {
           }
 
           Logger.log(
-            `paymentCreatedConsumer: referenceDate to calculate the new installments: ${referenceDate}`,
+            `paymentCreatedConsumer. referenceDate to calculate the new installments: ${referenceDate}`,
             MovementConsumerService.name,
           );
 
@@ -279,13 +353,13 @@ export class MovementConsumerService {
             });
         } else {
           Logger.log(
-            `paymentCreatedConsumer: the payment ${existingPayment.uid} has an invalid type wich is ${existingPayment.type} and is not supported`,
+            `paymentCreatedConsumer. the payment ${existingPayment.uid} has an invalid type wich is ${existingPayment.type} and is not supported`,
             MovementConsumerService.name,
           );
         }
 
         Logger.log(
-          `paymentCreatedConsumer: newInstallments: ${newInstallments.length}`,
+          `paymentCreatedConsumer. newInstallments: ${newInstallments.length}`,
           MovementConsumerService.name,
         );
 
@@ -309,13 +383,13 @@ export class MovementConsumerService {
         ]);
 
         Logger.log(
-          `paymentCreatedConsumer: the installments were recalculated and saved`,
+          `paymentCreatedConsumer. the installments were recalculated and saved`,
           MovementConsumerService.name,
         );
 
         comment = `The payment was greater than the minimum amount to pay, so the installments were recalculated`;
       } else {
-        // otherwise, the new principal debt is less than or equal to zero
+        // otherwise, the new principal debt is less than or equal to the amount to forgive
         // means the loan is paid
 
         // soft delete the installments
@@ -343,31 +417,43 @@ export class MovementConsumerService {
       await this.movementRepository.save(preloadedPayment);
 
       Logger.log(
-        `paymentCreatedConsumer: the payment ${existingPayment.uid} was processed`,
+        `paymentCreatedConsumer. the payment ${existingPayment.uid} was processed`,
         MovementConsumerService.name,
       );
 
-      if (base64File) {
-        const fileExtension = getFileExtensionByMimeType(base64File);
+      const settledResults = await Promise.allSettled([
+        // upload the file (proof of payment)
+        this.uploadPaymentFile({
+          base64File,
+          existingPayment,
+        }),
+        // send the payment received notification
+        this.sendPaymentReceivedNotification({
+          existingPayment,
+        }),
+      ]);
 
-        const googleFile = await this.googleStorageService.uploadFileFromBase64(
-          {
-            bucketName: 'wepresto_bucket', // TODO: move to env
-            base64: base64File,
-            destinationPath: `${this.appConfiguration.environment}/payments/${existingPayment.uid}.${fileExtension}`,
-          },
-        );
+      // display warnings for rejected promises
+      for (let index = 0; index < settledResults.length; index++) {
+        const settledResult = settledResults[index];
 
-        // make the file public
-        await googleFile.makePublic();
+        if (settledResult.status === 'rejected') {
+          let message: string;
+          switch (index) {
+            case 0:
+              message = `paymentCreatedConsumer. the file could not be uploaded:`;
+              break;
+            case 1:
+              message = `paymentCreatedConsumer. the payment received notification could not be sent:`;
+              break;
+            default:
+              message = `paymentCreatedConsumer. unknown error:`;
+              break;
+          }
 
-        // update the movement with the file url
-        const preloadedPayment = await this.movementRepository.preload({
-          id: existingPayment.id,
-          proofURL: `https://storage.googleapis.com/wepresto_bucket/${this.appConfiguration.environment}/payments/${existingPayment.uid}.${fileExtension}`,
-        });
-
-        await this.movementRepository.save(preloadedPayment);
+          Logger.warn(message, MovementConsumerService.name);
+          Logger.warn(settledResult.reason, MovementConsumerService.name);
+        }
       }
     } catch (error) {
       console.error(error);

@@ -25,7 +25,7 @@ import { RabbitMQLocalService } from './rabbit-mq-local.service';
         return {
           exchanges: [
             {
-              type: 'topic', // TODO: use a env variable
+              type: 'topic',
               name: rabbitmqExchangeName,
             },
           ],

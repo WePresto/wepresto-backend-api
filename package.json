@@ -34,6 +34,7 @@
     "seed:run": "npx ts-node ./src/database/seeds"
   },
   "dependencies": {
+    "@aws-sdk/client-sns": "3.382.0",
     "@golevelup/nestjs-rabbitmq": "3.7.0",
     "@google-cloud/storage": "6.12.0",
     "@nestjs/axios": "3.0.0",

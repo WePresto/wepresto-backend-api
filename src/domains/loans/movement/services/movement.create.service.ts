@@ -49,6 +49,33 @@ export class MovementCreateService {
       );
     }
 
+    // validate the type of the payment in relation with the minimumPaymentAmount,
+    // the amount of the payment
+    if (type) {
+      if (
+        type === MovementType.PAYMENT_INSTALLMENT_AMOUNT_REDUCTION &&
+        +amount <= minimumPaymentAmount
+      ) {
+        throw new ConflictException(
+          `the amount of the payment needs to be greater than the minimum payment amount, so you payment can reduce the installment amount`,
+        );
+      } else if (
+        type === MovementType.PAYMENT_TERM_REDUCTION &&
+        +amount <= minimumPaymentAmount
+      ) {
+        throw new ConflictException(
+          `the amount of the payment needs to be greater than the minimum payment amount, so you payment can reduce the number of installments`,
+        );
+      } else if (
+        type === MovementType.PAYMENT &&
+        (+amount < minimumPaymentAmount || +amount > minimumPaymentAmount)
+      ) {
+        throw new ConflictException(
+          `the amount of the payment needs to be equal to the minimum payment amount`,
+        );
+      }
+    }
+
     // check if the amout of the payment is greater than the total amount of the loan
     const { totalAmount: totalLoanAmount } =
       await this.loanService.readService.getTotalPaymentAmount({
@@ -63,13 +90,14 @@ export class MovementCreateService {
     }
 
     // determine the type of the payment
-    let typeToUse;
-    if (+amount > minimumPaymentAmount && !type) {
-      typeToUse = MovementType.PAYMENT_INSTALLMENT_AMOUNT_REDUCTION;
-    } else if (+amount > minimumPaymentAmount && type) {
-      typeToUse = type;
-    } else {
-      typeToUse = MovementType.PAYMENT;
+    // if the type is not provided
+    let typeToUse = type;
+    if (!typeToUse) {
+      if (+amount === minimumPaymentAmount) {
+        typeToUse = MovementType.PAYMENT;
+      } else if (+amount > minimumPaymentAmount) {
+        typeToUse = MovementType.PAYMENT_INSTALLMENT_AMOUNT_REDUCTION;
+      }
     }
 
     // create the movement

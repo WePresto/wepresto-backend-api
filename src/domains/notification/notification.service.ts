@@ -12,6 +12,7 @@ import { SendLatePaymentNotificationAInput } from './dto/send-late-payment-notif
 import { SendLatePaymentNotificationBInput } from './dto/send-late-payment-notification-b-input.dto';
 import { SendLatePaymentNotificationCInput } from './dto/send-late-payment-notification-c-input.dto';
 import { SendNewInvestmentOpportunityNotificationInput } from './dto/send-new-investment-opportunity-notification-input.dto';
+import { SendPaymentReceivedNotificationInput } from './dto/send-payment-received-notification-input.dto';
 
 @Injectable()
 export class NotificationService {
@@ -133,6 +134,23 @@ export class NotificationService {
         firstName,
         loanUid,
         link,
+      },
+    });
+  }
+
+  public async sendPaymentReceivedNotification(
+    input: SendPaymentReceivedNotificationInput,
+  ) {
+    const { email, firstName, loanUid, paymentAmount } = input;
+
+    await this.mailingService.sendEmail({
+      templateName: 'BORROWER_PAYMENT_RECEIVED',
+      subject: 'WePresto - Pago recibido!',
+      to: email,
+      parameters: {
+        firstName,
+        loanUid,
+        paymentAmount,
       },
     });
   }
