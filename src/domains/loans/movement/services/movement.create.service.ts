@@ -68,10 +68,10 @@ export class MovementCreateService {
         );
       } else if (
         type === MovementType.PAYMENT &&
-        (+amount < minimumPaymentAmount || +amount > minimumPaymentAmount)
+        +amount > minimumPaymentAmount
       ) {
         throw new ConflictException(
-          `the amount of the payment needs to be equal to the minimum payment amount`,
+          `the amount of the payment needs to be equal to the minimum payment amount, as the type of the payment is ${MovementType.PAYMENT}`,
         );
       }
     }

@@ -9,6 +9,7 @@ import { MovementType } from '../movement.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
 enum PaymentMovementType {
+  PAYMENT = MovementType.PAYMENT,
   PAYMENT_TERM_REDUCTION = MovementType.PAYMENT_TERM_REDUCTION,
   PAYMENT_INSTALLMENT_AMOUNT_REDUCTION = MovementType.PAYMENT_INSTALLMENT_AMOUNT_REDUCTION,
 }
