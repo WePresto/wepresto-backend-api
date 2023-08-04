@@ -18,6 +18,7 @@ import { GoogleStorageModule } from '../../../plugins/google-storage/google-stor
 import { EventMessageModule } from '../../event-message/event-message.module';
 import { LoanModule } from '../loan/loan.module';
 import { FrenchAmortizationSystemModule } from '../french-amortization-system/french-amortization-system.module';
+import { NotificationModule } from '../../notification/notification.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { FrenchAmortizationSystemModule } from '../french-amortization-system/fr
     EventMessageModule,
     LoanModule,
     FrenchAmortizationSystemModule,
+    NotificationModule,
   ],
   providers: [
     MovementConsumerService,
