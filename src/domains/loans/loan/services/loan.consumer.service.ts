@@ -281,7 +281,10 @@ export class LoanConsumerService {
       app: { selftWebUrl },
     } = this.appConfiguration;
 
-    Logger.log('sendLatePaymentNotifications: started');
+    Logger.log(
+      'sendLatePaymentNotifications: started',
+      LoanConsumerService.name,
+    );
 
     const eventMessage = await this.eventMessageService.create({
       routingKey: `${RABBITMQ_EXCHANGE}.send_late_payment_notifications`,
@@ -309,6 +312,14 @@ export class LoanConsumerService {
 
         return overdueInterestMovement;
       });
+
+      if (!filteredLoans.length) {
+        Logger.log(
+          'sendLatePaymentNotifications: there are no loans in overdue',
+          LoanConsumerService.name,
+        );
+        return;
+      }
 
       // iterate over the loans
       for (const loan of filteredLoans) {
@@ -400,7 +411,10 @@ export class LoanConsumerService {
         data: {},
       };
     } finally {
-      Logger.log(`sendLatePaymentNotifications: completed`);
+      Logger.log(
+        `sendLatePaymentNotifications: completed`,
+        LoanConsumerService.name,
+      );
     }
   }
 
