@@ -17,6 +17,7 @@ import { RabbitMQLocalModule } from './plugins/rabbit-local/rabbit-mq-local.modu
 import { GoogleStorageModule } from './plugins/google-storage/google-storage.module';
 import { WeprestoSlackModule } from './plugins/wepresto-slack/wepresto-slack.module';
 import { FirebaseAdminModule } from './plugins/firebase-admin/firebase-admin.module';
+import { AwsSnsModule } from './plugins/aws-sns/aws-sns.module';
 
 import { UserModule } from './domains/users/user/user.module';
 import { BorrowerModule } from './domains/users/borrower/borrower.module';
@@ -29,6 +30,7 @@ import { NotificationModule } from './domains/notification/notification.module';
 import { NequiModule } from './domains/payments/nequi/nequi.module';
 import { PaymentAttemptModule } from './domains/payments/payment-attempt/payment-attempt.module';
 import { WithdrawalModule } from './domains/loans/withdrawal/withdrawal.module';
+
 @Module({
   imports: [
     // config
@@ -73,6 +75,9 @@ import { WithdrawalModule } from './domains/loans/withdrawal/withdrawal.module';
 
     // Firebase admin
     FirebaseAdminModule,
+
+    // AWS SNS
+    AwsSnsModule,
 
     // Cache
     /*

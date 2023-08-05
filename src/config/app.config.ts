@@ -85,5 +85,10 @@ export default registerAs('config', () => {
       authProviderX509CertUrl: process.env.GCP_AUTH_PROVIDER_X509_CERT_URL,
       clientC509CertUrl: process.env.GCP_CLIENT_X509_CERT_URL,
     },
+    aws: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      region: process.env.AWS_REGION,
+    },
   };
 });

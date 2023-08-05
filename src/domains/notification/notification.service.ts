@@ -4,6 +4,7 @@ import { ConfigType } from '@nestjs/config';
 import appConfig from '../../config/app.config';
 
 import { MailingService } from '../../plugins/mailing/mailing.service';
+import { AwsSnsService } from '../../plugins/aws-sns/aws-sns.service';
 
 import { SendEarlyPaymentNotificationAInput } from './dto/send-early-payment-notification-a-input.dto';
 import { SendEarlyPaymentNotificationBInput } from './dto/send-early-payment-notification-b-input.dto';
@@ -20,6 +21,7 @@ export class NotificationService {
     @Inject(appConfig.KEY)
     private readonly appConfiguration: ConfigType<typeof appConfig>,
     private readonly mailingService: MailingService,
+    private readonly awsSnsService: AwsSnsService,
   ) {}
 
   public async sendEarlyPaymentNotificationA(
@@ -59,99 +61,144 @@ export class NotificationService {
   public async sendEarlyPaymentNotificationC(
     input: SendEarlyPaymentNotificationCInput,
   ): Promise<void> {
-    const { email, firstName, alias, link } = input;
+    const { email, phoneNumber, firstName, alias, link } = input;
 
-    await this.mailingService.sendEmail({
-      templateName: 'BORROWER_EARLY_PAYMENT_NOTIFICATION_C',
-      subject: 'WePreso - Notificación de pronto pago',
-      to: email,
-      parameters: {
-        firstName,
-        alias,
-        link,
-      },
-    });
+    Promise.all([
+      this.mailingService.sendEmail({
+        templateName: 'BORROWER_EARLY_PAYMENT_NOTIFICATION_C',
+        subject: 'WePreso - Notificación de pronto pago',
+        to: email,
+        parameters: {
+          firstName,
+          alias,
+          link,
+        },
+      }),
+      this.awsSnsService.sendSms({
+        phoneNumber,
+        message: `${firstName}, hoy es el último día para realizar el pago de tu cuota. Ingresa a WePreso para realizar el pago :)`,
+      }),
+    ]);
   }
 
   public async sendLatePaymentNotificationA(
     input: SendLatePaymentNotificationAInput,
   ) {
-    const { email, firstName, link } = input;
+    const { email, phoneNumber, firstName, link } = input;
 
-    await this.mailingService.sendEmail({
-      templateName: 'BORROWER_LATE_PAYMENT_NOTIFICATION_A',
-      subject: 'WePresto - Notificación por impago',
-      to: email,
-      parameters: {
-        firstName,
-        link,
-      },
-    });
+    Promise.all([
+      this.mailingService.sendEmail({
+        templateName: 'BORROWER_LATE_PAYMENT_NOTIFICATION_A',
+        subject: 'WePresto - Notificación por impago',
+        to: email,
+        parameters: {
+          firstName,
+          link,
+        },
+      }),
+      this.awsSnsService.sendSms({
+        phoneNumber,
+        message: `${firstName}, tú prestamo está en mora. Ingresa a WePreso para obtener más información y realizar el pago`,
+      }),
+    ]);
   }
 
   public async sendLatePaymentNotificationB(
     input: SendLatePaymentNotificationBInput,
   ) {
-    const { email, firstName, link } = input;
+    const { email, phoneNumber, firstName, link } = input;
 
-    await this.mailingService.sendEmail({
-      templateName: 'BORROWER_LATE_PAYMENT_NOTIFICATION_B',
-      subject: 'WePresto - Notificación por impago',
-      to: email,
-      parameters: {
-        firstName,
-        link,
-      },
-    });
+    Promise.all([
+      this.mailingService.sendEmail({
+        templateName: 'BORROWER_LATE_PAYMENT_NOTIFICATION_B',
+        subject: 'WePresto - Notificación por impago',
+        to: email,
+        parameters: {
+          firstName,
+          link,
+        },
+      }),
+      this.awsSnsService.sendSms({
+        phoneNumber,
+        message: `${firstName}, tú prestamo está en mora. Ve a WePresto, obtén más información y animáte a realizar el pago minimo`,
+      }),
+    ]);
   }
 
   public async sendLatePaymentNotificationC(
     input: SendLatePaymentNotificationCInput,
   ): Promise<void> {
-    const { email, firstName, link } = input;
+    const { email, phoneNumber, firstName, link } = input;
 
-    await this.mailingService.sendEmail({
-      templateName: 'BORROWER_LATE_PAYMENT_NOTIFICATION_C',
-      subject: 'WePresto - Notificación por impago',
-      to: email,
-      parameters: {
-        firstName,
-        link,
-      },
-    });
+    Promise.all([
+      this.mailingService.sendEmail({
+        templateName: 'BORROWER_LATE_PAYMENT_NOTIFICATION_C',
+        subject: 'WePresto - Notificación por impago',
+        to: email,
+        parameters: {
+          firstName,
+          link,
+        },
+      }),
+      this.awsSnsService.sendSms({
+        phoneNumber,
+        message: `${firstName}, tú prestamo está en mora. Ve a WePresto, comunicate con nosotros si tienes inconvenientes`,
+      }),
+    ]);
   }
 
   public async sendNewInvestmentOpportunityNotification(
     input: SendNewInvestmentOpportunityNotificationInput,
   ) {
-    const { email, firstName, loanUid, link } = input;
+    const { email, phoneNumber, firstName, loanUid, link } = input;
 
-    await this.mailingService.sendEmail({
-      templateName: 'LENDER_NEW_INVESTMENT_OPPORTUNITY_NOTIFICATION',
-      subject: 'WePresto - Nueva oportunidad de inversión',
-      to: email,
-      parameters: {
-        firstName,
-        loanUid,
-        link,
-      },
-    });
+    Promise.all([
+      this.mailingService.sendEmail({
+        templateName: 'LENDER_NEW_INVESTMENT_OPPORTUNITY_NOTIFICATION',
+        subject: 'WePresto - Nueva oportunidad de inversión',
+        to: email,
+        parameters: {
+          firstName,
+          loanUid,
+          link,
+        },
+      }),
+      this.awsSnsService.sendSms({
+        phoneNumber,
+        message: `${firstName}, hay una nueva oportunidad de inversión. Ve a la opción de Oportunidades, puede interesarte ;)`,
+      }),
+    ]);
   }
 
   public async sendPaymentReceivedNotification(
     input: SendPaymentReceivedNotificationInput,
   ) {
-    const { email, firstName, loanUid, paymentAmount } = input;
+    const { email, phoneNumber, firstName, loanUid, paymentAmount } = input;
 
-    await this.mailingService.sendEmail({
-      templateName: 'BORROWER_PAYMENT_RECEIVED',
-      subject: 'WePresto - Pago recibido!',
-      to: email,
-      parameters: {
-        firstName,
-        loanUid,
-        paymentAmount,
-      },
+    Promise.all([
+      this.mailingService.sendEmail({
+        templateName: 'BORROWER_PAYMENT_RECEIVED',
+        subject: 'WePresto - Pago recibido!',
+        to: email,
+        parameters: {
+          firstName,
+          loanUid,
+          paymentAmount,
+        },
+      }),
+      this.awsSnsService.sendSms({
+        phoneNumber,
+        message: `${firstName}, muchas gracias! Hemos recibido tu pago por ${paymentAmount}, puedes ir a WePresto y revisarlo`,
+      }),
+    ]);
+  }
+
+  public async sendLoanInFundingNotification(input: any) {
+    const { phoneNumber, firstName } = input;
+
+    await this.awsSnsService.sendSms({
+      phoneNumber,
+      message: `${firstName}, tu préstamo ha sido publicado y está en proceso de financiación. Te notificaremos cuando esté listo`,
     });
   }
 }

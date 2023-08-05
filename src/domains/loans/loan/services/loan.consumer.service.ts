@@ -215,18 +215,19 @@ export class LoanConsumerService {
         // get the difference in days between the due date and the current date
         const { dueDate } = firstUnpaidLoanInstallment;
 
+        // calculate the number of days
         const currentDate = new Date();
         currentDate.setHours(0, 0, 0, 0);
-
         const numberOfDays = getNumberOfDays(currentDate, dueDate);
 
+        // depending on the number of days send the notification
         switch (numberOfDays) {
-          case 0:
-            await this.notificationService.sendEarlyPaymentNotificationC({
+          case 10:
+            await this.notificationService.sendEarlyPaymentNotificationA({
               email: loan.borrower.user.email,
               firstName: loan.borrower.user.fullName.split(' ')[0],
               alias: loan.alias || '' + loan.id,
-              link: `${selftWebUrl}/borrower/loans`,
+              dueDate: formatDate(dueDate, 'UTC'),
             });
             break;
           case 3:
@@ -237,12 +238,13 @@ export class LoanConsumerService {
               link: `${selftWebUrl}/borrower/loans`,
             });
             break;
-          case 10:
-            await this.notificationService.sendEarlyPaymentNotificationA({
+          case 0:
+            await this.notificationService.sendEarlyPaymentNotificationC({
               email: loan.borrower.user.email,
+              phoneNumber: loan.borrower.user.phoneNumber,
               firstName: loan.borrower.user.fullName.split(' ')[0],
               alias: loan.alias || '' + loan.id,
-              dueDate: formatDate(dueDate, 'UTC'),
+              link: `${selftWebUrl}/borrower/loans`,
             });
             break;
           default:
@@ -254,8 +256,6 @@ export class LoanConsumerService {
         }
       }
     } catch (error) {
-      console.error(error);
-
       const message = error.message;
 
       await this.eventMessageService.setError({
@@ -345,6 +345,7 @@ export class LoanConsumerService {
           );
           await this.notificationService.sendLatePaymentNotificationA({
             email: loan.borrower.user.email,
+            phoneNumber: loan.borrower.user.phoneNumber,
             firstName: loan.borrower.user.fullName.split(' ')[0],
             link: `${selftWebUrl}/borrower/loans`,
           });
@@ -356,6 +357,7 @@ export class LoanConsumerService {
 
           await this.notificationService.sendLatePaymentNotificationB({
             email: loan.borrower.user.email,
+            phoneNumber: loan.borrower.user.phoneNumber,
             firstName: loan.borrower.user.fullName.split(' ')[0],
             link: `${selftWebUrl}/borrower/loans`,
           });
@@ -367,6 +369,7 @@ export class LoanConsumerService {
 
           await this.notificationService.sendLatePaymentNotificationC({
             email: loan.borrower.user.email,
+            phoneNumber: loan.borrower.user.phoneNumber,
             firstName: loan.borrower.user.fullName.split(' ')[0],
             link: `${selftWebUrl}/borrower/loans`,
           });
@@ -453,26 +456,45 @@ export class LoanConsumerService {
         LoanConsumerService.name,
       );
 
-      // get lenders
-      const { lenders } = await this.lenderService.readService.getMany({
-        take: '' + 1000 * 1000,
-      });
+      const [{ borrower }, { lenders }] = await Promise.all([
+        // get borrower
+        this.loanRepository
+          .createQueryBuilder('loan')
+          .innerJoinAndSelect('loan.borrower', 'borrower')
+          .innerJoinAndSelect('borrower.user', 'user')
+          .where('loan.uid = :uid', { uid: loanUid })
+          .getOne(),
+        // get lenders
+        this.lenderService.readService.getMany({
+          take: '' + 1000 * 1000,
+        }),
+      ]);
 
-      for (const lender of lenders) {
-        Logger.log(
-          `loanInFundingConsumer: sending new investment notification to lender ${lender.uid}`,
-          LoanConsumerService.name,
-        );
+      // sending the the notifications
+      Promise.all([
+        // sending loan in funding notification to borrower
+        this.notificationService.sendLoanInFundingNotification({
+          phoneNumber: borrower.user.phoneNumber,
+          firstName: borrower.user.fullName.split(' ')[0],
+        }),
+        // sending new investment notification to each lender
+        ...lenders.map(async (lender) => {
+          Logger.log(
+            `loanInFundingConsumer: sending new investment notification to lender ${lender.uid}`,
+            LoanConsumerService.name,
+          );
 
-        await this.notificationService.sendNewInvestmentOpportunityNotification(
-          {
-            email: lender.user.email,
-            firstName: lender.user.fullName.split(' ')[0],
-            loanUid,
-            link: `${selftWebUrl}/lender/opportunities`,
-          },
-        );
-      }
+          await this.notificationService.sendNewInvestmentOpportunityNotification(
+            {
+              email: lender.user.email,
+              phoneNumber: lender.user.phoneNumber,
+              firstName: lender.user.fullName.split(' ')[0],
+              loanUid,
+              link: `${selftWebUrl}/lender/opportunities`,
+            },
+          );
+        }),
+      ]);
     } catch (error) {
       console.error(error);
 

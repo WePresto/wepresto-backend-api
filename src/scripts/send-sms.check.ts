@@ -10,9 +10,11 @@ dotenv.config();
   // a client can be shared by different commands.
   const client = new SNSClient({ region: process.env.AWS_REGION });
 
+  const firstName = 'Juan';
+
   const command = new PublishCommand({
-    PhoneNumber: '+573052151278',
-    Message: 'Hello from SNS! again :) 7',
+    PhoneNumber: '+573016666666',
+    Message: `${firstName}, hoy es el último día para realizar el pago de tu cuota. Ingresa a WePreso para realizar el pago :)`,
   });
 
   const response = await client.send(command);

@@ -90,11 +90,7 @@ export class MovementConsumerService {
     const { loan } = existingPayment;
 
     // get the borrower user
-    const {
-      loan: {
-        borrower: { user },
-      },
-    } = await this.movementRepository
+    const movement = await this.movementRepository
       .createQueryBuilder('movement')
       .innerJoinAndSelect('movement.loan', 'loan')
       .innerJoinAndSelect('loan.borrower', 'borrower')
@@ -104,10 +100,20 @@ export class MovementConsumerService {
       })
       .getOne();
 
+    // check if the movement exists
+    if (!movement) {
+      throw new Error(`payment movement ${existingPayment.uid} not found`);
+    }
+
+    const {
+      loan: { borrower },
+    } = movement;
+
     // send the notification
     await this.notificationService.sendPaymentReceivedNotification({
-      email: user.email,
-      firstName: user.fullName.split(' ')[0],
+      email: borrower.user.email,
+      phoneNumber: borrower.user.phoneNumber,
+      firstName: borrower.user.fullName.split(' ')[0],
       loanUid: loan.uid,
       paymentAmount: formatCurrency(existingPayment.amount),
     });
