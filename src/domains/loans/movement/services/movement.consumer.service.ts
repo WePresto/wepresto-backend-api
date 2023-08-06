@@ -112,7 +112,7 @@ export class MovementConsumerService {
     // send the notification
     await this.notificationService.sendPaymentReceivedNotification({
       email: borrower.user.email,
-      phoneNumber: borrower.user.phoneNumber,
+      phoneNumber: `+57${borrower.user.phoneNumber}`,
       firstName: borrower.user.fullName.split(' ')[0],
       loanUid: loan.uid,
       paymentAmount: formatCurrency(existingPayment.amount),

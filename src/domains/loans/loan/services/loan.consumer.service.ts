@@ -241,7 +241,7 @@ export class LoanConsumerService {
           case 0:
             await this.notificationService.sendEarlyPaymentNotificationC({
               email: loan.borrower.user.email,
-              phoneNumber: loan.borrower.user.phoneNumber,
+              phoneNumber: `+57${loan.borrower.user.phoneNumber}`,
               firstName: loan.borrower.user.fullName.split(' ')[0],
               alias: loan.alias || '' + loan.id,
               link: `${selftWebUrl}/borrower/loans`,
@@ -345,7 +345,7 @@ export class LoanConsumerService {
           );
           await this.notificationService.sendLatePaymentNotificationA({
             email: loan.borrower.user.email,
-            phoneNumber: loan.borrower.user.phoneNumber,
+            phoneNumber: `+57${loan.borrower.user.phoneNumber}`,
             firstName: loan.borrower.user.fullName.split(' ')[0],
             link: `${selftWebUrl}/borrower/loans`,
           });
@@ -357,7 +357,7 @@ export class LoanConsumerService {
 
           await this.notificationService.sendLatePaymentNotificationB({
             email: loan.borrower.user.email,
-            phoneNumber: loan.borrower.user.phoneNumber,
+            phoneNumber: `+57${loan.borrower.user.phoneNumber}`,
             firstName: loan.borrower.user.fullName.split(' ')[0],
             link: `${selftWebUrl}/borrower/loans`,
           });
@@ -369,7 +369,7 @@ export class LoanConsumerService {
 
           await this.notificationService.sendLatePaymentNotificationC({
             email: loan.borrower.user.email,
-            phoneNumber: loan.borrower.user.phoneNumber,
+            phoneNumber: `+57${loan.borrower.user.phoneNumber}`,
             firstName: loan.borrower.user.fullName.split(' ')[0],
             link: `${selftWebUrl}/borrower/loans`,
           });
@@ -474,7 +474,7 @@ export class LoanConsumerService {
       Promise.all([
         // sending loan in funding notification to borrower
         this.notificationService.sendLoanInFundingNotification({
-          phoneNumber: borrower.user.phoneNumber,
+          phoneNumber: `+57${borrower.user.phoneNumber}`,
           firstName: borrower.user.fullName.split(' ')[0],
         }),
         // sending new investment notification to each lender
@@ -487,7 +487,7 @@ export class LoanConsumerService {
           await this.notificationService.sendNewInvestmentOpportunityNotification(
             {
               email: lender.user.email,
-              phoneNumber: lender.user.phoneNumber,
+              phoneNumber: `+57${lender.user.phoneNumber}`,
               firstName: lender.user.fullName.split(' ')[0],
               loanUid,
               link: `${selftWebUrl}/lender/opportunities`,
