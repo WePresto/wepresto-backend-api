@@ -1,10 +1,12 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 
 import appConfig from '../../config/app.config';
 
 import { MailingService } from '../../plugins/mailing/mailing.service';
 import { AwsSnsService } from '../../plugins/aws-sns/aws-sns.service';
+
+import { isHolidayOrWeekend } from '../../utils/is-holyday-or-weekend.util';
 
 import { SendEarlyPaymentNotificationAInput } from './dto/send-early-payment-notification-a-input.dto';
 import { SendEarlyPaymentNotificationBInput } from './dto/send-early-payment-notification-b-input.dto';
@@ -14,6 +16,7 @@ import { SendLatePaymentNotificationBInput } from './dto/send-late-payment-notif
 import { SendLatePaymentNotificationCInput } from './dto/send-late-payment-notification-c-input.dto';
 import { SendNewInvestmentOpportunityNotificationInput } from './dto/send-new-investment-opportunity-notification-input.dto';
 import { SendPaymentReceivedNotificationInput } from './dto/send-payment-received-notification-input.dto';
+import { getReferenceDate } from 'src/utils';
 
 @Injectable()
 export class NotificationService {
@@ -24,10 +27,37 @@ export class NotificationService {
     private readonly awsSnsService: AwsSnsService,
   ) {}
 
+  private shouldSendNotification({ timezone }: { timezone: string }) {
+    const currentReferenceDate = getReferenceDate(new Date(), timezone);
+
+    const currentDateIsHolidayOrWeekend = isHolidayOrWeekend(
+      'CO', // TODO: Get country code based on timezone
+      currentReferenceDate,
+    );
+
+    if (currentDateIsHolidayOrWeekend) {
+      Logger.log(
+        `Current date is holiday or weekend, no notification will be sent`,
+        NotificationService.name,
+      );
+      return false;
+    }
+
+    return true;
+  }
+
   public async sendEarlyPaymentNotificationA(
     input: SendEarlyPaymentNotificationAInput,
   ): Promise<void> {
     const { email, firstName, alias, dueDate } = input;
+
+    const shouldSendNotification = this.shouldSendNotification({
+      timezone: 'America/Bogota',
+    });
+
+    if (!shouldSendNotification) {
+      return;
+    }
 
     await this.mailingService.sendEmail({
       templateName: 'BORROWER_EARLY_PAYMENT_NOTIFICATION_A',
@@ -46,6 +76,14 @@ export class NotificationService {
   ): Promise<void> {
     const { email, firstName, alias, link } = input;
 
+    const shouldSendNotification = this.shouldSendNotification({
+      timezone: 'America/Bogota',
+    });
+
+    if (!shouldSendNotification) {
+      return;
+    }
+
     await this.mailingService.sendEmail({
       templateName: 'BORROWER_EARLY_PAYMENT_NOTIFICATION_B',
       subject: 'WePresto - Notificación de pronto pago',
@@ -62,6 +100,14 @@ export class NotificationService {
     input: SendEarlyPaymentNotificationCInput,
   ): Promise<void> {
     const { email, phoneNumber, firstName, alias, link } = input;
+
+    const shouldSendNotification = this.shouldSendNotification({
+      timezone: 'America/Bogota',
+    });
+
+    if (!shouldSendNotification) {
+      return;
+    }
 
     Promise.all([
       this.mailingService.sendEmail({
@@ -86,6 +132,14 @@ export class NotificationService {
   ) {
     const { email, phoneNumber, firstName, link } = input;
 
+    const shouldSendNotification = this.shouldSendNotification({
+      timezone: 'America/Bogota',
+    });
+
+    if (!shouldSendNotification) {
+      return;
+    }
+
     Promise.all([
       this.mailingService.sendEmail({
         templateName: 'BORROWER_LATE_PAYMENT_NOTIFICATION_A',
@@ -107,6 +161,14 @@ export class NotificationService {
     input: SendLatePaymentNotificationBInput,
   ) {
     const { email, phoneNumber, firstName, link } = input;
+
+    const shouldSendNotification = this.shouldSendNotification({
+      timezone: 'America/Bogota',
+    });
+
+    if (!shouldSendNotification) {
+      return;
+    }
 
     Promise.all([
       this.mailingService.sendEmail({
@@ -130,6 +192,14 @@ export class NotificationService {
   ): Promise<void> {
     const { email, phoneNumber, firstName, link } = input;
 
+    const shouldSendNotification = this.shouldSendNotification({
+      timezone: 'America/Bogota',
+    });
+
+    if (!shouldSendNotification) {
+      return;
+    }
+
     Promise.all([
       this.mailingService.sendEmail({
         templateName: 'BORROWER_LATE_PAYMENT_NOTIFICATION_C',
@@ -151,6 +221,14 @@ export class NotificationService {
     input: SendNewInvestmentOpportunityNotificationInput,
   ) {
     const { email, phoneNumber, firstName, loanUid, link } = input;
+
+    const shouldSendNotification = this.shouldSendNotification({
+      timezone: 'America/Bogota',
+    });
+
+    if (!shouldSendNotification) {
+      return;
+    }
 
     Promise.all([
       this.mailingService.sendEmail({
