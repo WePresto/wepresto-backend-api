@@ -489,7 +489,7 @@ export class MovementConsumerService {
 
     try {
       Logger.log(
-        `settleLatePaymentInterest: starting`,
+        `settleLatePaymentInterestConsumer: starting`,
         MovementConsumerService.name,
       );
 
@@ -502,7 +502,7 @@ export class MovementConsumerService {
       const { timeZone } = input;
 
       Logger.log(
-        `settleLatePaymentInterest: getting all loans that are disbursed`,
+        `settleLatePaymentInterestConsumer: getting all loans that are disbursed`,
         MovementConsumerService.name,
       );
 
@@ -514,7 +514,7 @@ export class MovementConsumerService {
       const referenceDate = getReferenceDate(new Date(), timeZone);
 
       Logger.log(
-        `settleLatePaymentInterest: referenceDate: ${referenceDate}`,
+        `settleLatePaymentInterestConsumer: referenceDate: ${referenceDate}`,
         MovementConsumerService.name,
       );
 
@@ -522,7 +522,7 @@ export class MovementConsumerService {
       // and get the movements
       for (const existingLoan of existingLoans) {
         Logger.log(
-          `settleLatePaymentInterest: processing loan ${existingLoan.uid}`,
+          `settleLatePaymentInterestConsumer: processing loan ${existingLoan.uid}`,
           MovementConsumerService.name,
         );
 
@@ -536,7 +536,7 @@ export class MovementConsumerService {
         // if there are no movements, continue
         if (!movements.length) {
           Logger.log(
-            `settleLatePaymentInterest: there are no movements to pay for the loan ${existingLoan.uid}`,
+            `settleLatePaymentInterestConsumer: there are no movements to pay for the loan ${existingLoan.uid}`,
             MovementConsumerService.name,
           );
           continue;
@@ -563,7 +563,7 @@ export class MovementConsumerService {
                 );
 
                 Logger.log(
-                  `settleLatePaymentInterest: the installment ${currentMovement.uid} is overdue for ${daysOverdue} days`,
+                  `settleLatePaymentInterestConsumer: the installment ${currentMovement.uid} is overdue for ${daysOverdue} days`,
                   MovementConsumerService.name,
                 );
 
@@ -602,7 +602,7 @@ export class MovementConsumerService {
                 }
               } else {
                 Logger.log(
-                  `settleLatePaymentInterest: the installment ${currentMovement.uid} is not overdue`,
+                  `settleLatePaymentInterestConsumer: the installment ${currentMovement.uid} is not overdue`,
                   MovementConsumerService.name,
                 );
               }
@@ -620,7 +620,7 @@ export class MovementConsumerService {
         await this.movementRepository.save(overdueInterestMovementsToSave);
 
         Logger.log(
-          `settleLatePaymentInterest: the overdue interest movements were saved for loan ${existingLoan.uid}`,
+          `settleLatePaymentInterestConsumer: the overdue interest movements were saved for loan ${existingLoan.uid}`,
           MovementConsumerService.name,
         );
       }
@@ -643,7 +643,7 @@ export class MovementConsumerService {
       };
     } finally {
       Logger.log(
-        `settleLatePaymentInterest: finished`,
+        `settleLatePaymentInterestConsumer: finished`,
         MovementConsumerService.name,
       );
     }
