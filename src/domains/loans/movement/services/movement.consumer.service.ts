@@ -485,13 +485,20 @@ export class MovementConsumerService {
     queue: `${RABBITMQ_EXCHANGE}.${MovementConsumerService.name}.settle_late_payment_interest`,
   })
   public async settleLatePaymentInterestConsumer(input: any) {
-    const eventMessage = await this.eventMessageService.create({
-      routingKey: `${RABBITMQ_EXCHANGE}.settle_late_payment_interest`,
-      functionName: 'settleLatePaymentInterestConsumer',
-      data: input,
-    });
+    let eventMessage;
 
     try {
+      Logger.log(
+        `settleLatePaymentInterest: starting`,
+        MovementConsumerService.name,
+      );
+
+      eventMessage = await this.eventMessageService.create({
+        routingKey: `${RABBITMQ_EXCHANGE}.settle_late_payment_interest`,
+        functionName: 'settleLatePaymentInterestConsumer',
+        data: input,
+      });
+
       const { timeZone } = input;
 
       Logger.log(
@@ -622,16 +629,23 @@ export class MovementConsumerService {
 
       const message = error.message;
 
-      await this.eventMessageService.setError({
-        id: eventMessage._id,
-        error,
-      });
+      if (eventMessage) {
+        await this.eventMessageService.setError({
+          id: eventMessage._id,
+          error,
+        });
+      }
 
       return {
         status: error.status || 500,
         message,
         data: {},
       };
+    } finally {
+      Logger.log(
+        `settleLatePaymentInterest: finished`,
+        MovementConsumerService.name,
+      );
     }
   }
 }
