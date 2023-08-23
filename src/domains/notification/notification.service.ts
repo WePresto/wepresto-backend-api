@@ -7,6 +7,7 @@ import { MailingService } from '../../plugins/mailing/mailing.service';
 import { AwsSnsService } from '../../plugins/aws-sns/aws-sns.service';
 
 import { isHolidayOrWeekend } from '../../utils/is-holyday-or-weekend.util';
+import { getReferenceDate } from '../../utils';
 
 import { SendEarlyPaymentNotificationAInput } from './dto/send-early-payment-notification-a-input.dto';
 import { SendEarlyPaymentNotificationBInput } from './dto/send-early-payment-notification-b-input.dto';
@@ -16,7 +17,6 @@ import { SendLatePaymentNotificationBInput } from './dto/send-late-payment-notif
 import { SendLatePaymentNotificationCInput } from './dto/send-late-payment-notification-c-input.dto';
 import { SendNewInvestmentOpportunityNotificationInput } from './dto/send-new-investment-opportunity-notification-input.dto';
 import { SendPaymentReceivedNotificationInput } from './dto/send-payment-received-notification-input.dto';
-import { getReferenceDate } from 'src/utils';
 
 @Injectable()
 export class NotificationService {

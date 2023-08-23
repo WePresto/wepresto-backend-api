@@ -30,6 +30,7 @@ import { NotificationModule } from './domains/notification/notification.module';
 import { NequiModule } from './domains/payments/nequi/nequi.module';
 import { PaymentAttemptModule } from './domains/payments/payment-attempt/payment-attempt.module';
 import { WithdrawalModule } from './domains/loans/withdrawal/withdrawal.module';
+import { RetoolModule } from './domains/retool/retool.module';
 
 @Module({
   imports: [
@@ -145,6 +146,8 @@ import { WithdrawalModule } from './domains/loans/withdrawal/withdrawal.module';
     PaymentAttemptModule,
 
     WithdrawalModule,
+
+    RetoolModule,
 
     /* Payments domain */
   ],

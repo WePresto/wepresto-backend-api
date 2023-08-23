@@ -6,6 +6,10 @@ import { Repository } from 'typeorm';
 import appConfig from '../../../../config/app.config';
 
 import { Lender } from '../lender.entity';
+import {
+  Movement,
+  MovementType,
+} from '../../../loans/movement/movement.entity';
 
 import { BaseService } from '../../../../common/base.service';
 
@@ -84,30 +88,36 @@ export class LenderReadService extends BaseService<Lender> {
         );
 
         // get the total collected
-        const totalCollected =
-          loan.movements.reduce((pre, cur) => {
-            const { type, processed, amount } = cur;
+        const totalCollected = loan.movements.reduce((pre, cur) => {
+          const { type, processed, amount } = cur;
 
-            if (type?.includes('PAYMENT') && processed) {
-              return pre + Math.abs(amount);
-            }
+          if (type?.includes('PAYMENT') && processed) {
+            return pre + Math.abs(amount);
+          }
 
-            return pre;
-          }, 0) * participationRate;
+          return pre;
+        }, 0);
 
         // get paid interest
-        const paidInterest =
-          loan.movements.reduce((pre, cur) => {
-            const { interest, paid } = cur;
+        const paidInterest = loan.movements.reduce((pre, cur: Movement) => {
+          const { type, amount, interest, paid } = cur;
+          if (!paid) return pre;
+          else if (type === MovementType.LOAN_INSTALLMENT)
+            return pre + interest;
+          else if (type === MovementType.OVERDUE_INTEREST) return pre + amount;
 
-            return pre + (paid ? interest : 0);
-          }, 0) * participationRate;
+          return pre;
+        }, 0);
 
         return {
           totalInvested: pre.totalInvested + amount,
-          totalPrincipal: pre.totalPrincipal + (totalCollected - paidInterest),
-          totalInterest: pre.totalInterest + paidInterest,
-          totalCollected: pre.totalCollected + totalCollected,
+          totalPrincipal:
+            pre.totalPrincipal +
+            totalCollected * participationRate -
+            paidInterest * participationRate,
+          totalInterest: pre.totalInterest + paidInterest * participationRate,
+          totalCollected:
+            pre.totalCollected + totalCollected * participationRate,
         };
       },
       {
@@ -185,24 +195,25 @@ export class LenderReadService extends BaseService<Lender> {
       }, 0);
 
       // get the total collected
-      const totalCollected =
-        loan.movements.reduce((pre, cur) => {
-          const { type, processed, amount } = cur;
+      const totalCollected = loan.movements.reduce((pre, cur) => {
+        const { type, processed, amount } = cur;
 
-          if (type?.includes('PAYMENT') && processed) {
-            return pre + Math.abs(amount);
-          }
+        if (type?.includes('PAYMENT') && processed) {
+          return pre + Math.abs(amount);
+        }
 
-          return pre;
-        }, 0) * participationRate;
+        return pre;
+      }, 0);
 
       // get paid interest
-      const paidInterest =
-        loan.movements.reduce((pre, cur) => {
-          const { interest, paid } = cur;
+      const paidInterest = loan.movements.reduce((pre, cur: Movement) => {
+        const { type, amount, interest, paid } = cur;
+        if (!paid) return pre;
+        else if (type === MovementType.LOAN_INSTALLMENT) return pre + interest;
+        else if (type === MovementType.OVERDUE_INTEREST) return pre + amount;
 
-          return pre + (paid ? interest : 0);
-        }, 0) * participationRate;
+        return pre;
+      }, 0);
 
       return {
         ...loanParticipation,
@@ -216,9 +227,11 @@ export class LenderReadService extends BaseService<Lender> {
           term: loan.term,
           annualInterestRate: loan.annualInterestRate,
           annualInterestOverdueRate: loan.annualInterestOverdueRate,
-          totalCollected: totalCollected,
-          paidInterest: paidInterest,
-          paidPrincipal: totalCollected - paidInterest,
+          totalCollected: totalCollected * participationRate,
+          paidInterest: paidInterest * participationRate,
+          paidPrincipal:
+            totalCollected * participationRate -
+            paidInterest * participationRate,
         },
       };
     });

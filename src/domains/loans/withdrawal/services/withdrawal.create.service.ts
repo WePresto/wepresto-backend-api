@@ -16,10 +16,11 @@ import { WithdrawalReadService } from './withdrawal.read.service';
 import { WeprestoSlackService } from '../../../../plugins/wepresto-slack/wepresto-slack.service';
 import { LenderService } from '../../../users/lender/services/lender.service';
 
+import { getCommisionPercentageByCountry } from '../../../../utils/get-commision-percentage-by-country';
+
 import { RequestWithdrawalInput } from '../dto/request-withdrawal-input.dto';
 
 const MINIMUM_WITHDRAWAL_AMOUNT = 100000;
-const COMISSION_PERCENTAGE = 0.025;
 
 @Injectable()
 export class WithdrawalCreateService {
@@ -67,8 +68,8 @@ export class WithdrawalCreateService {
     // create the withdrawal
     const createdWithdrawal = await this.withdrawalRepository.create({
       amount,
-      depositAmount: amount - amount * COMISSION_PERCENTAGE,
-      comissionAmount: amount * COMISSION_PERCENTAGE,
+      depositAmount: amount - amount * getCommisionPercentageByCountry('CO'),
+      comissionAmount: amount * getCommisionPercentageByCountry('CO'),
       lender: existingLender,
       status: WithdrawalStatus.REQUESTED,
       accountInfo: {

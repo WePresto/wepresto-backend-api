@@ -1,11 +1,5 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsEnum,
-  IsNumber,
-  IsOptional,
-  IsString,
-  IsUUID,
-} from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEnum, IsNumber, IsString, IsUUID } from 'class-validator';
 
 import { LoanTerm } from '../loan.entity';
 
@@ -35,7 +29,7 @@ export class ApplyLoanInput {
   })
   readonly term: number;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     example: '5f9f1c1b0e1c0c0c0c0c0c0c',
   })
   @IsString()
