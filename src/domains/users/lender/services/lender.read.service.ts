@@ -189,9 +189,15 @@ export class LenderReadService extends BaseService<Lender> {
 
       // get interest
       const interest = loan.movements.reduce((pre, cur) => {
-        const { interest } = cur;
+        const { type, interest, amount } = cur;
 
-        return pre + interest;
+        if (type === MovementType.LOAN_INSTALLMENT) {
+          return pre + interest;
+        } else if (type === MovementType.OVERDUE_INTEREST) {
+          return pre + amount;
+        }
+
+        return pre;
       }, 0);
 
       // get the total collected
