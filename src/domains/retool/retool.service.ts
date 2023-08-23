@@ -61,7 +61,7 @@ export class RetoolService {
           ) {
             return pre + +cur.movement_amount;
           } else if (
-            cur.movement_type === MovementType.LOAN_INSTALLMENT &&
+            cur.movement_type === MovementType.OVERDUE_INTEREST &&
             !cur.movement_paid
           ) {
             return pre + +cur.movement_amount;
