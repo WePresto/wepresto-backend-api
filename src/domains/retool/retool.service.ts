@@ -5,7 +5,7 @@ import { EntityManager } from 'typeorm';
 
 import appConfig from '../../config/app.config';
 
-import { LoanStatus } from '../loans/loan/loan.entity';
+import { Loan, LoanStatus } from '../loans/loan/loan.entity';
 import { MovementType } from '../loans/movement/movement.entity';
 
 import { getCommisionPercentageByCountry } from '../../utils/get-commision-percentage-by-country';
@@ -32,7 +32,7 @@ export class RetoolService {
       'inner join borrower b on l.borrower_id = b.id ' +
       'inner join "user" u on b.user_id = u.id ' +
       'where 1 = 1 ' +
-      `and l.status in ('${LoanStatus.DISBURSED}') ` +
+      `and l.status in ('${LoanStatus.DISBURSED}', '${LoanStatus.PAID}') ` +
       'order by l.start_date asc;';
 
     const movementsQuery =
@@ -40,7 +40,9 @@ export class RetoolService {
       'm.loan_id as movement_loan_id, ' +
       'm.amount as movement_amount, ' +
       'm.type as movement_type, ' +
-      'm.paid as movement_paid ' +
+      'm.paid as movement_paid, ' +
+      'm.movement_date as movement_date, ' +
+      'm.due_date as  movement_due_date ' +
       'from movement m ' +
       'where 1 = 1 ' +
       'and m.delete_at is null';
@@ -51,31 +53,59 @@ export class RetoolService {
     ]);
 
     const response = loans.map((loan) => {
-      const movementsTotalAmount = movements.reduce((pre, cur) => {
+      // determine the earnings by year
+      const earningsByYearObj = movements.reduce((pre, cur) => {
         if (cur.movement_loan_id === loan.loan_id) {
+          const { movement_date, movement_due_date } = cur;
+          const dateToUse: Date = movement_date || movement_due_date;
+          const movementYear = dateToUse.getFullYear();
+
           if (cur.movement_type.includes(MovementType.PAYMENT)) {
-            return pre + Math.abs(+cur.movement_amount);
+            return {
+              ...pre,
+              [movementYear]:
+                (pre[movementYear] ?? 0) +
+                Math.abs(+cur.movement_amount) *
+                  getCommisionPercentageByCountry('CO'),
+            };
           } else if (
             cur.movement_type === MovementType.LOAN_INSTALLMENT &&
             !cur.movement_paid
           ) {
-            return pre + +cur.movement_amount;
+            return {
+              ...pre,
+              [movementYear]:
+                (pre[movementYear] ?? 0) +
+                +cur.movement_amount * getCommisionPercentageByCountry('CO'),
+            };
           } else if (
             cur.movement_type === MovementType.OVERDUE_INTEREST &&
             !cur.movement_paid
           ) {
-            return pre + +cur.movement_amount;
+            return {
+              ...pre,
+              [movementYear]:
+                (pre[movementYear] ?? 0) +
+                +cur.movement_amount * getCommisionPercentageByCountry('CO'),
+            };
           }
         }
         return pre;
-      }, 0);
-
-      const movementEarnings =
-        movementsTotalAmount * getCommisionPercentageByCountry('CO');
+      }, {});
+      let earningsByYearObjectArray = [];
+      for (const key in earningsByYearObj) {
+        earningsByYearObjectArray = [
+          ...earningsByYearObjectArray,
+          {
+            year: key,
+            amount: earningsByYearObj[key],
+          },
+        ];
+      }
 
       return {
         ...loan,
-        loan_expected_earnings: +loan.loan_platform_fee + movementEarnings,
+        loan_expected_earnings: earningsByYearObjectArray,
       };
     });
 
