@@ -5,10 +5,10 @@
 
 // const holidayApi = new HolidayAPI({ key: process.env.HOLIDAY_API_KEY });
 
-export const isHolidayOrWeekend = async (
+export const isHolidayOrWeekend = (
   countryCode: string,
   date: Date,
-): Promise<boolean> => {
+): boolean => {
   // const year = date.getFullYear();
   // const month = date.getMonth() + 1;
   // const day = date.getDate();
