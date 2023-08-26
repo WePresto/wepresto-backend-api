@@ -38,7 +38,7 @@ export class NotificationService {
     if (currentDateIsHolidayOrWeekend) {
       Logger.log(
         `Current date is holiday or weekend, no notification will be sent`,
-        NotificationService.name,
+        NotificationService.name + '.shouldSendNotification',
       );
       return false;
     }

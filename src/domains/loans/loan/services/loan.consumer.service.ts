@@ -56,8 +56,8 @@ export class LoanConsumerService {
       const { loanUid } = input;
 
       Logger.log(
-        `loanDisbursementConsumer: loan ${loanUid} received`,
-        LoanConsumerService.name,
+        `loan ${loanUid} received`,
+        LoanConsumerService.name + '.loanDisbursementConsumer',
       );
 
       // get the loan
@@ -95,8 +95,8 @@ export class LoanConsumerService {
       await this.loanRepository.save(preloadedLoan);
 
       Logger.log(
-        `loanDisbursementConsumer: loan ${loanUid} disbursement completed`,
-        LoanConsumerService.name,
+        `loan ${loanUid} disbursement completed`,
+        LoanConsumerService.name + '.loanDisbursementConsumer',
       );
     } catch (error) {
       console.error(error);
@@ -132,8 +132,8 @@ export class LoanConsumerService {
       const { loanUid } = input;
 
       Logger.log(
-        `loanApplicationConsumer: loan ${loanUid} received`,
-        LoanConsumerService.name,
+        `loan ${loanUid} received`,
+        LoanConsumerService.name + '.loanApplicationConsumer',
       );
 
       // get the loan
@@ -249,8 +249,9 @@ export class LoanConsumerService {
             break;
           default:
             Logger.log(
-              `number of days to due date: ${numberOfDays}, loan: ${loan.uid} has no early payment notification to send`,
-              LoanConsumerService.name,
+              `number of days to due date ${numberOfDays}, loan ${loan.uid} has no early payment notification to send`,
+              LoanConsumerService.name +
+                '.sendEarlyPaymentNotificationsConsumer',
             );
             break;
         }
@@ -282,8 +283,8 @@ export class LoanConsumerService {
     } = this.appConfiguration;
 
     Logger.log(
-      'sendLatePaymentNotifications: started',
-      LoanConsumerService.name,
+      'started',
+      LoanConsumerService.name + '.sendLatePaymentNotificationsConsumer',
     );
 
     const eventMessage = await this.eventMessageService.create({
@@ -315,8 +316,8 @@ export class LoanConsumerService {
 
       if (!filteredLoans.length) {
         Logger.log(
-          'sendLatePaymentNotifications: there are no loans in overdue',
-          LoanConsumerService.name,
+          'there are no loans in overdue',
+          LoanConsumerService.name + '.sendLatePaymentNotificationsConsumer',
         );
         return;
       }
@@ -340,8 +341,8 @@ export class LoanConsumerService {
 
         if (numberOfDays === 1) {
           Logger.log(
-            `sendLatePaymentNotifications: sending notification A to loan ${loan.uid}`,
-            LoanConsumerService.name,
+            `sending notification A to loan ${loan.uid}`,
+            LoanConsumerService.name + '.sendLatePaymentNotificationsConsumer',
           );
           await this.notificationService.sendLatePaymentNotificationA({
             email: loan.borrower.user.email,
@@ -351,8 +352,8 @@ export class LoanConsumerService {
           });
         } else if (numberOfDays === 3) {
           Logger.log(
-            `sendLatePaymentNotifications: sending notification B to loan ${loan.uid}`,
-            LoanConsumerService.name,
+            `sending notification B to loan ${loan.uid}`,
+            LoanConsumerService.name + '.sendLatePaymentNotificationsConsumer',
           );
 
           await this.notificationService.sendLatePaymentNotificationB({
@@ -363,8 +364,8 @@ export class LoanConsumerService {
           });
         } else if (numberOfDays === 5) {
           Logger.log(
-            `sendLatePaymentNotifications: sending notification C to loan ${loan.uid}`,
-            LoanConsumerService.name,
+            `sending notification C to loan ${loan.uid}`,
+            LoanConsumerService.name + '.sendLatePaymentNotificationsConsumer',
           );
 
           await this.notificationService.sendLatePaymentNotificationC({
@@ -375,8 +376,8 @@ export class LoanConsumerService {
           });
         } else if (numberOfDays > 5) {
           Logger.log(
-            `sendLatePaymentNotifications: sending slack message to start collection management to loan ${loan.uid}`,
-            LoanConsumerService.name,
+            `sending slack message to start collection management to loan ${loan.uid}`,
+            LoanConsumerService.name + '.sendLatePaymentNotificationsConsumer',
           );
 
           await this.weprestoSlackService.sendStartCollectionManagement({
@@ -393,8 +394,8 @@ export class LoanConsumerService {
           });
         } else {
           Logger.log(
-            `sendLatePaymentNotifications: number of days in due date: ${numberOfDays}, loan: ${loan.uid} has no late payment notification to send`,
-            LoanConsumerService.name,
+            `number of days in due date: ${numberOfDays}, loan: ${loan.uid} has no late payment notification to send`,
+            LoanConsumerService.name + '.sendLatePaymentNotificationsConsumer',
           );
         }
       }
@@ -415,8 +416,8 @@ export class LoanConsumerService {
       };
     } finally {
       Logger.log(
-        `sendLatePaymentNotifications: completed`,
-        LoanConsumerService.name,
+        `completed`,
+        LoanConsumerService.name + '.sendLatePaymentNotificationsConsumer',
       );
     }
   }
@@ -434,13 +435,13 @@ export class LoanConsumerService {
 
     if (environment === 'local') {
       Logger.log(
-        'loanInFundingConsumer: skipped because environment is local',
-        LoanConsumerService.name,
+        'skipped because environment is local',
+        LoanConsumerService.name + '.loanInFundingConsumer',
       );
       return;
     }
 
-    Logger.log('loanInFundingConsumer: started', LoanConsumerService.name);
+    Logger.log('started', LoanConsumerService.name + '.loanInFundingConsumer');
 
     const eventMessage = await this.eventMessageService.create({
       routingKey: `${RABBITMQ_EXCHANGE}.loan_in_funding`,
@@ -452,8 +453,8 @@ export class LoanConsumerService {
       const { loanUid } = input;
 
       Logger.log(
-        `loanInFundingConsumer: loan ${loanUid} received`,
-        LoanConsumerService.name,
+        `loan ${loanUid} received`,
+        LoanConsumerService.name + '.loanInFundingConsumer',
       );
 
       const [{ borrower }, { lenders }] = await Promise.all([
@@ -480,8 +481,8 @@ export class LoanConsumerService {
         // sending new investment notification to each lender
         ...lenders.map(async (lender) => {
           Logger.log(
-            `loanInFundingConsumer: sending new investment notification to lender ${lender.uid}`,
-            LoanConsumerService.name,
+            `sending new investment notification to lender ${lender.uid}`,
+            LoanConsumerService.name + '.loanInFundingConsumer',
           );
 
           await this.notificationService.sendNewInvestmentOpportunityNotification(
@@ -511,7 +512,10 @@ export class LoanConsumerService {
         data: {},
       };
     } finally {
-      Logger.log(`loanInFundingConsumer: completed`, LoanConsumerService.name);
+      Logger.log(
+        `completed`,
+        LoanConsumerService.name + '.loanInFundingConsumer',
+      );
     }
   }
 }

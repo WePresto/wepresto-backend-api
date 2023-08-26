@@ -26,16 +26,7 @@ export const isHolidayOrWeekend = (
     day,
   });
   */
-  // eslint-disable-next-line no-console
-  console.log('isHolidayOrWeekend');
-  // eslint-disable-next-line no-console
-  console.log('date:', date);
-
   const dayOfWeek = date.getDay();
-  // eslint-disable-next-line no-console
-  console.log('dayOfWeek:', dayOfWeek);
-  // eslint-disable-next-line no-console
-  console.log('---');
 
   // eslint-disable-next-line prettier/prettier
   // const dateToCompare = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
