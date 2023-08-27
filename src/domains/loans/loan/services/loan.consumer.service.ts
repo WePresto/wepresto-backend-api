@@ -380,7 +380,7 @@ export class LoanConsumerService {
             LoanConsumerService.name + '.sendLatePaymentNotificationsConsumer',
           );
 
-          await this.weprestoSlackService.sendStartCollectionManagement({
+          await this.weprestoSlackService.sendStartCollectionManagementMessage({
             loan: {
               ...loan,
               dueDate: formatDate(dueDate),

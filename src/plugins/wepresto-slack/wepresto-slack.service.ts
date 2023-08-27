@@ -4,7 +4,8 @@ import { WebClient } from '@slack/web-api';
 
 import appConfig from '../../config/app.config';
 
-import { formatCurrency, formatDateTime } from '../../utils';
+import { formatCurrency, formatDateTime, getReferenceDate } from '../../utils';
+import { isHolidayOrWeekend } from '../../utils/is-holyday-or-weekend.util';
 
 import { SendNewLoanApplicationMessageInput } from './dto/send-new-loan-application-input.dto';
 import { SendNewWithdrawalRequestMessageInput } from './dto/send-new-withdrawal-request-message-input.dto';
@@ -23,6 +24,25 @@ export class WeprestoSlackService {
     } = this.appConfiguration;
 
     this.webClient = new WebClient(token);
+  }
+
+  private shouldSendMessage({ timezone }: { timezone: string }) {
+    const currentReferenceDate = getReferenceDate(new Date(), timezone);
+
+    const currentDateIsHolidayOrWeekend = isHolidayOrWeekend(
+      'CO', // TODO: Get country code based on timezone
+      currentReferenceDate,
+    );
+
+    if (currentDateIsHolidayOrWeekend) {
+      Logger.log(
+        `current date is holiday or weekend, no notification will be sent`,
+        WeprestoSlackService.name + '.shouldSendNotification',
+      );
+      return false;
+    }
+
+    return true;
   }
 
   public async sendNewLoanApplicationMessage(
@@ -94,15 +114,23 @@ export class WeprestoSlackService {
     );
   }
 
-  public async sendStartCollectionManagement(
+  public async sendStartCollectionManagementMessage(
     input: SendStartCollectionManagementInput,
   ) {
     const { loan } = input;
 
     Logger.log(
       `sending start collection management message to slack`,
-      WeprestoSlackService.name,
+      WeprestoSlackService.name + '.sendStartCollectionManagementMessage',
     );
+
+    const shouldSendMessage = this.shouldSendMessage({
+      timezone: 'America/Bogota',
+    });
+
+    if (!shouldSendMessage) {
+      return;
+    }
 
     const message =
       '<!here> *Start Collection Management* :moneybag: \n' +
