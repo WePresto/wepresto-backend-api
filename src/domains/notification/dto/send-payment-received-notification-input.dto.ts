@@ -8,4 +8,6 @@ export class SendPaymentReceivedNotificationInput {
   readonly loanUid: string;
 
   readonly paymentAmount: string;
+
+  readonly loanAlias?: string;
 }

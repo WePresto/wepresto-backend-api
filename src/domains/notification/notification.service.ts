@@ -251,7 +251,12 @@ export class NotificationService {
   public async sendPaymentReceivedNotification(
     input: SendPaymentReceivedNotificationInput,
   ) {
-    const { email, phoneNumber, firstName, loanUid, paymentAmount } = input;
+    const { email, phoneNumber, firstName, loanUid, paymentAmount, loanAlias } =
+      input;
+
+    const loanName = loanAlias
+      ? `${loanUid.split('-')[4]} - ${loanAlias}`
+      : loanUid.split('-')[4];
 
     Promise.all([
       this.mailingService.sendEmail({
@@ -260,13 +265,13 @@ export class NotificationService {
         to: email,
         parameters: {
           firstName,
-          loanUid,
+          loanName,
           paymentAmount,
         },
       }),
       this.awsSnsService.sendSms({
         phoneNumber,
-        message: `${firstName}, muchas gracias! Hemos recibido tu pago por ${paymentAmount}, puedes ir a WePresto y revisarlo`,
+        message: `${firstName}, muchas gracias! Hemos recibido el pago por ${paymentAmount}, puedes ir a WePresto y revisarlo`,
       }),
     ]);
   }

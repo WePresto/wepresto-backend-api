@@ -27,7 +27,7 @@
           Hola {{firstName}}! 👋🏻
         </mj-text>
         <mj-text>
-          Hemos recibido tú pago, para el préstamo {{loanUid}}, por un valor de:
+          Hemos recibido un pago, para tú préstamo {{loanName}}, por un valor de:
         </mj-text>
         <mj-text font-weight="bold">
           {{paymentAmount}}
