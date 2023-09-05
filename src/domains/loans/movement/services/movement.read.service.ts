@@ -182,6 +182,11 @@ export class MovementReadService extends BaseService<Movement> {
         return true;
       })
       .sort((a, b) => {
+        if (a.movementDate)
+          a.movementDate.setSeconds(a.movementDate.getSeconds() + 1);
+        if (b.movementDate)
+          b.movementDate.setSeconds(b.movementDate.getSeconds() + 1);
+
         const aDate = a.dueDate ?? a.movementDate;
         const bDate = b.dueDate ?? b.movementDate;
 

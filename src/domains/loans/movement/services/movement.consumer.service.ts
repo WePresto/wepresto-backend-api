@@ -115,7 +115,7 @@ export class MovementConsumerService {
       phoneNumber: `+57${borrower.user.phoneNumber}`,
       firstName: borrower.user.fullName.split(' ')[0],
       loanUid: loan.uid,
-      paymentAmount: formatCurrency(existingPayment.amount),
+      paymentAmount: formatCurrency(Math.abs(existingPayment.amount)),
     });
   }
 
@@ -135,8 +135,8 @@ export class MovementConsumerService {
       const { movementUid, base64File } = input;
 
       Logger.log(
-        `paymentCreatedConsumer. payment ${movementUid} received`,
-        MovementConsumerService.name,
+        `payment ${movementUid} received`,
+        MovementConsumerService.name + '.paymentCreatedConsumer',
       );
 
       // get the movement
@@ -171,8 +171,12 @@ export class MovementConsumerService {
       });
 
       Logger.log(
-        `paymentCreatedConsumer. minimumPaymentAmount: ${minimumPaymentAmount} minimalMovementsToPay: ${minimalMovementsToPay.length}`,
-        MovementConsumerService.name,
+        `minimum payment amount: ${minimumPaymentAmount}`,
+        MovementConsumerService.name + '.paymentCreatedConsumer',
+      );
+      Logger.log(
+        `minimal movements to pay: ${minimalMovementsToPay.length}`,
+        MovementConsumerService.name + '.paymentCreatedConsumer',
       );
 
       // check if the payment is enough
@@ -196,16 +200,16 @@ export class MovementConsumerService {
       );
 
       Logger.log(
-        `paymentCreatedConsumer. minimalMovementsToPay: ${minimalMovementsToPay.length} are now paid`,
-        MovementConsumerService.name,
+        `minimal movements to pay: ${minimalMovementsToPay.length} are now paid`,
+        MovementConsumerService.name + '.paymentCreatedConsumer',
       );
 
       let comment;
 
       // if the payment is greater or equal than the minimum amount to pay
       Logger.log(
-        `paymentCreatedConsumer. the payment ${existingPayment.uid} is greater or equal than the minimum amount to pay`,
-        MovementConsumerService.name,
+        `the payment ${existingPayment.uid} is greater or equal than the minimum amount to pay`,
+        MovementConsumerService.name + '.paymentCreatedConsumer',
       );
 
       // get the missing installments to pay  (if any)
@@ -218,8 +222,8 @@ export class MovementConsumerService {
       });
 
       Logger.log(
-        `paymentCreatedConsumer. missingInstallments: ${missingInstallments.length}`,
-        MovementConsumerService.name,
+        `missing installments: ${missingInstallments.length}`,
+        MovementConsumerService.name + '.paymentCreatedConsumer',
       );
 
       // get the total principal amount of the loan
@@ -229,21 +233,21 @@ export class MovementConsumerService {
       );
 
       Logger.log(
-        `paymentCreatedConsumer. totalPrincipalDebt: ${totalPrincipalDebt}`,
-        MovementConsumerService.name,
+        `total principal debt: ${totalPrincipalDebt}`,
+        MovementConsumerService.name + '.paymentCreatedConsumer',
       );
 
       // determine the amount to re calculate the installments
-      const newPrincipalDebt =
+      const newTotalPrincipalDebt =
         totalPrincipalDebt -
         (Math.abs(existingPayment.amount) - minimumPaymentAmount);
 
       Logger.log(
-        `paymentCreatedConsumer. newPrincipalDebt: ${newPrincipalDebt}`,
-        MovementConsumerService.name,
+        `new total principal debt: ${newTotalPrincipalDebt}`,
+        MovementConsumerService.name + '.paymentCreatedConsumer',
       );
 
-      if (newPrincipalDebt > getAmountToForgive('CO')) {
+      if (newTotalPrincipalDebt > getAmountToForgive('CO')) {
         // if the new principal debt is greater than the amount to forgive
         // means the loan is not paid yet
 
@@ -253,14 +257,14 @@ export class MovementConsumerService {
           // IF THE EXTRA PAYMENT IS TO REDUCE THE NUMBER OF THE INSTALLMENTS
 
           Logger.log(
-            `paymentCreatedConsumer. the payment ${existingPayment.uid} is to reduce the number of the installments`,
-            MovementConsumerService.name,
+            `the payment ${existingPayment.uid} is to reduce the number of the installments`,
+            MovementConsumerService.name + '.paymentCreatedConsumer',
           );
 
           newInstallments = [];
 
           // distribute the new principal debt to the missing installments
-          let newPrincipalDebtInInstallments = newPrincipalDebt;
+          let newPrincipalDebtInInstallments = newTotalPrincipalDebt;
           for (let i = 0; i < missingInstallments.length; i++) {
             const installment = missingInstallments[i];
 
@@ -316,8 +320,8 @@ export class MovementConsumerService {
           MovementType.PAYMENT_INSTALLMENT_AMOUNT_REDUCTION
         ) {
           Logger.log(
-            `paymentCreatedConsumer. the payment ${existingPayment.uid} is to reduce the amount of the installments`,
-            MovementConsumerService.name,
+            `the payment ${existingPayment.uid} is to reduce the amount of the installments`,
+            MovementConsumerService.name + '.paymentCreatedConsumer',
           );
 
           let referenceDate;
@@ -345,28 +349,28 @@ export class MovementConsumerService {
           }
 
           Logger.log(
-            `paymentCreatedConsumer. referenceDate to calculate the new installments: ${referenceDate}`,
-            MovementConsumerService.name,
+            `referenceDate to calculate the new installments: ${referenceDate}`,
+            MovementConsumerService.name + '.paymentCreatedConsumer',
           );
 
           // get the new installments
           newInstallments =
             await this.frenchAmortizationSystemService.getLoanInstallments({
-              amount: newPrincipalDebt,
+              amount: newTotalPrincipalDebt,
               annualInterestRate: loan.annualInterestRate,
               term: missingInstallments.length,
               referenceDate,
             });
         } else {
           Logger.log(
-            `paymentCreatedConsumer. the payment ${existingPayment.uid} has an invalid type wich is ${existingPayment.type} and is not supported`,
-            MovementConsumerService.name,
+            `the payment ${existingPayment.uid} has an invalid type wich is ${existingPayment.type} and is not supported`,
+            MovementConsumerService.name + '.paymentCreatedConsumer',
           );
         }
 
         Logger.log(
-          `paymentCreatedConsumer. newInstallments: ${newInstallments.length}`,
-          MovementConsumerService.name,
+          `new installments: ${newInstallments.length}`,
+          MovementConsumerService.name + '.paymentCreatedConsumer',
         );
 
         // create the new installments
@@ -389,8 +393,8 @@ export class MovementConsumerService {
         ]);
 
         Logger.log(
-          `paymentCreatedConsumer. the installments were recalculated and saved`,
-          MovementConsumerService.name,
+          `the installments were recalculated and saved`,
+          MovementConsumerService.name + '.paymentCreatedConsumer',
         );
 
         comment = `The payment was greater than the minimum amount to pay, so the installments were recalculated`;
@@ -406,7 +410,7 @@ export class MovementConsumerService {
         // update the loan as paid
         await this.loanService.updateService.pay({
           uid: loan.uid,
-          comment: 'loan is paid',
+          comment: `loan paid with the payment: ${existingPayment.uid}`,
         });
 
         // set the comment
@@ -423,8 +427,8 @@ export class MovementConsumerService {
       await this.movementRepository.save(preloadedPayment);
 
       Logger.log(
-        `paymentCreatedConsumer. the payment ${existingPayment.uid} was processed`,
-        MovementConsumerService.name,
+        `the payment ${existingPayment.uid} was processed`,
+        MovementConsumerService.name + '.paymentCreatedConsumer',
       );
 
       const settledResults = await Promise.allSettled([
@@ -447,18 +451,24 @@ export class MovementConsumerService {
           let message: string;
           switch (index) {
             case 0:
-              message = `paymentCreatedConsumer. the file could not be uploaded:`;
+              message = `the file could not be uploaded:`;
               break;
             case 1:
-              message = `paymentCreatedConsumer. the payment received notification could not be sent:`;
+              message = `the payment received notification could not be sent:`;
               break;
             default:
-              message = `paymentCreatedConsumer. unknown error:`;
+              message = `unknown error:`;
               break;
           }
 
-          Logger.warn(message, MovementConsumerService.name);
-          Logger.warn(settledResult.reason, MovementConsumerService.name);
+          Logger.warn(
+            message,
+            MovementConsumerService.name + '.paymentCreatedConsumer',
+          );
+          Logger.warn(
+            settledResult.reason,
+            MovementConsumerService.name + '.paymentCreatedConsumer',
+          );
         }
       }
     } catch (error) {
