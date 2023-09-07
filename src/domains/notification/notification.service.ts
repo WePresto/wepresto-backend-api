@@ -338,7 +338,7 @@ export class NotificationService {
 
     Promise.all([
       this.mailingService.sendEmail({
-        templateName: 'LENDER_LOAN_PARTICIPATION_RECEIVED',
+        templateName: 'LENDER_LOAN_PARTICIPATION_RECEIVED_NOTIFICATION',
         subject: 'WePresto - Participación recibida',
         to: lenderEmail,
         parameters: {
