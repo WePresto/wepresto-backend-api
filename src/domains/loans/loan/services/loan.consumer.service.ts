@@ -176,6 +176,11 @@ export class LoanConsumerService {
       app: { selftWebUrl },
     } = this.appConfiguration;
 
+    Logger.log(
+      'started',
+      LoanConsumerService.name + '.sendEarlyPaymentNotificationsConsumer',
+    );
+
     const eventMessage = await this.eventMessageService.create({
       routingKey: `${RABBITMQ_EXCHANGE}.send_early_payment_notifications`,
       functionName: 'sendEarlyPaymentNotificationsConsumer',
@@ -269,6 +274,11 @@ export class LoanConsumerService {
         message,
         data: {},
       };
+    } finally {
+      Logger.log(
+        `completed`,
+        LoanConsumerService.name + '.sendEarlyPaymentNotificationsConsumer',
+      );
     }
   }
 
