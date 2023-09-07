@@ -122,7 +122,7 @@ export class NotificationService {
       }),
       this.awsSnsService.sendSms({
         phoneNumber,
-        message: `${firstName}, hoy es el último día para realizar el pago de tu cuota. Ingresa a WePreso para realizar el pago :)`,
+        message: `[WePresto] ${firstName}, hoy es el último día para realizar el pago de tu cuota. Ingresa para realizar el pago :)`,
       }),
     ]);
   }
@@ -152,7 +152,7 @@ export class NotificationService {
       }),
       this.awsSnsService.sendSms({
         phoneNumber,
-        message: `${firstName}, tú prestamo está en mora. Ingresa a WePreso para obtener más información y realizar el pago`,
+        message: `[WePresto] ${firstName}, tú prestamo está en mora. Ingresa para obtener más información y realizar el pago`,
       }),
     ]);
   }
@@ -182,7 +182,7 @@ export class NotificationService {
       }),
       this.awsSnsService.sendSms({
         phoneNumber,
-        message: `${firstName}, tú prestamo está en mora. Ve a WePresto, obtén más información y animáte a realizar el pago minimo`,
+        message: `[WePresto] ${firstName}, tú prestamo está en mora. Ingresa, obtén más información y animáte a realizar el pago minimo`,
       }),
     ]);
   }
@@ -212,7 +212,7 @@ export class NotificationService {
       }),
       this.awsSnsService.sendSms({
         phoneNumber,
-        message: `${firstName}, tú prestamo está en mora. Ve a WePresto, comunicate con nosotros si tienes inconvenientes`,
+        message: `[WePresto] ${firstName}, tú prestamo está en mora. Ingresa y comunicate con nosotros si tienes inconvenientes`,
       }),
     ]);
   }
@@ -243,7 +243,7 @@ export class NotificationService {
       }),
       this.awsSnsService.sendSms({
         phoneNumber,
-        message: `${firstName}, hay una nueva oportunidad de inversión. Ve a la opción de Oportunidades, puede interesarte ;)`,
+        message: `[WePresto] ${firstName}, hay una nueva oportunidad de inversión. Ve a la opción de Oportunidades, puede interesarte ;)`,
       }),
     ]);
   }
@@ -271,7 +271,7 @@ export class NotificationService {
       }),
       this.awsSnsService.sendSms({
         phoneNumber,
-        message: `${firstName}, muchas gracias! Hemos recibido el pago por ${paymentAmount}, puedes ir a WePresto y revisarlo`,
+        message: `[WePresto] ${firstName}, muchas gracias! Hemos recibido el pago por ${paymentAmount}, puedes ingresar y revisarlo`,
       }),
     ]);
   }
@@ -281,7 +281,7 @@ export class NotificationService {
 
     await this.awsSnsService.sendSms({
       phoneNumber,
-      message: `${firstName}, tu préstamo ha sido publicado y está en proceso de financiación. Te notificaremos cuando esté listo`,
+      message: `[WePresto] ${firstName}, tu préstamo ha sido publicado y está en proceso de financiación. Te notificaremos cuando esté listo`,
     });
   }
 }
