@@ -150,7 +150,7 @@ export class RabbitMQLocalService {
     Logger.log(
       `message published to exchange ${exchangeName} ` +
         `for routing key ${routingKey} with input: ${JSON.stringify(input)}`,
-      RabbitMQLocalService.name + 'publishLoanParticipationCreated',
+      RabbitMQLocalService.name + '.publishLoanParticipationCreated',
     );
   }
 
