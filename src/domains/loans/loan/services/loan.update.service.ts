@@ -18,6 +18,7 @@ import { RejectLoanInput } from '../dto/reject-loan-input.dto';
 import { ApproveLoanInput } from '../dto/approve-loan-input.dto';
 import { DisburseLoanInput } from '../dto/disburse-loan-input.dto';
 import { FundLoanInput } from '../dto/fund-loan-input.dto';
+import { PayLoanInput } from '../dto/pay-loan-input.dto';
 
 @Injectable()
 export class LoanUpdateService {
@@ -51,6 +52,11 @@ export class LoanUpdateService {
     });
 
     const savedLoan = await this.loanRepository.save(preloadedLoan);
+
+    // publish loan in review event
+    await this.rabbitMQLocalService.publishLoanInReview({
+      loanUid: savedLoan.uid,
+    });
 
     return savedLoan;
   }
@@ -168,7 +174,7 @@ export class LoanUpdateService {
     return savedLoan;
   }
 
-  public async pay(input: any) {
+  public async pay(input: PayLoanInput) {
     const { uid, comment } = input;
 
     // get loan

@@ -12,6 +12,7 @@ import { PublishSettleLatePaymentInterestInput } from './dto/publish-settle-late
 import { PublishWithdrawalCompletedInput } from './dto/publish-withdrawal-completed-input.dto';
 import { PublishLoanParticipationCreatedInput } from './dto/publish-loan-participation-created-input.dto';
 import { PublishLoanInFundingInput } from './dto/publish-loan-in-funding-input.dto';
+import { PublishLoanInReviewInput } from './dto/publish-loan-in-review-input.dto';
 
 @Injectable()
 export class RabbitMQLocalService {
@@ -180,6 +181,22 @@ export class RabbitMQLocalService {
       `message published to exchange ${this.exchangeName} ` +
         `for routing key ${routingKey} with input: ${JSON.stringify(input)}`,
       RabbitMQLocalService.name + '.publishLoanInFunding',
+    );
+  }
+
+  public async publishLoanInReview(input: PublishLoanInReviewInput) {
+    const { loanUid } = input;
+
+    const routingKey = `${this.exchangeName}.loan_in_review`;
+
+    await this.amqpConnection.publish(this.exchangeName, routingKey, {
+      loanUid,
+    });
+
+    Logger.log(
+      `message published to exchange ${this.exchangeName} ` +
+        `for routing key ${routingKey} with input: ${JSON.stringify(input)}`,
+      RabbitMQLocalService.name + '.publishLoanInReview',
     );
   }
 }

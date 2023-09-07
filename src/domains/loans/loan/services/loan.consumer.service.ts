@@ -501,11 +501,14 @@ export class LoanConsumerService {
 
       const message = error.message;
 
-      await this.eventMessageService.setError({
-        id: eventMessage._id,
-        error,
-      });
-
+      this.eventMessageService
+        .setError({
+          id: eventMessage._id,
+          error,
+        })
+        .catch((error) => {
+          console.error(error);
+        });
       return {
         status: error.status || 500,
         message,
@@ -515,6 +518,81 @@ export class LoanConsumerService {
       Logger.log(
         `completed`,
         LoanConsumerService.name + '.loanInFundingConsumer',
+      );
+    }
+  }
+
+  @RabbitRPC({
+    exchange: RABBITMQ_EXCHANGE,
+    routingKey: `${RABBITMQ_EXCHANGE}.loan_in_review`,
+    queue: `${RABBITMQ_EXCHANGE}.${LoanConsumerService.name}.`,
+  })
+  public async loanInReviewConsumer(input: any) {
+    const { environment } = this.appConfiguration;
+
+    if (environment === 'local') {
+      Logger.log(
+        'skipped because environment is local',
+        LoanConsumerService.name + '.loanInFundingConsumer',
+      );
+      return;
+    }
+
+    Logger.log('started', LoanConsumerService.name + '.loanInReviewConsumer');
+
+    const eventMessage = await this.eventMessageService.create({
+      routingKey: `${RABBITMQ_EXCHANGE}.loan_in_review`,
+      functionName: 'loanInReviewConsumer',
+      data: input || {},
+    });
+
+    try {
+      const { loanUid } = input;
+
+      Logger.log(
+        `loan ${loanUid} received`,
+        LoanConsumerService.name + '.loanInReviewConsumer',
+      );
+
+      // get the loan with its borrower
+      const existingLoan = await this.loanRepository
+        .createQueryBuilder('loan')
+        .innerJoinAndSelect('loan.borrower', 'borrower')
+        .innerJoinAndSelect('borrower.user', 'user')
+        .where('loan.uid = :uid', { uid: loanUid })
+        .getOne();
+
+      // sending the the notifications
+      await this.notificationService.sendLoanInReviewNotification({
+        borrowerEmail: existingLoan?.borrower?.user?.email,
+        borrowerPhoneNumber: `+57${existingLoan?.borrower?.user?.phoneNumber}`,
+        borrowerFirstName: existingLoan?.borrower?.user?.fullName.split(' ')[0],
+        loanUid: existingLoan.uid,
+        loanAlias: existingLoan.alias,
+      });
+    } catch (error) {
+      console.error(error);
+
+      const message = error.message;
+
+      this.eventMessageService
+        .setError({
+          id: eventMessage._id,
+          error,
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+
+      return {
+        status: error.status || 500,
+        message,
+        data: {},
+      };
+    } finally {
+      Logger.log(
+        `completed`,
+        LoanConsumerService.name + '.loanInReviewConsumer',
       );
     }
   }

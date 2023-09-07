@@ -17,6 +17,8 @@ import { SendLatePaymentNotificationBInput } from './dto/send-late-payment-notif
 import { SendLatePaymentNotificationCInput } from './dto/send-late-payment-notification-c-input.dto';
 import { SendNewInvestmentOpportunityNotificationInput } from './dto/send-new-investment-opportunity-notification-input.dto';
 import { SendPaymentReceivedNotificationInput } from './dto/send-payment-received-notification-input.dto';
+import { SendLoanInFundingNotificationInput } from './dto/send-loan-in-funding-notification-input.dto';
+import { SendLoanInReviewNotificationInput } from './dto/send-loan-in-review-notification-input.dto';
 
 @Injectable()
 export class NotificationService {
@@ -276,12 +278,46 @@ export class NotificationService {
     ]);
   }
 
-  public async sendLoanInFundingNotification(input: any) {
+  public async sendLoanInFundingNotification(
+    input: SendLoanInFundingNotificationInput,
+  ) {
     const { phoneNumber, firstName } = input;
 
     await this.awsSnsService.sendSms({
       phoneNumber,
       message: `[WePresto] ${firstName}, tu préstamo ha sido publicado y está en proceso de financiación. Te notificaremos cuando esté listo`,
     });
+  }
+
+  public async sendLoanInReviewNotification(
+    input: SendLoanInReviewNotificationInput,
+  ) {
+    const {
+      borrowerEmail,
+      borrowerPhoneNumber,
+      borrowerFirstName,
+      loanUid,
+      loanAlias,
+    } = input;
+
+    const loanName = loanAlias
+      ? `${loanUid.split('-')[4]} - ${loanAlias}`
+      : loanUid.split('-')[4];
+
+    Promise.all([
+      this.mailingService.sendEmail({
+        templateName: 'BORROWER_LOAN_IN_REVIEW',
+        subject: 'WePresto - Préstamo en revisión',
+        to: borrowerEmail,
+        parameters: {
+          firstName: borrowerFirstName,
+          loanName,
+        },
+      }),
+      this.awsSnsService.sendSms({
+        phoneNumber: borrowerPhoneNumber,
+        message: `[WePresto] ${borrowerFirstName}, tu préstamo está en revisión. Te notificaremos cuando esté listo`,
+      }),
+    ]);
   }
 }
