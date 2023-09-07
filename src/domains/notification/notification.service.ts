@@ -19,6 +19,7 @@ import { SendNewInvestmentOpportunityNotificationInput } from './dto/send-new-in
 import { SendPaymentReceivedNotificationInput } from './dto/send-payment-received-notification-input.dto';
 import { SendLoanInFundingNotificationInput } from './dto/send-loan-in-funding-notification-input.dto';
 import { SendLoanInReviewNotificationInput } from './dto/send-loan-in-review-notification-input.dto';
+import { SendLoanPaticipationReceivedNotificationInput } from './dto/send-loan-paticipation-received-notification-input.dto';
 
 @Injectable()
 export class NotificationService {
@@ -317,6 +318,39 @@ export class NotificationService {
       this.awsSnsService.sendSms({
         phoneNumber: borrowerPhoneNumber,
         message: `[WePresto] ${borrowerFirstName}, tu préstamo está en revisión. Te notificaremos cuando esté listo`,
+      }),
+    ]);
+  }
+
+  public async sendLoanParticipationReceivedNotification(
+    input: SendLoanPaticipationReceivedNotificationInput,
+  ): Promise<void> {
+    const {
+      lenderEmail,
+      lenderPhoneNumber,
+      lenderFirstName,
+      loanUid,
+      loanParticipationAmount,
+      link,
+    } = input;
+
+    const loanName = loanUid.split('-')[4];
+
+    Promise.all([
+      this.mailingService.sendEmail({
+        templateName: 'LENDER_LOAN_PARTICIPATION_RECEIVED',
+        subject: 'WePresto - Participación recibida',
+        to: lenderEmail,
+        parameters: {
+          firstName: lenderFirstName,
+          loanName,
+          amount: loanParticipationAmount,
+          link,
+        },
+      }),
+      this.awsSnsService.sendSms({
+        phoneNumber: lenderPhoneNumber,
+        message: `[WePresto] ${lenderFirstName}, recibimos tu inversion en el préstamo ${loanName} :)`,
       }),
     ]);
   }

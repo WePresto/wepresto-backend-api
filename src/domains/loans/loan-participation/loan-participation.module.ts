@@ -18,6 +18,7 @@ import { GoogleStorageModule } from '../../../plugins/google-storage/google-stor
 import { EventMessageModule } from '../../event-message/event-message.module';
 import { LoanModule } from '../loan/loan.module';
 import { LenderModule } from '../../users/lender/lender.module';
+import { NotificationModule } from '../../notification/notification.module';
 @Module({
   imports: [
     ConfigModule.forFeature(appConfig),
@@ -27,6 +28,7 @@ import { LenderModule } from '../../users/lender/lender.module';
     EventMessageModule,
     LoanModule,
     LenderModule,
+    NotificationModule,
   ],
   providers: [
     LoanParticipationCreateService,
