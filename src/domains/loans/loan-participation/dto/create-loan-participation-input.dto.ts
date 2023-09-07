@@ -8,7 +8,7 @@ export class CreateLoanParticipationInput {
   readonly lenderUid: string;
 
   @IsNumberString()
-  readonly amount: number;
+  readonly amount: string;
 
   @IsOptional()
   readonly file?: any;

@@ -35,8 +35,11 @@ export class LoanParticipationCreateService {
   public async create(input: CreateLoanParticipationInput) {
     const { loanUid, lenderUid, amount, file } = input;
 
+    const newParticipationAmount =
+      typeof amount === 'string' ? parseInt(amount) : amount;
+
     try {
-      validateAmountByCountry('CO', amount);
+      validateAmountByCountry('CO', newParticipationAmount);
     } catch (error) {
       throw new BadRequestException(error.message);
     }
@@ -49,7 +52,7 @@ export class LoanParticipationCreateService {
     const base64File = file ? file.buffer.toString('base64') : undefined;
 
     // check the participation amount vs the loan amount
-    if (amount > existingLoan.amount) {
+    if (newParticipationAmount > existingLoan.amount) {
       throw new PreconditionFailedException(
         'participation amount cannot be greater than loan amount',
       );
@@ -72,7 +75,10 @@ export class LoanParticipationCreateService {
     );
 
     // check the total participation amount vs the loan amount
-    if (totalParticipationAmount + amount > existingLoan.amount) {
+    if (
+      totalParticipationAmount + newParticipationAmount >
+      existingLoan.amount
+    ) {
       throw new PreconditionFailedException(
         'total participation amount cannot be greater than loan amount, the loan is already fully funded',
       );
@@ -99,7 +105,7 @@ export class LoanParticipationCreateService {
     const createLoanParticipation = this.loanParticipationRepository.create({
       loan: existingLoan,
       lender: existingLender,
-      amount,
+      amount: newParticipationAmount,
     });
 
     const savedLoanParticipation = await this.loanParticipationRepository.save(
