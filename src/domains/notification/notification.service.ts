@@ -307,7 +307,7 @@ export class NotificationService {
 
     Promise.all([
       this.mailingService.sendEmail({
-        templateName: 'BORROWER_LOAN_IN_REVIEW',
+        templateName: 'BORROWER_LOAN_IN_REVIEW_NOTIFICATION',
         subject: 'WePresto - Préstamo en revisión',
         to: borrowerEmail,
         parameters: {
