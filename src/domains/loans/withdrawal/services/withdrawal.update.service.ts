@@ -48,9 +48,8 @@ export class WithdrawalUpdateService {
       status: WithdrawalStatus.COMPLETED,
     });
 
-    const savedWithdrawal = await this.withdrawalRepository.save(
-      preloadedWithdrawal,
-    );
+    const savedWithdrawal =
+      await this.withdrawalRepository.save(preloadedWithdrawal);
 
     // publish the withdrawal completed event
     await this.rabbitMQLocalService.publishWithdrawalCompleted({

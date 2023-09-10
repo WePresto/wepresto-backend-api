@@ -80,9 +80,8 @@ export class WithdrawalCreateService {
     });
 
     // save the withdrawal
-    const savedWithdrawal = await this.withdrawalRepository.save(
-      createdWithdrawal,
-    );
+    const savedWithdrawal =
+      await this.withdrawalRepository.save(createdWithdrawal);
 
     // send the new withdrawal request message to slack
     await this.weprestoSlackService.sendNewWithdrawalRequestMessage({
