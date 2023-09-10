@@ -53,6 +53,13 @@ export class Loan extends BaseEntity {
   uid: string;
 
   @Column({
+    type: 'varchar',
+    length: 20,
+    nullable: true,
+  })
+  consecutive: string;
+
+  @Column({
     type: 'decimal',
     precision: 15,
     scale: 3,
