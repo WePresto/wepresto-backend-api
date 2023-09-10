@@ -1,4 +1,5 @@
 import {
+  AfterInsert,
   BaseEntity,
   Column,
   CreateDateColumn,
@@ -174,4 +175,9 @@ export class Loan extends BaseEntity {
     (loanParticipation) => loanParticipation.lender,
   )
   paymentAttempts: PaymentAttempt[];
+
+  @AfterInsert()
+  setConecutive() {
+    this.consecutive = `WE-${this.id}`;
+  }
 }
