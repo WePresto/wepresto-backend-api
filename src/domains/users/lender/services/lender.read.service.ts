@@ -228,6 +228,8 @@ export class LenderReadService extends BaseService<Lender> {
           loan.annualInterestRate * participationRate,
         loan: {
           uid: loan.uid,
+          consecutive: loan.consecutive,
+          status: loan.status,
           amount: loan.amount,
           interest: interest * participationRate,
           term: loan.term,
