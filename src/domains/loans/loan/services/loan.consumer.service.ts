@@ -435,7 +435,7 @@ export class LoanConsumerService {
   @RabbitRPC({
     exchange: RABBITMQ_EXCHANGE,
     routingKey: `${RABBITMQ_EXCHANGE}.loan_in_funding`,
-    queue: `${RABBITMQ_EXCHANGE}.${LoanConsumerService.name}.`,
+    queue: `${RABBITMQ_EXCHANGE}.${LoanConsumerService.name}.loan_in_funding`,
   })
   public async loanInFundingConsumer(input: any) {
     const {
@@ -535,7 +535,7 @@ export class LoanConsumerService {
   @RabbitRPC({
     exchange: RABBITMQ_EXCHANGE,
     routingKey: `${RABBITMQ_EXCHANGE}.loan_in_review`,
-    queue: `${RABBITMQ_EXCHANGE}.${LoanConsumerService.name}.`,
+    queue: `${RABBITMQ_EXCHANGE}.${LoanConsumerService.name}.loan_in_review`,
   })
   public async loanInReviewConsumer(input: any) {
     const { environment } = this.appConfiguration;
