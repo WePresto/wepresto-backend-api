@@ -46,13 +46,20 @@ export class LoanConsumerService {
     queue: `${RABBITMQ_EXCHANGE}.${LoanConsumerService.name}.loan_disbursement`,
   })
   public async loanDisbursementConsumer(input: any) {
-    const eventMessage = await this.eventMessageService.create({
-      routingKey: `${RABBITMQ_EXCHANGE}.loan_disbursement`,
-      functionName: 'loanDisbursementConsumer',
-      data: input,
-    });
+    let eventMessage;
+
+    Logger.log(
+      'started',
+      LoanConsumerService.name + '.loanDisbursementConsumer',
+    );
 
     try {
+      eventMessage = await this.eventMessageService.create({
+        routingKey: `${RABBITMQ_EXCHANGE}.loan_disbursement`,
+        functionName: 'loanDisbursementConsumer',
+        data: input,
+      });
+
       const { loanUid } = input;
 
       Logger.log(
@@ -103,10 +110,15 @@ export class LoanConsumerService {
 
       const message = error.message;
 
-      await this.eventMessageService.setError({
-        id: eventMessage._id,
-        error,
-      });
+      if (eventMessage)
+        this.eventMessageService
+          .setError({
+            id: eventMessage._id,
+            error,
+          })
+          .catch((error) => {
+            console.error(error);
+          });
 
       return {
         status: error.status || 500,
@@ -122,13 +134,20 @@ export class LoanConsumerService {
     queue: `${RABBITMQ_EXCHANGE}.${LoanConsumerService.name}.loan_application`,
   })
   public async loanApplicationConsumer(input: any) {
-    const eventMessage = await this.eventMessageService.create({
-      routingKey: `${RABBITMQ_EXCHANGE}.loan_application`,
-      functionName: 'loanApplicationConsumer',
-      data: input,
-    });
+    let eventMessage;
+
+    Logger.log(
+      'started',
+      LoanConsumerService.name + '.loanApplicationConsumer',
+    );
 
     try {
+      eventMessage = await this.eventMessageService.create({
+        routingKey: `${RABBITMQ_EXCHANGE}.loan_application`,
+        functionName: 'loanApplicationConsumer',
+        data: input,
+      });
+
       const { loanUid } = input;
 
       Logger.log(
@@ -153,10 +172,15 @@ export class LoanConsumerService {
 
       const message = error.message;
 
-      await this.eventMessageService.setError({
-        id: eventMessage._id,
-        error,
-      });
+      if (eventMessage)
+        this.eventMessageService
+          .setError({
+            id: eventMessage._id,
+            error,
+          })
+          .catch((error) => {
+            console.error(error);
+          });
 
       return {
         status: error.status || 500,
@@ -181,13 +205,15 @@ export class LoanConsumerService {
       LoanConsumerService.name + '.sendEarlyPaymentNotificationsConsumer',
     );
 
-    const eventMessage = await this.eventMessageService.create({
-      routingKey: `${RABBITMQ_EXCHANGE}.send_early_payment_notifications`,
-      functionName: 'sendEarlyPaymentNotificationsConsumer',
-      data: input || {},
-    });
+    let eventMessage;
 
     try {
+      eventMessage = await this.eventMessageService.create({
+        routingKey: `${RABBITMQ_EXCHANGE}.send_early_payment_notifications`,
+        functionName: 'sendEarlyPaymentNotificationsConsumer',
+        data: input || {},
+      });
+
       // get the loans that are DISBURSED with them movements
       const loans = await this.loanRepository
         .createQueryBuilder('loan')
@@ -264,10 +290,15 @@ export class LoanConsumerService {
     } catch (error) {
       const message = error.message;
 
-      await this.eventMessageService.setError({
-        id: eventMessage._id,
-        error,
-      });
+      if (eventMessage)
+        this.eventMessageService
+          .setError({
+            id: eventMessage._id,
+            error,
+          })
+          .catch((error) => {
+            console.error(error);
+          });
 
       return {
         status: error.status || 500,
@@ -297,13 +328,15 @@ export class LoanConsumerService {
       LoanConsumerService.name + '.sendLatePaymentNotificationsConsumer',
     );
 
-    const eventMessage = await this.eventMessageService.create({
-      routingKey: `${RABBITMQ_EXCHANGE}.send_late_payment_notifications`,
-      functionName: 'sendLatePaymentNotificationsConsumer',
-      data: input || {},
-    });
+    let eventMessage;
 
     try {
+      eventMessage = await this.eventMessageService.create({
+        routingKey: `${RABBITMQ_EXCHANGE}.send_late_payment_notifications`,
+        functionName: 'sendLatePaymentNotificationsConsumer',
+        data: input || {},
+      });
+
       // get the loans that are in overdue
       const loans = await this.loanRepository
         .createQueryBuilder('loan')
@@ -414,10 +447,15 @@ export class LoanConsumerService {
 
       const message = error.message;
 
-      await this.eventMessageService.setError({
-        id: eventMessage._id,
-        error,
-      });
+      if (eventMessage)
+        this.eventMessageService
+          .setError({
+            id: eventMessage._id,
+            error,
+          })
+          .catch((error) => {
+            console.error(error);
+          });
 
       return {
         status: error.status || 500,
@@ -453,13 +491,15 @@ export class LoanConsumerService {
 
     Logger.log('started', LoanConsumerService.name + '.loanInFundingConsumer');
 
-    const eventMessage = await this.eventMessageService.create({
-      routingKey: `${RABBITMQ_EXCHANGE}.loan_in_funding`,
-      functionName: 'loanInFundingConsumer',
-      data: input || {},
-    });
+    let eventMessage;
 
     try {
+      eventMessage = await this.eventMessageService.create({
+        routingKey: `${RABBITMQ_EXCHANGE}.loan_in_funding`,
+        functionName: 'loanInFundingConsumer',
+        data: input || {},
+      });
+
       const { loanUid } = input;
 
       Logger.log(
@@ -511,14 +551,16 @@ export class LoanConsumerService {
 
       const message = error.message;
 
-      this.eventMessageService
-        .setError({
-          id: eventMessage._id,
-          error,
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+      if (eventMessage)
+        this.eventMessageService
+          .setError({
+            id: eventMessage._id,
+            error,
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+
       return {
         status: error.status || 500,
         message,
@@ -550,13 +592,15 @@ export class LoanConsumerService {
 
     Logger.log('started', LoanConsumerService.name + '.loanInReviewConsumer');
 
-    const eventMessage = await this.eventMessageService.create({
-      routingKey: `${RABBITMQ_EXCHANGE}.loan_in_review`,
-      functionName: 'loanInReviewConsumer',
-      data: input || {},
-    });
+    let eventMessage;
 
     try {
+      eventMessage = await this.eventMessageService.create({
+        routingKey: `${RABBITMQ_EXCHANGE}.loan_in_review`,
+        functionName: 'loanInReviewConsumer',
+        data: input || {},
+      });
+
       const { loanUid } = input;
 
       Logger.log(
@@ -585,14 +629,15 @@ export class LoanConsumerService {
 
       const message = error.message;
 
-      this.eventMessageService
-        .setError({
-          id: eventMessage._id,
-          error,
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+      if (eventMessage)
+        this.eventMessageService
+          .setError({
+            id: eventMessage._id,
+            error,
+          })
+          .catch((error) => {
+            console.error(error);
+          });
 
       return {
         status: error.status || 500,
