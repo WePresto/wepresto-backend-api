@@ -20,6 +20,7 @@ import { SendPaymentReceivedNotificationInput } from './dto/send-payment-receive
 import { SendLoanInFundingNotificationInput } from './dto/send-loan-in-funding-notification-input.dto';
 import { SendLoanInReviewNotificationInput } from './dto/send-loan-in-review-notification-input.dto';
 import { SendLoanPaticipationReceivedNotificationInput } from './dto/send-loan-paticipation-received-notification-input.dto';
+import { SendLoanRejectedNotificationInput } from './dto/send-loan-rejected-notification-input.dto';
 
 @Injectable()
 export class NotificationService {
@@ -351,6 +352,35 @@ export class NotificationService {
       this.awsSnsService.sendSms({
         phoneNumber: lenderPhoneNumber,
         message: `[WePresto] ${lenderFirstName}, recibimos tu inversion en el préstamo ${loanName} :)`,
+      }),
+    ]);
+  }
+
+  public async sendLoanRejectedNotification(
+    input: SendLoanRejectedNotificationInput,
+  ) {
+    const {
+      borrowerEmail,
+      borrowerPhoneNumber,
+      borrowerFirstName,
+      loanConsecutive,
+      laonComment,
+    } = input;
+
+    Promise.all([
+      this.mailingService.sendEmail({
+        templateName: 'BORROWER_LOAN_REJECTED_NOTIFICATION',
+        subject: 'WePresto - Préstamo rechazado',
+        to: borrowerEmail,
+        parameters: {
+          borrowerFirstName,
+          loanConsecutive,
+          laonComment,
+        },
+      }),
+      this.awsSnsService.sendSms({
+        phoneNumber: borrowerPhoneNumber,
+        message: `[WePresto] ${borrowerFirstName}, tu préstamo ha sido rechazado. Al tú correo electrónico enviamos más información`,
       }),
     ]);
   }

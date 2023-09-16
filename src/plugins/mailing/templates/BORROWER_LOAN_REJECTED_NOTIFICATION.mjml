@@ -24,17 +24,16 @@
     <mj-section background-color="#FFF" padding-top="0">
       <mj-column>
         <mj-text>
-          Hola {{firstName}}! 👋🏻
+          Hola {{borrowerFirstName}}! 👋🏻
         </mj-text>
         <mj-text>
-          Tú préstamo {{loanName}}, se encuentra en proceso de revisión... 🔍
+          Tú préstamo {{loanConsecutive}}, ha sido rechazado. 😔
         </mj-text>
         <mj-text>
-          Estamos revisando detalladamente, no te preocupes si tu perfil crediticio no es tan bueno, en WePresto nos
-          importan los números, pero también las personas. 💚
+          Esta es la razón: {{laonComment}}
         </mj-text>
         <mj-text>
-          Te notificaremos cuando se haya aprobado o rechazado. 📫
+          Te invitamos a que vuelvas a intentarlo en un futuro. 😊
         </mj-text>
     </mj-section>
 
