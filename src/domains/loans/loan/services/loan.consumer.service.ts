@@ -724,4 +724,76 @@ export class LoanConsumerService {
       );
     }
   }
+
+  @RabbitRPC({
+    exchange: RABBITMQ_EXCHANGE,
+    routingKey: `${RABBITMQ_EXCHANGE}.loan_approved`,
+    queue: `${RABBITMQ_EXCHANGE}.${LoanConsumerService.name}.loan_approved`,
+  })
+  public async loanApprovedConsumer(input: any) {
+    Logger.log('started', LoanConsumerService.name + '.loanApprovedConsumer');
+
+    let eventMessage;
+
+    try {
+      eventMessage = await this.eventMessageService.create({
+        routingKey: `${RABBITMQ_EXCHANGE}.loan_approved`,
+        functionName: 'loanApprovedConsumer',
+        data: input || {},
+      });
+
+      const { loanUid } = input;
+
+      Logger.log(
+        `loan ${loanUid} received`,
+        LoanConsumerService.name + '.loanApprovedConsumer',
+      );
+
+      // get the loan with its borrower
+      const existingLoan = await this.loanRepository
+        .createQueryBuilder('loan')
+        .innerJoinAndSelect('loan.borrower', 'borrower')
+        .innerJoinAndSelect('borrower.user', 'user')
+        .where('loan.uid = :uid', { uid: loanUid })
+        .getOne();
+
+      Logger.log(
+        `sending the the notifications...`,
+        LoanConsumerService.name + '.loanApprovedConsumer',
+      );
+
+      // sending the the notifications
+      await this.notificationService.sendLoanApprovedNotification({
+        borrowerEmail: existingLoan?.borrower?.user?.email,
+        borrowerPhoneNumber: `+57${existingLoan?.borrower?.user?.phoneNumber}`,
+        borrowerFirstName: existingLoan?.borrower?.user?.fullName.split(' ')[0],
+        loanConsecutive: existingLoan.uid,
+      });
+    } catch (error) {
+      console.error(error);
+
+      const message = error.message;
+
+      if (eventMessage)
+        this.eventMessageService
+          .setError({
+            id: eventMessage._id,
+            error,
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+
+      return {
+        status: error.status || 500,
+        message,
+        data: {},
+      };
+    } finally {
+      Logger.log(
+        `completed`,
+        LoanConsumerService.name + '.loanApprovedConsumer',
+      );
+    }
+  }
 }
