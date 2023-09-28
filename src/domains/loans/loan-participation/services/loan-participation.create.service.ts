@@ -112,7 +112,7 @@ export class LoanParticipationCreateService {
       createLoanParticipation,
     );
 
-    // publish the withdrawal completed event
+    // publish the loan participation created event
     await this.rabbitMQLocalService.publishLoanParticipationCreated({
       loanParticipationUid: savedLoanParticipation.uid,
       base64File: base64File,

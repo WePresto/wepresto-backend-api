@@ -22,6 +22,7 @@ import { SendLoanInReviewNotificationInput } from './dto/send-loan-in-review-not
 import { SendLoanPaticipationReceivedNotificationInput } from './dto/send-loan-paticipation-received-notification-input.dto';
 import { SendLoanRejectedNotificationInput } from './dto/send-loan-rejected-notification-input.dto';
 import { SendLoanApprovedNotificationInput } from './dto/send-loan-approved-notification-input.dto';
+import { SendLoanFullyFundedNotificationInput } from './dto/send-loan-fully-funded-notification-input.dto';
 
 @Injectable()
 export class NotificationService {
@@ -408,7 +409,34 @@ export class NotificationService {
       }),
       this.awsSnsService.sendSms({
         phoneNumber: borrowerPhoneNumber,
-        message: `[WePresto] ${borrowerFirstName}, tu préstamo ${loanConsecutive} ha sido aprobado. Ingresa para ver más información`,
+        message: `[WePresto] ${borrowerFirstName}, tu préstamo ${loanConsecutive} ha sido aprobado! Ingresa para ver más información`,
+      }),
+    ]);
+  }
+
+  public async sendLoanFullyFundedNotification(
+    input: SendLoanFullyFundedNotificationInput,
+  ) {
+    const {
+      borrowerEmail,
+      borrowerPhoneNumber,
+      borrowerFirstName,
+      loanConsecutive,
+    } = input;
+
+    Promise.all([
+      this.mailingService.sendEmail({
+        templateName: 'BORROWER_LOAN_FULLY_FUNDED_NOTIFICATION',
+        subject: 'WePresto - Préstamo fondeado',
+        to: borrowerEmail,
+        parameters: {
+          borrowerFirstName,
+          loanConsecutive,
+        },
+      }),
+      this.awsSnsService.sendSms({
+        phoneNumber: borrowerPhoneNumber,
+        message: `[WePresto] ${borrowerFirstName}, tu préstamo ${loanConsecutive} ha sido fondeado! Ingresa para ver más información`,
       }),
     ]);
   }

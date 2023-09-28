@@ -18,6 +18,7 @@ import { GetManyLoansInput } from '../dto/get-many-loans-input.dto';
 import { GetMinimumPaymentAmountInput } from '../dto/get-minimum-payment-amount-input.dto';
 import { GetTotalPaymentAmountInput } from '../dto/get-total-payment-amount-input.dto';
 import { GetTotalPaymentAmountOutput } from '../dto/get-total-payment-amount-output.dto';
+import { GetFundedAmountInput } from '../dto/get-funded-amount-input.dto';
 
 @Injectable()
 export class LoanReadService extends BaseService<Loan> {
@@ -281,26 +282,33 @@ export class LoanReadService extends BaseService<Loan> {
       count,
       loans: await Promise.all(
         loans.map(async (loan) => {
-          const { id, amount } = loan;
+          const { uid, amount } = loan;
 
-          const { fundedAmount } = await this.loanRepository
-            .createQueryBuilder('loan')
-            .select(
-              'COALESCE(SUM(loanParticipation.amount), 0)',
-              'fundedAmount',
-            )
-            .leftJoin('loan.loanParticipations', 'loanParticipation')
-            .where('loan.id = :id', { id })
-            .getRawOne();
+          const { fundedAmount } = await this.getFundedAmount({ uid });
 
           return {
             ...loan,
-            fundedAmount: +fundedAmount,
+            fundedAmount: fundedAmount,
             remainingAmount: amount - fundedAmount,
-            fundedPercentage: +fundedAmount / amount,
+            fundedPercentage: fundedAmount / amount,
           };
         }),
       ),
+    };
+  }
+
+  public async getFundedAmount(input: GetFundedAmountInput) {
+    const { uid } = input;
+
+    const { fundedAmount } = await this.loanRepository
+      .createQueryBuilder('loan')
+      .select('COALESCE(SUM(loanParticipation.amount), 0)', 'fundedAmount')
+      .leftJoin('loan.loanParticipations', 'loanParticipation')
+      .where('loan.uid = :uid', { uid })
+      .getRawOne();
+
+    return {
+      fundedAmount: +fundedAmount,
     };
   }
 }

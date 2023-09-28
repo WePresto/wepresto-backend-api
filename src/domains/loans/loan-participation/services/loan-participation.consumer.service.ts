@@ -12,6 +12,7 @@ import { LoanParticipationReadService } from './loan-participation.read.service'
 import { EventMessageService } from '../../../event-message/event-message.service';
 import { GoogleStorageService } from '../../../../plugins/google-storage/google-storage.service';
 import { NotificationService } from '../../../notification/notification.service';
+import { LoanService } from '../../loan/services/loan.service';
 
 import { getRabbitMQExchangeName, formatCurrency } from '../../../../utils';
 import { getFileExtensionByMimeType } from '../../../../utils/get-file-extension.util';
@@ -29,6 +30,7 @@ export class LoanParticipationConsumerService {
     private readonly googleStorageService: GoogleStorageService,
     private readonly eventMessageService: EventMessageService,
     private readonly notificationService: NotificationService,
+    private readonly loanService: LoanService,
   ) {}
 
   @RabbitRPC({
@@ -60,7 +62,9 @@ export class LoanParticipationConsumerService {
         .createQueryBuilder('loanParticipation')
         .innerJoinAndSelect('loanParticipation.loan', 'loan')
         .innerJoinAndSelect('loanParticipation.lender', 'lender')
-        .innerJoinAndSelect('lender.user', 'user')
+        .innerJoinAndSelect('lender.user', 'lenderUser')
+        .innerJoinAndSelect('loan.borrower', 'borrower')
+        .innerJoinAndSelect('borrower.user', 'borrowerUser')
         .where('loanParticipation.uid = :loanParticipationUid', {
           loanParticipationUid,
         })
@@ -113,6 +117,34 @@ export class LoanParticipationConsumerService {
         ),
         link: `${selftWebUrl}/lender/investments`,
       });
+
+      const { loan } = existingLoanParticipation;
+
+      const { fundedAmount: loanFundedAmount } =
+        await this.loanService.readService.getFundedAmount({
+          uid: loan.uid,
+        });
+
+      const loanFundedPercentage = Math.round(
+        (loanFundedAmount / loan.amount) * 100,
+      );
+
+      if (loanFundedPercentage > 99 && loanFundedPercentage <= 100) {
+        const borrower = existingLoanParticipation?.loan?.borrower;
+
+        Logger.log(
+          `sending notification to borrower for loan ${loan.uid} fully funded`,
+          LoanParticipationConsumerService.name +
+            '.loanParticipationCreatedConsumer',
+        );
+
+        await this.notificationService.sendLoanFullyFundedNotification({
+          borrowerEmail: borrower?.user?.email,
+          borrowerPhoneNumber: `+57${borrower?.user?.phoneNumber}`,
+          borrowerFirstName: borrower?.user?.fullName.split(' ')[0],
+          loanConsecutive: loan?.consecutive,
+        });
+      }
     } catch (error) {
       console.error(error);
 
