@@ -104,12 +104,10 @@ export class MovementCreateService {
       }
     }
 
-    const isTheLastPayment = totalLoanAmount - +amount <= 0;
-
     // create the movement
     const createdMovement = this.movementRepository.create({
       loan: existingLoan,
-      amount: isTheLastPayment ? totalLoanAmount * -1 : +amount * -1,
+      amount: +amount * -1,
       movementDate: paymentDate,
       type: typeToUse,
       processed: false,
