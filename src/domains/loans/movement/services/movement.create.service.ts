@@ -11,6 +11,7 @@ import { RabbitMQLocalService } from '../../../../plugins/rabbit-local/rabbit-mq
 import { LoanService } from '../../loan/services/loan.service';
 
 import { getReferenceDate } from '../../../../utils';
+import { getAmountToForgive } from '../../../../utils/get-amount-to-forgive.util';
 
 import { CreatePaymentMovementInput } from '../dto/create-payment-movement-input.dto';
 
@@ -83,7 +84,10 @@ export class MovementCreateService {
         referenceDate: getReferenceDate(new Date()),
       });
 
-    if (totalLoanAmount < +amount) {
+    if (
+      totalLoanAmount < +amount &&
+      +amount - totalLoanAmount > getAmountToForgive('CO')
+    ) {
       throw new ConflictException(
         `the amount of the payment is greater than the total payment amount of the loan`,
       );
@@ -100,10 +104,12 @@ export class MovementCreateService {
       }
     }
 
+    const isTheLastPayment = totalLoanAmount - +amount <= 0;
+
     // create the movement
     const createdMovement = this.movementRepository.create({
       loan: existingLoan,
-      amount: +amount * -1,
+      amount: isTheLastPayment ? totalLoanAmount * -1 : +amount * -1,
       movementDate: paymentDate,
       type: typeToUse,
       processed: false,
