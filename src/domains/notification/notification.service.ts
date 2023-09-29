@@ -285,11 +285,32 @@ export class NotificationService {
   public async sendLoanInFundingNotification(
     input: SendLoanInFundingNotificationInput,
   ) {
-    const { phoneNumber, firstName } = input;
+    const {
+      borrowerFirstName,
+      borrowerEmail,
+      borrowerPhoneNumber,
+      loanConsecutive,
+    } = input;
+
+    await Promise.all([
+      this.mailingService.sendEmail({
+        templateName: 'BORROWER_LOAN_IN_FUNDING_NOTIFICATION',
+        subject: 'WePresto - Préstamo en financiación',
+        to: borrowerEmail,
+        parameters: {
+          borrowerFirstName,
+          loanConsecutive,
+        },
+      }),
+      this.awsSnsService.sendSms({
+        phoneNumber: borrowerPhoneNumber,
+        message: `[WePresto] ${borrowerFirstName}, tu préstamo ${loanConsecutive} ha sido publicado y está en proceso de financiación.`,
+      }),
+    ]);
 
     await this.awsSnsService.sendSms({
-      phoneNumber,
-      message: `[WePresto] ${firstName}, tu préstamo ha sido publicado y está en proceso de financiación. Te notificaremos cuando esté listo`,
+      phoneNumber: borrowerPhoneNumber,
+      message: `[WePresto] ${borrowerFirstName}, tu préstamo ${loanConsecutive} ha sido publicado y está en proceso de financiación.`,
     });
   }
 
@@ -320,7 +341,7 @@ export class NotificationService {
       }),
       this.awsSnsService.sendSms({
         phoneNumber: borrowerPhoneNumber,
-        message: `[WePresto] ${borrowerFirstName}, tu préstamo está en revisión. Te notificaremos cuando esté listo`,
+        message: `[WePresto] ${borrowerFirstName}, tu préstamo está en revisión.`,
       }),
     ]);
   }
@@ -353,7 +374,7 @@ export class NotificationService {
       }),
       this.awsSnsService.sendSms({
         phoneNumber: lenderPhoneNumber,
-        message: `[WePresto] ${lenderFirstName}, recibimos tu inversion en el préstamo ${loanName} :)`,
+        message: `[WePresto] ${lenderFirstName}, recibimos tu inversion en el préstamo ${loanName}.`,
       }),
     ]);
   }

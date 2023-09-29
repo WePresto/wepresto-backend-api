@@ -507,7 +507,7 @@ export class LoanConsumerService {
         LoanConsumerService.name + '.loanInFundingConsumer',
       );
 
-      const [{ borrower }, { lenders }] = await Promise.all([
+      const [loan, { lenders }] = await Promise.all([
         // get borrower
         this.loanRepository
           .createQueryBuilder('loan')
@@ -525,8 +525,10 @@ export class LoanConsumerService {
       Promise.all([
         // sending loan in funding notification to borrower
         this.notificationService.sendLoanInFundingNotification({
-          phoneNumber: `+57${borrower.user.phoneNumber}`,
-          firstName: borrower.user.fullName.split(' ')[0],
+          borrowerEmail: loan?.borrower?.user?.email,
+          borrowerPhoneNumber: `+57${loan?.borrower?.user?.phoneNumber}`,
+          borrowerFirstName: loan?.borrower?.user?.fullName?.split(' ')[0],
+          loanConsecutive: loan.consecutive,
         }),
         // sending new investment notification to each lender
         ...lenders.map(async (lender) => {
