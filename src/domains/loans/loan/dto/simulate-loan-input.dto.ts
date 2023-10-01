@@ -1,5 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsNumber, IsString } from 'class-validator';
+import {
+  IsDateString,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 import { LoanTerm } from '../loan.entity';
 
@@ -28,4 +34,11 @@ export class SimulateLoanInput {
   })
   @IsString()
   readonly alias: string;
+
+  @ApiPropertyOptional({
+    example: '2020-10-31',
+  })
+  @IsOptional()
+  @IsDateString({ strict: false })
+  readonly referenceDate?: string;
 }

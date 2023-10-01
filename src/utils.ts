@@ -10,6 +10,12 @@ export const delay = (ms: number) => {
   });
 };
 
+export const addMonths = (date: Date, months: number) => {
+  const result = new Date(date);
+  result.setMonth(result.getMonth() + months);
+  return result;
+};
+
 export const addDays = (date: Date, days: number) => {
   const result = new Date(date);
   result.setDate(result.getDate() + days);

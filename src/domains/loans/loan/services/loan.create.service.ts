@@ -119,7 +119,7 @@ export class LoanCreateService {
   }
 
   public simulate(input: SimulateLoanInput) {
-    const { alias, amount: requestedAmount, term } = input;
+    const { alias, amount: requestedAmount, term, referenceDate } = input;
 
     // validate amount
     try {
@@ -137,13 +137,13 @@ export class LoanCreateService {
     // calculate total amount of the loan
     const amount = requestedAmount + platformUsageFee;
 
-    const currentDate = new Date();
+    const dateToUse = referenceDate ? new Date(referenceDate) : new Date();
 
     const loanInstallments =
       this.frenchAmortizationSystemService.getLoanInstallments({
         amount,
         term,
-        referenceDate: currentDate,
+        referenceDate: dateToUse,
         annualInterestRate: InterstRate[term],
       });
 
@@ -153,7 +153,7 @@ export class LoanCreateService {
       platformUsageFee,
       amount,
       term,
-      referenceDate: currentDate.toISOString(),
+      referenceDate: dateToUse.toISOString(),
       annualInterestRate: InterstRate[term],
       annualInterestOverdueRate: InterstRate[term] * 1.5,
       totalAmountToPay: loanInstallments.reduce(

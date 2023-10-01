@@ -28,6 +28,13 @@ export class LenderReadService extends BaseService<Lender> {
     super(lenderRepository);
   }
 
+  private getParticipationRate(
+    participationAmount: number,
+    loanAmount: number,
+  ) {
+    return participationAmount / loanAmount;
+  }
+
   public async getOne(input: GetOneLenderInput): Promise<Lender> {
     const { uid } = input;
 
@@ -41,13 +48,6 @@ export class LenderReadService extends BaseService<Lender> {
     });
 
     return existingLender;
-  }
-
-  private getParticipationRate(
-    participationAmount: number,
-    loanAmount: number,
-  ) {
-    return participationAmount / loanAmount;
   }
 
   public async getParticipationsResume(input: GetOneLenderInput) {

@@ -3,7 +3,7 @@ import { ConfigType } from '@nestjs/config';
 
 import appConfig from '../../../config/app.config';
 
-import { addDays } from '../../../utils';
+import { addMonths } from '../../../utils';
 
 import { GetLoanInstallmentsInput } from './dto/get-loan-installments-input.dto';
 import { GetLoanInstallmentsOutput } from './dto/get-loan-installments-output.dto';
@@ -39,9 +39,11 @@ export class FrenchAmortizationSystemService {
 
       let dueDate;
       if (j === 0) {
-        dueDate = addDays(referenceDate, 30);
+        // dueDate = addDays(referenceDate, 30);
+        dueDate = addMonths(referenceDate, 1);
       } else {
-        dueDate = addDays(installments[j - 1].dueDate, 30);
+        // dueDate = addDays(installments[j - 1].dueDate, 30);
+        dueDate = addMonths(installments[j - 1].dueDate, 1);
       }
 
       installments = [
