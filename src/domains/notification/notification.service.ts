@@ -461,4 +461,31 @@ export class NotificationService {
       }),
     ]);
   }
+
+  public async sendLoanDisbursedNotification(
+    input: SendLoanFullyFundedNotificationInput,
+  ) {
+    const {
+      borrowerEmail,
+      borrowerPhoneNumber,
+      borrowerFirstName,
+      loanConsecutive,
+    } = input;
+
+    Promise.all([
+      this.mailingService.sendEmail({
+        templateName: 'BORROWER_LOAN_DISBURSED_NOTIFICATION',
+        subject: 'WePresto - Préstamo desembolsado',
+        to: borrowerEmail,
+        parameters: {
+          borrowerFirstName,
+          loanConsecutive,
+        },
+      }),
+      this.awsSnsService.sendSms({
+        phoneNumber: borrowerPhoneNumber,
+        message: `[WePresto] ${borrowerFirstName}, tu préstamo ${loanConsecutive} ha sido desembolsado! Ingresa para ver más información`,
+      }),
+    ]);
+  }
 }

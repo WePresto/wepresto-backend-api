@@ -68,9 +68,12 @@ export class LoanConsumerService {
       );
 
       // get the loan
-      const existingLoan = await this.readService.getOne({
-        uid: loanUid,
-      });
+      const existingLoan = await this.loanRepository
+        .createQueryBuilder('loan')
+        .innerJoinAndSelect('loan.borrower', 'borrower')
+        .innerJoinAndSelect('borrower.user', 'user')
+        .where('loan.uid = :loanUid', { loanUid })
+        .getOne();
 
       // get the loan installments
       const loanInstallments =
@@ -100,6 +103,20 @@ export class LoanConsumerService {
 
       // save the loan with the movements
       await this.loanRepository.save(preloadedLoan);
+
+      Logger.log(
+        `loan ${loanUid} disbursement completed`,
+        LoanConsumerService.name + '.loanDisbursementConsumer',
+      );
+
+      // send the notificationç
+      const borrower = existingLoan?.borrower;
+      await this.notificationService.sendLoanDisbursedNotification({
+        borrowerEmail: borrower?.user?.email,
+        borrowerPhoneNumber: `+57${borrower?.user?.phoneNumber}`,
+        borrowerFirstName: borrower?.user?.fullName.split(' ')[0],
+        loanConsecutive: existingLoan.consecutive,
+      });
 
       Logger.log(
         `loan ${loanUid} disbursement completed`,
