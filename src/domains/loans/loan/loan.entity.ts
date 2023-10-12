@@ -17,6 +17,7 @@ import { Borrower } from '../../users/borrower/borrower.entity';
 import { Movement } from '../movement/movement.entity';
 import { LoanParticipation } from '../loan-participation/loan-participation.entity';
 import { PaymentAttempt } from '../../payments/payment-attempt/payment-attempt.entity';
+import { Logger } from '@nestjs/common';
 
 export enum LoanStatus {
   APPLIED = 'APPLIED',
@@ -178,6 +179,8 @@ export class Loan extends BaseEntity {
 
   @AfterInsert()
   setConecutive() {
+    Logger.log('AfterInsert', Loan.name + '.setConecutive');
     this.consecutive = `WE-${this.id}`;
+    Logger.log(`AfterInsert ${this.consecutive}`, Loan.name + '.setConecutive');
   }
 }

@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Inject,
   Injectable,
   PreconditionFailedException,
@@ -11,8 +10,6 @@ import { Repository } from 'typeorm';
 import appConfig from '../../../../config/app.config';
 
 import { LoanParticipation } from '../loan-participation.entity';
-
-import { validateAmountByCountry } from '../../../../utils/validate-amount-by-country';
 
 import { RabbitMQLocalService } from '../../../../plugins/rabbit-local/rabbit-mq-local.service';
 import { LoanService } from '../../loan/services/loan.service';
@@ -37,12 +34,6 @@ export class LoanParticipationCreateService {
 
     const newParticipationAmount =
       typeof amount === 'string' ? parseInt(amount) : amount;
-
-    try {
-      validateAmountByCountry('CO', newParticipationAmount);
-    } catch (error) {
-      throw new BadRequestException(error.message);
-    }
 
     // get loan
     const existingLoan = await this.loanService.readService.getOne({
