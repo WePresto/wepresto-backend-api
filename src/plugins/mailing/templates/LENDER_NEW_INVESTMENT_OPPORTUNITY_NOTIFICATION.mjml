@@ -24,14 +24,14 @@
     <mj-section background-color="#FFF" padding-top="0">
       <mj-column>
         <mj-text>
-          Hola {{firstName}}! 👋🏻
+          Hola {{lenderFirstName}}! 👋🏻
         </mj-text>
         <mj-text>
           Esperamos que estés muy bien! 😊
         </mj-text>
         <mj-text>
           Queremos contarte que tenemos una nueva oportunidad de inversión
-          en el prestamo <strong>{{loanUid}}</strong>, puede interesarte. 🤑
+          en el prestamo <strong>{{loanConsecutive}}</strong>, puede interesarte. 🤑
         </mj-text>
         <mj-text>
           Si quieres saber más, haz click en el botón de abajo. 👇🏻

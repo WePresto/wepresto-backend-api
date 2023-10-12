@@ -226,7 +226,13 @@ export class NotificationService {
   public async sendNewInvestmentOpportunityNotification(
     input: SendNewInvestmentOpportunityNotificationInput,
   ) {
-    const { email, phoneNumber, firstName, loanUid, link } = input;
+    const {
+      lenderEmail,
+      lenderFirstName,
+      lenderPhoneNumber,
+      loanConsecutive,
+      link,
+    } = input;
 
     const shouldSendNotification = this.shouldSendNotification({
       timezone: 'America/Bogota',
@@ -240,16 +246,16 @@ export class NotificationService {
       this.mailingService.sendEmail({
         templateName: 'LENDER_NEW_INVESTMENT_OPPORTUNITY_NOTIFICATION',
         subject: 'WePresto - Nueva oportunidad de inversión',
-        to: email,
+        to: lenderEmail,
         parameters: {
-          firstName,
-          loanUid,
+          lenderFirstName,
+          loanConsecutive,
           link,
         },
       }),
       this.awsSnsService.sendSms({
-        phoneNumber,
-        message: `[WePresto] ${firstName}, hay una nueva oportunidad de inversión. Ve a la opción de Oportunidades, puede interesarte ;)`,
+        phoneNumber: lenderPhoneNumber,
+        message: `[WePresto] ${lenderFirstName}, hay una nueva oportunidad de inversión. Ve a la opción de Oportunidades, puede interesarte ;)`,
       }),
     ]);
   }

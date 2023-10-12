@@ -1,11 +1,11 @@
 export class SendNewInvestmentOpportunityNotificationInput {
-  readonly email: string;
+  readonly lenderEmail: string;
 
-  readonly phoneNumber: string;
+  readonly lenderPhoneNumber: string;
 
-  readonly firstName: string;
+  readonly lenderFirstName: string;
 
-  readonly loanUid: string;
+  readonly loanConsecutive: string;
 
   readonly link: string;
 }

@@ -539,7 +539,7 @@ export class LoanConsumerService {
       ]);
 
       // sending the the notifications
-      Promise.all([
+      await Promise.all([
         // sending loan in funding notification to borrower
         this.notificationService.sendLoanInFundingNotification({
           borrowerEmail: loan?.borrower?.user?.email,
@@ -556,10 +556,10 @@ export class LoanConsumerService {
 
           await this.notificationService.sendNewInvestmentOpportunityNotification(
             {
-              email: lender.user.email,
-              phoneNumber: `+57${lender.user.phoneNumber}`,
-              firstName: lender.user.fullName.split(' ')[0],
-              loanUid,
+              lenderEmail: lender.user.email,
+              lenderPhoneNumber: `+57${lender.user.phoneNumber}`,
+              lenderFirstName: lender.user.fullName.split(' ')[0],
+              loanConsecutive: loan.consecutive,
               link: `${selftWebUrl}/lender/opportunities`,
             },
           );
