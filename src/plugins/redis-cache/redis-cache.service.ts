@@ -15,7 +15,7 @@ export class RedisCacheService {
     @Inject(appConfig.KEY)
     private readonly appConfiguration: ConfigType<typeof appConfig>,
   ) {
-    // this.init();
+    this.init();
   }
 
   private async init() {
