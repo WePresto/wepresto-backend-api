@@ -13,7 +13,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { PermissionName } from 'nestjs-basic-acl-sdk';
+import { PermissionName, Public } from 'nestjs-basic-acl-sdk';
 
 import { WithdrawalService } from './services/withdrawal.service';
 
@@ -58,7 +58,8 @@ export class WithdrawalController {
   @ApiOperation({
     summary: 'Get the available to withdraw for a lender',
   })
-  @PermissionName('withdrawals:getAvailableToWithdraw')
+  // @PermissionName('withdrawals:getAvailableToWithdraw')
+  @Public()
   @Get('available-to-withdraw')
   getAvailableToWithdraw(@Query() input: GetAvailableToWithdrawInput) {
     return this.withdrawalService.readService.getAvailableToWithdraw(input);

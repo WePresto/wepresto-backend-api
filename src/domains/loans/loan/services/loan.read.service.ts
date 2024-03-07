@@ -11,6 +11,7 @@ import { Movement, MovementType } from '../../movement/movement.entity';
 import { BaseService } from '../../../../common/base.service';
 
 import { getYearMonthDayFromDateISOString } from '../../../../utils/get-year-month-day-from-date-iso-string.util';
+import { getNumberOfDays } from '../../../../utils';
 
 import { GetOneLoanInput } from '../dto/get-one-loan-input.dto';
 import { GetMinimumPaymentAmountOutput } from '../dto/get-minimum-payment-amount-output.dto';
@@ -52,21 +53,6 @@ export class LoanReadService extends BaseService<Loan> {
 
     const existingLoan = await this.getOne({ uid });
 
-    const referenceDateISO = new Date(referenceDate).toISOString();
-    const { year, month, day } =
-      getYearMonthDayFromDateISOString(referenceDateISO);
-
-    const nextLoanInstallmentQuery = this.loanRepository
-      .createQueryBuilder('loan')
-      .innerJoinAndSelect('loan.movements', 'movement')
-      .where('loan.id = :loanId', { loanId: existingLoan.id })
-      .andWhere('movement.type = :movementType', {
-        movementType: MovementType.LOAN_INSTALLMENT,
-      })
-      .andWhere('movement.paid = :paid', { paid: false })
-      .orderBy('movement.due_date', 'ASC')
-      .getOne();
-
     const loanInstallmentsQuery = this.loanRepository
       .createQueryBuilder('loan')
       .innerJoinAndSelect('loan.movements', 'movement')
@@ -75,11 +61,9 @@ export class LoanReadService extends BaseService<Loan> {
         movementType: MovementType.LOAN_INSTALLMENT,
       })
       .andWhere('movement.paid = :paid', { paid: false })
-      .andWhere(`extract('year' from movement.due_date) <= :year`, { year })
-      .andWhere(`extract('month' from movement.due_date) <= :month`, { month })
-      .andWhere(`extract('day' from movement.due_date) <= :day`, {
-        day,
-      })
+      // .andWhere(`extract('year' from movement.due_date) <= :year`, { year })
+      //.andWhere(`extract('month' from movement.due_date) <= :month`, { month })
+      // .andWhere(`extract('day' from movement.due_date) <= :day`, { day, })
       .orderBy('movement.due_date', 'ASC')
       .getOne();
 
@@ -95,31 +79,31 @@ export class LoanReadService extends BaseService<Loan> {
       .orderBy('movement.due_date', 'ASC')
       .getOne();
 
-    const [
-      nextLoanInstallmentResult,
-      loanInstallmentsResult,
-      overDueInterestsResult,
-    ] = await Promise.all([
-      nextLoanInstallmentQuery,
+    const [loanInstallmentsResult, overDueInterestsResult] = await Promise.all([
       loanInstallmentsQuery,
       overDueInterestsQuery,
     ]);
+    // console.log('loanInstallmentsResult', loanInstallmentsResult);
 
     let mergedMovements = [];
 
-    if (nextLoanInstallmentResult) {
-      // just concat the first movement (next loan installment)
-
-      mergedMovements = [
-        ...mergedMovements,
-        nextLoanInstallmentResult.movements[0],
-      ];
-    }
     if (loanInstallmentsResult) {
-      mergedMovements = [
-        ...mergedMovements,
-        ...loanInstallmentsResult.movements,
-      ];
+      const filteredMovements = loanInstallmentsResult.movements.filter(
+        (movement) => {
+          // check if the movement is due
+          if (movement.dueDate <= referenceDate) return true;
+
+          // check if the movement is due in the next 5 days
+          const diffInDays = getNumberOfDays(referenceDate, movement.dueDate);
+          if (diffInDays < 5) {
+            return true;
+          }
+
+          return false;
+        },
+      );
+
+      mergedMovements = [...mergedMovements, ...filteredMovements];
     }
     if (overDueInterestsResult) {
       mergedMovements = [
@@ -135,6 +119,8 @@ export class LoanReadService extends BaseService<Loan> {
           index === self.findIndex((m) => m.id === movement.id),
       )
       .sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
+
+    // console.log('movements', JSON.stringify(movements));
 
     const reducedMovements = movements.reduce(
       (acc, movement) => {
