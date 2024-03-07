@@ -75,8 +75,7 @@ export class LoanController {
   @ApiOperation({
     summary: 'Get minimum payment amount',
   })
-  // @PermissionName('loans:getMinimumPaymentAmount')
-  @Public()
+  @PermissionName('loans:getMinimumPaymentAmount')
   @Get('minimum-payment-amount')
   getMinimumPaymentAmount(@Query() input: GetOneLoanInput) {
     const { uid } = input;
